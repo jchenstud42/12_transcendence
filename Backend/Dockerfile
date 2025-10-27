@@ -11,7 +11,7 @@ RUN npm ci
 COPY tsconfig.json ./
 COPY srcs ./srcs
 
-RUN nmp run build
+RUN npm run build
 
 # ON RUN LE TRUC
 

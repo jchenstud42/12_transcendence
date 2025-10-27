@@ -6,11 +6,13 @@
 /*   By: mjameau <mjameau@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 11:25:58 by mjameau           #+#    #+#             */
-/*   Updated: 2025/10/27 11:45:51 by mjameau          ###   ########.fr       */
+/*   Updated: 2025/10/27 15:34:46 by mjameau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // CE FICHIER EST A DETRUIRE A LA FIN C UN TEST DE CUL POUR VOIR SI L'ALGO FONCTIONNE
+
+
 
 import { hashPassword, checkPassword } from "./passHash.js";
 
