@@ -4,30 +4,32 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>PONG</title>
+		<!-- <script src="https://cdn.tailwindcss.com"></script> -->
 	</head>
 
-	<body>
-		<main>
-			<h1>Welcome on Pong !</h1>
-			<p>Register here !</p>
+	<body id="page">
+		<h1>Welcome on Pong !</h1>
+		<!-- <button type="submit">login</button> -->
+		<div id="register-form" "hidden">
 			<form id="getForm" method="GET" action="/submit">
 				<label for="name">User Name :</label><br>
-				<input type="text" name="name" id="name" placeholder="User Name" required><br><br>
+				<input type="text" name="name" id="username" placeholder="User Name" required><br><br>
 				<label for="name">Password :</label><br>
-				<input type="text" name="name" id="name" placeholder="Password" required><br><br>
+				<input type="text" name="name" id="password" placeholder="Password" required><br><br>
 				<label for="name">Confirm Password :</label><br>
-				<input type="text" name="name" id="name" placeholder="Password" required><br><br>
+				<input type="text" name="name" id="confirm-password" placeholder="Password" required><br><br>
 				<button type="submit">register</button>
 			</form>
-			<p>Or login here !</p>
+		</div>
+		<div id="login-form" "hidden">
 			<form id="getForm" method="GET" action="/submit">
 				<label for="name">User Name :</label><br>
-				<input type="text" name="name" id="name" placeholder="User Name" required><br><br>
+				<input type="text" name="name" id="username" placeholder="User Name" required><br><br>
 				<label for="name">Password :</label><br>
-				<input type="text" name="name" id="name" placeholder="Password" required><br><br>
+				<input type="text" name="name" id="password" placeholder="Password" required><br><br>
 				<button type="submit">login</button>
 			</form>
-			<script SRC="../js/main.js"></script>
-		</main>
+		</div>
+		<script SRC="../js/main.js"></script>
 	</body>
 </html>
