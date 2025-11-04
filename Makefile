@@ -19,6 +19,10 @@ WHITE    		= \e[1;37m
 
 SILENT		=	> /dev/null 2>&1
 
+
+
+all: build up
+
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
 	@docker-compose build && cd Backend && npx tsc
@@ -50,3 +54,5 @@ clean:
 
 
 rebuild: clean build up
+
+.PHONY : all build up down ps logs clean rebuild
