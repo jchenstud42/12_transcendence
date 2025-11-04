@@ -53,6 +53,6 @@ clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 
-rebuild: clean build up
+re: clean build up
 
-.PHONY : all build up down ps logs clean rebuild
+.PHONY : all build up down ps logs clean re

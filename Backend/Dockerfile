@@ -17,6 +17,8 @@ RUN npm run build
 
 FROM node:22-alpine AS runtime
 
+RUN apk add --no-cache bash
+
 WORKDIR /app
 
 COPY package*.json ./
