@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"strict": true,
 		// File Layout
-		"rootDir": "./ts",
-		"outDir": "./js",
+		"rootDir": "ts",
+		"outDir": "js",
 	}
 }
