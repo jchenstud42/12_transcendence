@@ -1,8 +1,8 @@
 #  ON BUILD LE TRUC
 
-FROM ??
+FROM node:22-alpine AS build
 
-WORKDIR ??
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -15,15 +15,15 @@ RUN npm run build
 
 # ON RUN LE TRUC
 
-FROM ?? (pareil)
+FROM node:22-alpine AS runtime
 
-WORKDIR ?? (pareil)
+WORKDIR /app
 
 COPY package*.json ./
 
 # ON INSTALLE QUE LES DEPENDANCIES, PAS LES DEVDEPENDANCIES
 RUN npm ci --omit=dev
-COPY --from=build /??(WORKDIR)/dist ./dist
-EXPOSE  (port)
+COPY --from=build /app/dist ./dist
+EXPOSE  3000
 
 CMD ["node", "dist/main.js"]
