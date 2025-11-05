@@ -1,38 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script src="https://cdn.tailwindcss.com"></script>
-		<title>PONG</title>
-	</head>
 
-	<body id="page">
-		<h1>Welcome on Pong !</h1>
-		<button id="register-button" class="bg-purple-500 hover:bg-purple-700 border text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">register</button>
-		<button id="login-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">login</button>
-		<div id="register-form" class="w-full max-w-xs hidden">
-			<form id="getForm" method="GET" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-				<label for="name">Username :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
-				<label for="name">Email :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="email" placeholder="Email" required><br><br>
-				<label  for="name">Password :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
-				<label for="name">Confirm Password :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="confirm-password" placeholder="Confirm Password" required><br><br>
-				<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">register</button>
-			</form>
-		</div>
-		<div id="login-form" class="w-full max-w-xs hidden">
-			<form id="getForm" method="GET" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-				<label for="name">Username :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
-				<label for="name">Password :</label><br>
-				<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
-				<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
-			</form>
-		</div>
-		<script type="module" SRC="../js/main.js"></script>
-	</body>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://cdn.tailwindcss.com"></script>
+	<title>PONG</title>
+</head>
+
+<body id="page" class="relative min-h-screen overflow-hidden">
+	<img src="../assets/b5.jpeg" alt="Background" class="absolute inset-0 w-full h-full object-cover object-center z-0" />
+	<h1>Welcome on Pong !</h1>
+	<button id="register-button" class="relative z-10 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">register</button>
+	<button id="login-button" class="relative z-10 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">login</button>
+	<div id="register-form" class="relative z-10 w-full max-w-xs hidden">
+		<form id="getForm" method="GET" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+			<label for="name">Username :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
+			<label for="name">Email :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="email" placeholder="Email" required><br><br>
+			<label for="name">Password :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
+			<label for="name">Confirm Password :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="confirm-password" placeholder="Confirm Password" required><br><br>
+			<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">register</button>
+		</form>
+	</div>
+	<div id="login-form" class="relative z-10 w-full max-w-xs hidden">
+		<form id="getForm" method="GET" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+			<label for="name">Username :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
+			<label for="name">Password :</label><br>
+			<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
+			<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
+		</form>
+	</div>
+	<script type="module" SRC="../js/main.js"></script>
+</body>
+
 </html>
