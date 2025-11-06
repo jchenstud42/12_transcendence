@@ -2,57 +2,58 @@ import Fastify from "fastify";
 import { hashPassword, checkPassword } from "../../security/passHash.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../../security/inputSecurity.js";
 
-type User = {id: number, username: string, email: string, password: string};
+type User = { id: number, username: string, email: string, password: string };
 
-const users = new Map<string, User>(); // Une map pour le moment le temps que je n'ai pas de database prete
-export const server = Fastify({logger: true});
+const users = new Map<string, User>();
+/* Une map pour le moment le temps que je n'ai pas de database prete - Roro
+
+Quand la database sera prete -> Toujours utiliser des requêtes preparees / ORM (ex : Prisma),
+ne jamais concatener des strings pour ecrire une requete SQL avec un input user(pour protect injection SQL) - Mathis*/
+
+export const server = Fastify({ logger: true });
 let userIdCounter = 1;
 
 /**
  * REGISTER
- *  - Vérifie les entrées
- *  - Hash le mot de passe
- *  - Sauvegarde l’utilisateur
+ *  - Vérifie les entrées - Roro
+ *  - Hash le mot de passe - Roro
+ *  - Sauvegarde l’utilisateur - Roro
+ *
+ * - J'ai encore rien change ici bisous - Mathis
 */
 
-server.post("/register", async(req, reply) =>
-{
-	try
-	{
+server.post("/register", async (req, reply) => {
+	try {
 		const { username, email, password } = req.body as
-		{
-			username: string;
-			email: string;
-			password: string;
-		};
+			{
+				username: string;
+				email: string;
+				password: string;
+			};
 
 		if (!validateEmail(email) || !validatePassword(password) || !validateTextInput(username))
-			return (reply.status(400).send({error: "Invalid Input"}));
-		
+			return (reply.status(400).send({ error: "Invalid Input" }));
+
 		const cleanUsername = sanitizeInput(username);
 		const cleanEmail = sanitizeInput(email);
 
-		//Verifie que l'utilisateur n'a pas deja un email
-		if (users.has(email))
+		if (users.has(cleanEmail))
 			return (reply.status(409).send({ error: "User already exists" }));
 
-		//Verifie que le password est a la norme
 		const hashed = await hashPassword(password);
 
-		//Creer l'utilisateur
-		const newUser: User = 
+		const newUser: User =
 		{
 			id: userIdCounter++,
 			username: cleanUsername,
 			email: cleanEmail,
-			password: hashed		
+			password: hashed
 		}
-		
+
 		users.set(cleanEmail, newUser);
-		return (reply.status(201).send({message: "User registered successfully",user: { id: newUser.id, username: newUser.username, email: newUser.email }}));
+		return (reply.status(201).send({ message: "User registered successfully", user: { id: newUser.id, username: newUser.username, email: newUser.email } }));
 	}
-	catch (err) 
-	{
+	catch (err) {
 		req.log.error(err);
 		return (reply.status(500).send({ error: "Internal server error" }));
 	}
@@ -60,39 +61,38 @@ server.post("/register", async(req, reply) =>
 
 /**
  * LOGIN
- *  - Vérifie l’existence de l’utilisateur
- *  - Compare le mot de passe
- *  - Retourne un message ou un token
+ *  - On verifie si le mot de passe et l'identifiant sont valides - Roro
+ *  - Changement -> On ne verifie pas le mot de passe avec validatePassword car on veut juste checker si il correspond a celui enregistre, pas si il est "fort" - Mathis
+ *
+ *  - Vérifie l’existence de l’utilisateur - Roro (changement pour check email ou username - Mathis)
+ *  - Compare le mot de passe avec celui hashe et enregistre dans la DB
+ *  - Retourne un message ou un token - Roro (JWT a implementer plus tard - Mathis)
+ *  -
 */
 
-server.post("/login", async(req, reply) =>
-{
-	try
-	{
-		const { email, password } = req.body as
-		{
-			email: string;
-			password: string;
-		};
-		if (!validatePassword(password) || !validateTextInput(email))
-			return (reply.status(400).send({error: "Invalid Input"}));
+server.post("/login", async (req, reply) => {
+	try {
+		const { identifier, password } = req.body as
+			{
+				identifier: string;
+				password: string;
+			};
+		if (!password || password.length < 8 || !validateTextInput(identifier, 50))
+			return (reply.status(400).send({ error: "Invalid Input" }));
 
-		const cleanUsername = sanitizeInput(email);
+		const cleanIdentifier = sanitizeInput(identifier);
 
-		//Verifier que le user existe dans la db
-		const user = users.get(email);
+		const user = [...users.values()].find(u => u.email === cleanIdentifier || u.username === cleanIdentifier);
 		if (!user)
 			return (reply.status(404).send({ error: "User not found" }));
 
-		//Verifier que le mot de passe est le bon pour le user
 		const isValidPassword = await checkPassword(password, user.password);
 		if (!isValidPassword)
 			return (reply.status(401).send({ error: "User not found" }));
 
-		return (reply.send({message: "Login successful", user: { id: user.id, username: user.username, email: user.email }}));
+		return (reply.send({ message: "Login successful", user: { id: user.id, username: user.username, email: user.email } }));
 	}
-	catch (err)
-	{
+	catch (err) {
 		req.log.error(err);
 		return reply.status(500).send({ error: "Internal server error" });
 	}
