@@ -1,4 +1,5 @@
-//const pong = document.getElementById("pong") as HTMLDivElement;
+import { shuffleArray } from "./pong_utils";
+
 const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
 const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
 const ball = document.getElementById("ball") as HTMLDivElement;
@@ -11,8 +12,8 @@ const BALL_SIZE = 10;
 
 
 const pong_button 		= 	document.getElementById("pong-button")!;
-const qmatch_button 	= 	document.getElementById("quick-match-button")!;
-const tournament_button = 	document.getElementById("tournament-button")!;
+/* const qmatch_button 	= 	document.getElementById("quick-match-button")!;
+const tournament_button = 	document.getElementById("tournament-button")!; */
 
 const enterPlayerNbr_text 	= 	document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
 const playerNbr_text 	= 	document.getElementById("playerNbr-text")! as HTMLHeadingElement;
@@ -23,8 +24,8 @@ const play_button 		= 	document.getElementById("play-button")!;
 
 const playerName_container	= 	document.getElementById("playerName-container")! as HTMLDivElement;
 const playerName_input		= 	document.getElementById("playerName-input")! as HTMLInputElement;
-const playersList 			= 	document.getElementById("players-list") as HTMLDivElement;
 const playerColors 			= 	["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playersList 			= 	document.getElementById("players-list") as HTMLDivElement;
 
 class Player {
   name: string = "";
@@ -35,32 +36,28 @@ class Player {
 
   constructor(name: string, isAi: boolean) {
     this.name = name;
+	this.isAi = isAi;
   }
 }
 
-pong_button.addEventListener("click", () => {
-  	pong_button.classList.add("hidden");
-	paddle_left.classList.remove("hidden")
-	paddle_right.classList.remove("hidden")
-	ball.classList.remove("hidden")
-});
-
-function pong() {
-	let p1 = new Player("Paul", false);
-	p1.paddle = paddle_left
-	let p2 = new Player("Paul", false);
-	p2.paddle = paddle_right
-}
-
-/* class Game {
-	playersName: [string, boolean][] = []
+class Game {
 	players: Player[] = [];
   	winner: Player | null = null;
-	isTournament: boolean = false;
 
-	constructor(playersName: [string, boolean][], aiNames: string[]) {
+	constructor(playersName: [string, boolean][]) {
 		this.players = playersName.map(name => new Player(name[0], name[1]));
+		if (playersName.length > 2)
+			this.createTournament();
+		/* else play a normal game */
   }
+
+	public createTournament() {
+		const shuffled: Player[] = shuffleArray(this.players);
+		playersList.innerHTML = "";
+		shuffled.forEach(({name}, i) => {
+			addPlayerNameLabel(name, i);
+		});
+	}
 }
 
 //////////////////////////////////////////////////
@@ -139,7 +136,12 @@ let nameEntered = 0;
 playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 	if (event.key === "Enter") {
 		const playerName = playerName_input.value.trim();
-		if (playerName !== "" && !playerNames.includes([playerName, false])) {
+
+		const nameAlreadyUsed = playerNames.some(
+			([name, _isAI]) => name === playerName
+		);
+
+		if (playerName !== "" && !nameAlreadyUsed) {
 			playerName_input.value = "";
 			playerNames.push([playerName, false]);
 			addPlayerNameLabel(playerName, nameEntered);
@@ -148,14 +150,15 @@ playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 
 		if (nameEntered === playerNbr) {
 			playerName_container.classList.add("hidden")
+
 			for (let y = 0; y < aiNbr; y++) {
-				addPlayerNameLabel(aiNames[y], nameEntered + y);
-				playerNames.push([aiNames[y], true]);
+				const aiName = aiNames[y]
+
+				addPlayerNameLabel(aiName, nameEntered + y);
+				playerNames.push([aiName, true]);
 			}
+
 			//const game = new Game(players);
-			paddle_left.classList.remove("hidden")
-			paddle_right.classList.remove("hidden")
-			ball.classList.remove("hidden")
 		}
 	}
 })
@@ -190,4 +193,3 @@ function addPlayerNameLabel(name: string, index: number) {
 
 	playersList.appendChild(label);
 }
- */
