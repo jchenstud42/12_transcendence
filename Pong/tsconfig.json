@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-	"target": "es2016",
-    "lib": ["es2016", "dom"],
+	"target": "es2020",
+	"module": "es2020",
+	"moduleResolution": "node",
+    "lib": ["es2016", "dom"]
   }
 }
