@@ -2,13 +2,14 @@ version: "3.9"
 
 services:
   backend:
-    build: ./Backend
+    build:
+      context: ./Backend
+      target: runtime
     env_file:
       - .env
     ports:
-     - "3000:3000"
+      - "3000:3000"
     environment:
-     - NODE_ENV=development
-    volumes:
-     - ./Backend:/app
+      - NODE_ENV=production
+    command: npm start
     restart: on-failure

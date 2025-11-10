@@ -7,6 +7,9 @@
 # make rebuild = supprime tout (meme volume) et relance tout.
 
 
+BACKEND_DIR 	= Backend
+FRONT_DIR		= Front
+
 RESET			= \e[0m
 BLACK    		= \e[1;30m
 RED      		= \e[1;31m
@@ -25,10 +28,12 @@ all: build up
 
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
-	@docker-compose build && cd Backend && npx tsc
-	@cd Front/srcs/ && npx tsc
+	@docker-compose build --no-cache
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
+dev:
+	@echo "$(CYAN)Starting development environment... 🚀$(RESET)"
+	@NODE_ENV=development docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 up:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ⌚​​​" $(RESET)"
 	@docker-compose up -d
@@ -50,11 +55,11 @@ logs:
 clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker-compose down --volumes --rmi all
-	@rm -rf Backend/dist
-	@rm -rf Front/srcs/js
+	@rm -rf $(BACKEND_DIR)/dist
+	@rm -rf $(FRONT_DIR)/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 
 re: clean build up
 
-.PHONY : all build up down ps logs clean re
+.PHONY : all build dev up down ps logs clean re
