@@ -1,6 +1,8 @@
 import speakeasy from "speakeasy";
 import QRCode from "qrcode";
+import nodemailer from "nodemailer";
 import { signAccessToken, signRefreshToken } from "./jwtUtils.js";
+import { ref } from "process";
 
 export type twoFAMethod = "email" | "sms" | "totp";
 
@@ -40,10 +42,25 @@ export class twoFAService {
 		if (!data)
 			throw new Error("2FA data not found");
 		if (data.method === "email") {
-			await ??? ();
+			const transporter = nodemailer.createTransport({
+				service: "gmail",
+				auth: {
+					user: process.env.APP_EMAIL,
+					pass: process.env.APP_PASSWORD,
+				},
+			});
+
+			const mailOptions = {
+				from: `"Transcendence" <${process.env.APP_EMAIL}>`,
+				to: data.destination,
+				subject: "Transcendence - Your 2FA Code",
+				text: `Your 2FA code is: ${data.code}. It will expire in 5 minutes.`,
+			};
+			await transporter.sendMail(mailOptions);
+			console.log('[2FA Email] Code sent to', data.destination);
 		}
 		else if (data.method === "sms") {
-			await ??? (); // TWILIO MAIS PAYANT SINN ON SIMULE JUSTE L"ENVOI
+			console.log('[2FA SMS] Code sent to', data.destination, ':', data.code);
 		}
 		else if (data.method === "totp") {
 			const otpUrl = speakeasy.otpauthURL({
@@ -79,4 +96,16 @@ export class twoFAService {
 		return false;
 	}
 
+	complete2FA(userId: number, code: string) {
+		const verified = this.verify2FACode(userId, code);
+		if (!verified)
+			return null;
+
+		const accessToken = signAccessToken(userId, true);
+		const refreshToken = signRefreshToken(userId);
+
+		this.user2FAData.delete(userId);
+
+		return { accessToken, refreshToken };
+	}
 }

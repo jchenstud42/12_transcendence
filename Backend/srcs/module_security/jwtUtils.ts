@@ -43,10 +43,10 @@ export function signAccessToken(userId: number, twoFA = false): string {
 }
 
 /*Pareil, creer un token Refresh qui dure 7 jours*/
-export function signRefreshToken(userId: number, twoFA = false): string {
+export function signRefreshToken(userId: number): string {
 	return jwt.sign(
 		{
-			sub: userId, tokenType: "refresh", twoFA
+			sub: userId, tokenType: "refresh"
 		},
 		JWT_SECRET,
 		{
