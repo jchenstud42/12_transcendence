@@ -1,17 +1,15 @@
 import Fastify from "fastify";
+import { PrismaClient } from '@prisma/client';
 import { hashPassword, checkPassword } from "../../security/passHash.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../../security/inputSecurity.js";
 
-type User = { id: number, username: string, email: string, password: string };
-
-const users = new Map<string, User>();
-/* Une map pour le moment le temps que je n'ai pas de database prete - Roro
+const prisma = new PrismaClient();
+/* J'ai mis prisma meme si on a pas encore le database - Roro
 
 Quand la database sera prete -> Toujours utiliser des requêtes preparees / ORM (ex : Prisma),
 ne jamais concatener des strings pour ecrire une requete SQL avec un input user(pour protect injection SQL) - Mathis*/
 
 export const server = Fastify({ logger: true });
-let userIdCounter = 1;
 
 /**
  * REGISTER
@@ -37,21 +35,39 @@ server.post("/register", async (req, reply) => {
 		const cleanUsername = sanitizeInput(username);
 		const cleanEmail = sanitizeInput(email);
 
-		if (users.has(cleanEmail))
-			return (reply.status(409).send({ error: "User already exists" }));
+	const existingUser = await prisma.user.findFirst({
+	  where: {
+		OR: [
+			{ email: cleanEmail },
+			{ username: cleanUsername }
+		]
+		}
+	});
 
-		const hashed = await hashPassword(password);
+	if (existingUser) 
+		return (reply.status(409).send({ error: "User already exists" }));
 
-		const newUser: User =
+	const hashedPassword = await hashPassword(password);
+
+	const newUser = await prisma.user.create({
+		data:
 		{
-			id: userIdCounter++,
 			username: cleanUsername,
 			email: cleanEmail,
-			password: hashed
+			password: hashedPassword,
+		},
+		select:
+		{
+			id: true,
+			username: true,
+			email: true,
+			status: true,
+			createdAt: true,
 		}
+	})
 
-		users.set(cleanEmail, newUser);
-		return (reply.status(201).send({ message: "User registered successfully", user: { id: newUser.id, username: newUser.username, email: newUser.email } }));
+	return (reply.status(201).send({ message: "User registered successfully", user: { id: newUser.id, username: newUser.username, email: newUser.email } }));
+
 	}
 	catch (err) {
 		req.log.error(err);
@@ -82,13 +98,27 @@ server.post("/login", async (req, reply) => {
 
 		const cleanIdentifier = sanitizeInput(identifier);
 
-		const user = [...users.values()].find(u => u.email === cleanIdentifier || u.username === cleanIdentifier);
+		const user = await prisma.user.findFirst({
+			where: {
+				OR: [
+					{ email: cleanIdentifier },
+					{ username: cleanIdentifier }
+				]
+			}
+		});
+
 		if (!user)
 			return (reply.status(404).send({ error: "User not found" }));
 
 		const isValidPassword = await checkPassword(password, user.password);
 		if (!isValidPassword)
 			return (reply.status(401).send({ error: "User not found" }));
+
+		await prisma.user.update({
+			where: {id: user.id},
+			data: {status: 'online'},
+		});
+
 
 		return (reply.send({ message: "Login successful", user: { id: user.id, username: user.username, email: user.email } }));
 	}
