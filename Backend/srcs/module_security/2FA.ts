@@ -2,7 +2,6 @@ import speakeasy from "speakeasy";
 import QRCode from "qrcode";
 import nodemailer from "nodemailer";
 import { signAccessToken, signRefreshToken } from "./jwtUtils.js";
-import { ref } from "process";
 
 export type twoFAMethod = "email" | "sms" | "totp";
 

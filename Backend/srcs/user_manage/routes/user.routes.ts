@@ -2,7 +2,10 @@ import Fastify from "fastify";
 import { PrismaClient } from '@prisma/client';
 import { hashPassword, checkPassword } from "../../security/passHash.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../../security/inputSecurity.js";
+import { signAccessToken, signRefreshToken, verifyToken } from "../../module_security/jwtUtils.js";
+import { twoFAService } from "../../module_security/2FA.js";
 
+const twofa = new twoFAService();
 const prisma = new PrismaClient();
 /* J'ai mis prisma meme si on a pas encore le database - Roro
 
@@ -35,38 +38,38 @@ server.post("/register", async (req, reply) => {
 		const cleanUsername = sanitizeInput(username);
 		const cleanEmail = sanitizeInput(email);
 
-	const existingUser = await prisma.user.findFirst({
-	  where: {
-		OR: [
-			{ email: cleanEmail },
-			{ username: cleanUsername }
-		]
-		}
-	});
+		const existingUser = await prisma.user.findFirst({
+			where: {
+				OR: [
+					{ email: cleanEmail },
+					{ username: cleanUsername }
+				]
+			}
+		});
 
-	if (existingUser) 
-		return (reply.status(409).send({ error: "User already exists" }));
+		if (existingUser)
+			return (reply.status(409).send({ error: "User already exists" }));
 
-	const hashedPassword = await hashPassword(password);
+		const hashedPassword = await hashPassword(password);
 
-	const newUser = await prisma.user.create({
-		data:
-		{
-			username: cleanUsername,
-			email: cleanEmail,
-			password: hashedPassword,
-		},
-		select:
-		{
-			id: true,
-			username: true,
-			email: true,
-			status: true,
-			createdAt: true,
-		}
-	})
+		const newUser = await prisma.user.create({
+			data:
+			{
+				username: cleanUsername,
+				email: cleanEmail,
+				password: hashedPassword,
+			},
+			select:
+			{
+				id: true,
+				username: true,
+				email: true,
+				status: true,
+				createdAt: true,
+			}
+		})
 
-	return (reply.status(201).send({ message: "User registered successfully", user: { id: newUser.id, username: newUser.username, email: newUser.email } }));
+		return (reply.status(201).send({ message: "User registered successfully", user: { id: newUser.id, username: newUser.username, email: newUser.email } }));
 
 	}
 	catch (err) {
@@ -114,16 +117,89 @@ server.post("/login", async (req, reply) => {
 		if (!isValidPassword)
 			return (reply.status(401).send({ error: "User not found" }));
 
+		if (user.twoFAEnabled) {
+			const method = user.twoFAMethod as "email" | "sms" | "totp";
+			const destination = method === "email" ? user.email : undefined;
+
+			const secretOrCode = twofa.generate2FA(user.id, method, destination);
+			await twofa.send2FACode(user.id);
+
+			return reply.send({
+				message: "2FA required",
+				userId: user.id,
+				method,
+				qrCode: method === "totp" ? secretOrCode : undefined
+			});
+		}
+
 		await prisma.user.update({
-			where: {id: user.id},
-			data: {status: 'ONLINE'},
+			where: { id: user.id },
+			data: { status: 'ONLINE' },
 		});
 
+		const accessToken = signAccessToken(user.id, false);
+		const refreshToken = signRefreshToken(user.id);
 
-		return (reply.send({ message: "Login successful", user: { id: user.id, username: user.username, email: user.email } }));
+		return (reply.send(
+			{
+				message: "Login successful",
+				user: {
+					id: user.id,
+					username: user.username,
+					email: user.email
+				},
+				tokens: {
+					accessToken,
+					refreshToken
+				},
+			}));
 	}
 	catch (err) {
 		req.log.error(err);
 		return reply.status(500).send({ error: "Internal server error" });
 	}
 });
+
+server.post("/verify-2fa", async (req, reply) => {
+	try {
+		const { userId, code } = req.body as { userId: number; code: string };
+
+		const tokens = twofa.complete2FA(userId, code);
+
+		if (!tokens)
+			return reply.status(401).send({ error: "Invalid 2FA code" });
+
+		await prisma.user.update({
+			where: { id: userId },
+			data: { status: 'ONLINE' },
+
+		});
+
+		return reply.send({
+			message: "2FA successful",
+			tokens
+		});
+	}
+	catch (err) {
+		req.log.error(err);
+		return reply.status(500).send({ error: "Internal server error" });
+	}
+});
+
+server.post("/refresh", async (req, reply) => {
+	try {
+		const { refreshToken } = req.body as { refreshToken: string; };
+		const payload = verifyToken(refreshToken);
+
+		if (!payload || payload.tokenType !== "refresh")
+			return reply.status(401).send({ error: "Invalid refresh token" });
+
+		const newAccess = signAccessToken(payload.sub, true);
+		return reply.send({ accessToken: newAccess });
+
+	} catch (err) {
+		req.log.error(err);
+		return reply.status(500).send({ error: "Internal server error" });
+	}
+});
+

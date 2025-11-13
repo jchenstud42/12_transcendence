@@ -25,7 +25,6 @@ const REFRESH_EXPIRES_SEC = Number(process.env.JWT_REFRESH_EXPIRES ?? 604800);
 
 export type JwtPayload = {
 	sub: number;
-
 	tokenType?: string;
 	twoFA?: boolean;
 	[key: string]: any;
