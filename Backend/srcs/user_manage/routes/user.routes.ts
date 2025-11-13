@@ -116,7 +116,7 @@ server.post("/login", async (req, reply) => {
 
 		await prisma.user.update({
 			where: {id: user.id},
-			data: {status: 'online'},
+			data: {status: 'ONLINE'},
 		});
 
 
