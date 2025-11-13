@@ -7,7 +7,6 @@ const login_button = document.getElementById("login-button")!;
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
-
 register_button.addEventListener("click", () => {
 	if (login_form && !login_form.classList.contains("hidden")) {
 		login_form.classList.add("hidden");
@@ -204,13 +203,14 @@ const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
 const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
 const ball = document.getElementById("ball") as HTMLDivElement;
 
-const PONG_WIDTH = 600;
-const PONG_HEIGHT = 400;
+const PONG_WIDTH = 800;
+const PONG_HEIGHT = 600;
 const PADDLE_WIDTH = 10;
-const PADDLE_HEIGHT = 80;
+const PADDLE_HEIGHT = 100;
+const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
-
+const pong_menu			=	document.getElementById("pong-menu") as HTMLDivElement;
 const pong_button 		= 	document.getElementById("pong-button")!;
 const qmatch_button 	= 	document.getElementById("quick-match-button")!;
 const tournament_button = 	document.getElementById("tournament-button")!;
@@ -221,6 +221,9 @@ const playerIncr_button = 	document.getElementById("increasePlayer-button")!;
 const playerDecr_button = 	document.getElementById("decreasePlayer-button")!;
 const OK_button 		= 	document.getElementById("OK-button")!;
 const play_button 		= 	document.getElementById("play-button")!;
+const ready_text		=	document.getElementById("ready-text")!;
+const go_text			=	document.getElementById("go-text")!;
+
 
 const playerName_container	= 	document.getElementById("playerName-container")! as HTMLDivElement;
 const playerName_input		= 	document.getElementById("playerName-input")! as HTMLInputElement;
@@ -237,19 +240,201 @@ class Player {
   constructor(name: string, isAi: boolean) {
     this.name = name;
   }
+};
+
+class Ball {
+	el: HTMLDivElement;
+	container: HTMLElement;
+	size: number;
+	x = 0;
+	y = 0;
+	vx = 0;
+	vy = 0;
+	speed = 300;
+	active = false;
+
+	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
+		this.el = el;
+		this.container = container;
+		this.size = size;
+		this.initBallPos();
+		
+	}
+
+	initBallPos() {
+		const w	= this.container.clientWidth;
+		const h	= this.container.clientHeight;
+		this.x	= w / 2 - this.size / 2;
+		this.y	= h / 2 - this.size / 2;
+		this.vx	= 0;
+		this.vy = 0;
+		this.active = false;
+		this.render();
+	}
+
+	serve(direction: 1 | -1 = (Math.random() < 0.5 ? 1 : -1)) {
+		const maxAngle = 45 * (Math.PI / 180);
+		const angle = (Math.random() * maxAngle * 2) - maxAngle;
+		this.speed = 300;
+		this.vx = direction * this.speed * Math.cos(angle);
+		this.vy = this.speed * Math.sin(angle);
+		this.active = true;
+	}
+
+	reset() {
+		this.initBallPos();
+	}
+
+	render() {
+		this.el.style.left = `${this.x}px`;
+		this.el.style.top = `${this.y}px`
+	}
+
+	rectsIntersect(ax: number, ay: number, aw: number, ah: number, bx: number, by: number, bw: number, bh: number) {
+		return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+	}
+
+	update(dt: number) {
+		if (!this.active)
+			return;
+
+		const w = this.container.clientWidth;
+		const h = this.container.clientHeight;
+
+		//update ball position
+		this.x += this.vx * dt;
+		this.y += this.vy * dt;
+
+		//wll colision
+		if (this.y <= 0) {
+			this.y = 0;
+			this.vy = -this.vy;
+		}
+		if (this.y >= h) {
+			this.y = h - this.size;
+			this.vy = -this.vy;
+		}
+
+		const plX = paddle_left.offsetLeft;
+		const plY = paddle_left.offsetTop;
+		if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
+			const	paddleCenter = plY + PADDLE_HEIGHT / 2;
+			const	ballCenter = this.y + this.size / 2;
+			const	relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
+			const	bounceAngle = relative * (75 * Math.PI / 180);
+			this.speed = Math.min(this.speed + 20, 900);
+			this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
+			this.vy = this.speed * Math.sin(bounceAngle);
+			this.x = plX + PADDLE_WIDTH + 0.5;
+		}
+
+		const prX = paddle_right.offsetLeft;
+		const prY = paddle_right.offsetTop;
+		if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
+			const	paddleCenter = prY + PADDLE_HEIGHT / 2;
+			const	ballCenter = this.y + this.size / 2;
+			const	relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
+			const	bounceAngle = relative * (75 * Math.PI / 180);
+			this.speed = Math.min(this.speed + 20, 900);
+			this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
+			this.vy = this.speed * Math.sin(bounceAngle);
+			this.x = prX - PADDLE_WIDTH - 0.5;
+		}
+
+		if (this.x + this.size < 0) {
+			this.reset();
+		}
+		if (this.x > w) {
+			this.reset();
+		}
+		this.render();
+	}
+};
+
+const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+
+//game loop to update ball position;
+let lastTime = performance.now();
+function gameLoop(now = performance.now()) {
+	const dt = (now - lastTime) / 1000;
+	lastTime = now;
+
+	gameBall.update(dt);
+
+	requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
+
+
+//keys list
+const keys = {
+	w: false,
+	s: false,
+	ArrowUp: false,
+	ArrowDown: false
+};
+
+function delay(ms: number) {
+	return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
+//Start count down when Pong button is pressed
 pong_button.addEventListener("click", () => {
 	pong_button.classList.add("hidden");
 	paddle_left.classList.remove("hidden")
 	paddle_right.classList.remove("hidden")
-	ball.classList.remove("hidden")
+	ready_text.classList.remove("hidden")
+	setTimeout( () => {
+		ready_text.classList.add("hidden")
+		go_text.classList.remove("hidden")
+		setTimeout( () => {
+			go_text.classList.add("hidden")
+			ball.classList.remove("hidden")
+		}, 1000);
+	}, 1000);
+	gameBall.serve();
 });
 
-function pong() {
-	let p1 = new Player("Paul", false);
-	p1.paddle = paddle_left
-	let p2 = new Player("Allan", false);
-	p2.paddle = paddle_right
+//Set true or False wether a key is press among the "keys" list
+document.addEventListener('keydown', (e) => {
+	if (e.key in keys) {
+		keys[e.key as keyof typeof keys] = true;
+	}
+});
+document.addEventListener('keyup', (e) => {
+	if (e.key in keys) {
+		keys[e.key as keyof typeof keys] = false;
+	}
+});
 
+//Fonction pour bouger les paddles en fonction de la key press
+function updatePaddlePositions() {
+	if(keys.w && paddle_left.offsetTop > 0) {
+		paddle_left.style.top = `${paddle_left.offsetTop - PADDLE_SPEED}px`;
+	}
+	if(keys.s && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+		paddle_left.style.top = `${paddle_left.offsetTop + PADDLE_SPEED}px`;
+	}
+	
+	if(keys.ArrowUp && paddle_right.offsetTop > 0) {
+		paddle_right.style.top = `${paddle_right.offsetTop - PADDLE_SPEED}px`;
+	}
+	if(keys.ArrowDown && paddle_right.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+		paddle_right.style.top = `${paddle_right.offsetTop + PADDLE_SPEED}px`;
+	}
+
+	requestAnimationFrame(updatePaddlePositions);
 }
+
+
+let p1 = new Player("Paul", false);
+p1.paddle = paddle_left
+let p2 = new Player("Allan", false);
+p2.paddle = paddle_right
+
+
+function initBallPos() {
+	
+}
+
+	requestAnimationFrame(updatePaddlePositions);

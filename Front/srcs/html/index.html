@@ -7,8 +7,8 @@
 	<script src="https://cdn.tailwindcss.com"></script>
 	<style>
 			:root {
-				--game-width: 600px;
-				--game-height: 400px;
+				--game-width: 800px;
+				--game-height: 600px;
 				--paddle-width: 10px;
 				--paddle-height: 100px;
 				--ball-size: 10px;
@@ -166,9 +166,21 @@
 						style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
 						PLAY
 				</button>
+				
+				<div	id="ready-text"
+						class="absolute text-white font-bold text-lg text-6xl hidden"
+						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+						READY ?
+				</div>
 
+				<div	id="go-text"
+						class="absolute text-white font-bold text-lg text-6xl hidden"
+						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+						GOOOO !!!
+				</div>
 
 				<!-- Pong Elements (Paddle, ball...)-->
+				
 				<div	id="left-paddle"
 						class="absolute bg-white hidden"
 						style="width: var(--paddle-width); height: var(--paddle-height); left: 5%; top: 40%;">
@@ -180,7 +192,7 @@
 				</div>	
 
 				<div	id="ball"
-						class="absolute bg-white hidden"
+						class="absolute bg-white rounded hidden"
 						style="width: var(--ball-size); height: var(--ball-size); right: 50%; top:50%">
 				</div>	
 

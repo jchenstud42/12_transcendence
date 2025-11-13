@@ -32,7 +32,7 @@ build:
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
 dev:
-	@echo "$(CYAN)Starting development environment... 🚀$(RESET)"
+	@echo "$(RED)"D"$(YELLOW)"e"$(GREEN)"v" $(CYAN)"M"$(BLUE)"o"$(MAGENTA)"d"$(RED)"."$(YELLOW)"."$(CYAN)"." "🧑‍💻" $(RESET) "
 	@NODE_ENV=development docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 up:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ⌚​​​" $(RESET)"
