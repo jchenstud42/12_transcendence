@@ -14,8 +14,9 @@ export class UserService {
 				createdAt: true,
 			},
 		});
-		if (!user) throw new Error("User not found");
-		return user;
+		if (!user)
+			throw new Error("User not found");
+		return (user);
 	}
 
 	async updateProfile(userId: number, data: { username?: string; bio?: string; avatarUrl?: string }) {
@@ -24,7 +25,7 @@ export class UserService {
 			data,
 			select: { id: true, username: true, bio: true, avatarUrl: true, updatedAt: true },
 		});
-		return updated;
+		return (updated);
 	}
 
 	async getUserStatus(userId: number) {
@@ -32,7 +33,8 @@ export class UserService {
 			where: { id: userId },
 			select: { id: true, username: true, status: true },
 		});
-		if (!user) throw new Error("User not found");
-		return user;
+		if (!user)
+			throw new Error("User not found");
+		return (user);
 	}
 }
