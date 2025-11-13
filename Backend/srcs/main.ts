@@ -31,6 +31,7 @@ fastify.get('/', async (request, reply) => {
 	return { message: 'Fastify fonctionne, transcendence incoming!' };
 });
 
+// Integrez vos routes ici
 fastify.register(itemsRoutes, { prefix: '/items' });
 
 // Démarrage du server
