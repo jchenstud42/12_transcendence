@@ -28,20 +28,20 @@ all: build up
 
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
-	@docker-compose build --no-cache
+	@docker compose build --no-cache
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
 dev:
 	@echo "$(RED)"D"$(YELLOW)"e"$(GREEN)"v" $(CYAN)"M"$(BLUE)"o"$(MAGENTA)"d"$(RED)"."$(YELLOW)"."$(CYAN)"." "🧑‍💻" $(RESET) "
-	@NODE_ENV=development docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+	@NODE_ENV=development docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 up:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ⌚​​​" $(RESET)"
-	@docker-compose up -d
+	@docker compose up -d
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"e"$(RED)"d" "🥳​​​​" $(RESET)"
 
 down:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"o"$(CYAN)"p"$(BLUE)"p"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ✋🛑​​​" $(RESET)"
-	@docker-compose down $(SILENT)
+	@docker compose down $(SILENT)
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"o"$(CYAN)"p"$(BLUE)"p"$(MAGENTA)"e"$(RED)"d" "🥳​​​​" $(RESET)"
 
 ps:
@@ -50,11 +50,11 @@ ps:
 
 logs:
 	@echo "$(RED)"L"$(YELLOW)"o"$(GREEN)"g"$(CYAN)"g"$(BLUE)"i"$(MAGENTA)"n"$(RED)"g"$(YELLOW)"."$(CYAN)"."$(BLUE)"." " 📁​​​" $(RESET)"
-	@docker-compose logs -f
+	@docker compose logs -f
 
 clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
-	@docker-compose down --volumes --rmi all
+	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/dist
 	@rm -rf $(FRONT_DIR)/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
