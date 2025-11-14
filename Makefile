@@ -28,7 +28,8 @@ all: build up
 
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
-	@docker compose build --no-cache
+	@docker compose build && cd Backend && npx tsc
+	@cd Front/srcs/ && npx tsc
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
 dev:
@@ -56,7 +57,7 @@ clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/dist
-	@rm -rf $(FRONT_DIR)/srcs/jsn
+	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 
