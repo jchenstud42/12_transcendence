@@ -15,6 +15,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+COPY prisma ./prisma
+RUN npx prisma generate
+
+
 # Copie du reste du projet
 COPY tsconfig.json ./
 COPY srcs ./srcs
@@ -33,6 +37,9 @@ WORKDIR /app
 
 # Copie de package.json pour installer les dépendances
 COPY package*.json ./
+
+COPY prisma ./prisma
+RUN npx prisma generate
 
 # Installation prod uniquement (pas de devDependencies)
 RUN npm ci --omit=dev
@@ -56,6 +63,9 @@ WORKDIR /app
 # Copie le package.json et installe toutes les dépendances
 COPY package*.json ./
 RUN npm ci
+
+COPY prisma ./prisma
+RUN npx prisma generate
 
 # Copie le code source pour dev
 COPY tsconfig.json ./

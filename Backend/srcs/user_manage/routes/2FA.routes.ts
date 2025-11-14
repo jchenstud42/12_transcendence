@@ -28,7 +28,6 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 		}
 	});
 
-	// Refresh token
 	fastify.post("/refresh", async (req, reply) => {
 		try {
 			const { refreshToken } = req.body as { refreshToken: string };

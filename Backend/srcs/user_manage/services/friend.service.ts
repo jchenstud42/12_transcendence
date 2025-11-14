@@ -5,19 +5,19 @@ export class FriendService {
 		if (userId === friendId)
 			throw new Error("You cannot add yourself as a friend");
 
-		const existing = await prisma.friendship.findFirst({
+		const existing = await prisma.friend.findFirst({
 			where: { userId, friendId },
 		});
 		if (existing)
 			throw new Error("Already friends");
 
-		return (await prisma.friendship.create({
+		return (await prisma.friend.create({
 			data: { userId, friendId },
 		}));
 	}
 
 	async removeFriend(userId: number, friendId: number) {
-		await prisma.friendship.deleteMany({
+		await prisma.friend.deleteMany({
 			where: {
 				OR: [
 					{ userId, friendId },
@@ -29,7 +29,7 @@ export class FriendService {
 	}
 
 	async getFriendsList(userId: number) {
-		const friends = await prisma.friendship.findMany({
+		const friends = await prisma.friend.findMany({
 			where: { userId },
 			include: {
 				friend: { select: { id: true, username: true, status: true } },

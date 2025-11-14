@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUI from '@fastify/swagger-ui';
 import itemsRoutes from './tests/routes/items.js';
+import twofaRoutes from './user_manage/routes/2FA.routes.js';
 
 
 // Creation de l'instance du serv Fastify
@@ -33,6 +34,8 @@ fastify.get('/', async (request, reply) => {
 
 // Integrez vos routes ici
 fastify.register(itemsRoutes, { prefix: '/items' });
+
+fastify.register(twofaRoutes);
 
 // Démarrage du server
 const start = async (): Promise<void> => {

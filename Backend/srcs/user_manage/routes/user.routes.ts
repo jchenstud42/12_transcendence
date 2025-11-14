@@ -10,7 +10,7 @@ export default async function userRoutes(fastify: FastifyInstance) {
 	});
 
 	fastify.put("/profile/:id", async (req, reply) => {
-		const body = req.body as { username?: string; bio?: string; avatarUrl?: string }; 
+		const body = req.body as { username?: string; bio?: string; avatar?: string };
 		const updated = await userService.updateProfile(Number((req.params as any).id), body);
 		return reply.send(updated);
 	});
