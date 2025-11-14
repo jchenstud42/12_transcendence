@@ -273,6 +273,7 @@ class Ball {
 	}
 
 	serve(direction: 1 | -1 = (Math.random() < 0.5 ? 1 : -1)) {
+		this.initBallPos();
 		const maxAngle = 45 * (Math.PI / 180);
 		const angle = (Math.random() * maxAngle * 2) - maxAngle;
 		this.speed = 300;
@@ -286,6 +287,7 @@ class Ball {
 	}
 
 	render() {
+		this.el.style.removeProperty('right');
 		this.el.style.left = `${this.x}px`;
 		this.el.style.top = `${this.y}px`
 	}
@@ -305,12 +307,12 @@ class Ball {
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
 
-		//wll colision
+		//wall colision
 		if (this.y <= 0) {
 			this.y = 0;
 			this.vy = -this.vy;
 		}
-		if (this.y >= h) {
+		if (this.y + this.size >= h) {
 			this.y = h - this.size;
 			this.vy = -this.vy;
 		}
@@ -379,20 +381,33 @@ function delay(ms: number) {
 }
 
 //Start count down when Pong button is pressed
-pong_button.addEventListener("click", () => {
+function startGame() {
+	// si le bouton est déjà caché, on ne relance pas le countdown
+	if (pong_button.classList.contains("hidden")) return;
+
 	pong_button.classList.add("hidden");
-	paddle_left.classList.remove("hidden")
-	paddle_right.classList.remove("hidden")
-	ready_text.classList.remove("hidden")
-	setTimeout( () => {
-		ready_text.classList.add("hidden")
-		go_text.classList.remove("hidden")
-		setTimeout( () => {
-			go_text.classList.add("hidden")
-			ball.classList.remove("hidden")
+	paddle_left.classList.remove("hidden");
+	paddle_right.classList.remove("hidden");
+	ready_text.classList.remove("hidden");
+
+	setTimeout(() => {
+		ready_text.classList.add("hidden");
+		go_text.classList.remove("hidden");
+		setTimeout(() => {
+			go_text.classList.add("hidden");
+			ball.classList.remove("hidden");
+			gameBall.serve();
 		}, 1000);
 	}, 1000);
-	gameBall.serve();
+}
+
+pong_button.addEventListener("click", startGame);
+
+document.addEventListener("keydown", (e) => {
+	if (e.key !== "Enter") return;
+	const active = document.activeElement as HTMLElement | null;
+	if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+	startGame();
 });
 
 //Set true or False wether a key is press among the "keys" list
