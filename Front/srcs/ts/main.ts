@@ -95,6 +95,7 @@ else {
 				// ------------------------------------- A CHANGER ICI LE PATH TO REGISTER SI BESOIN------------------------------------------------------
 				const res = await fetch("http://localhost:3000/register", {
 					method: "POST",
+					credentials: "include",
 					headers: {
 						"Content-Type": "application/json"
 					},
@@ -168,6 +169,7 @@ else {
 				try {
 					const res = await fetch("http://localhost:3000/login", {
 						method: "POST",
+						credentials: "include",
 						headers: {
 							"Content-Type": "application/json"
 						},
@@ -210,36 +212,36 @@ const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
-const pong_menu			=	document.getElementById("pong-menu") as HTMLDivElement;
-const pong_button 		= 	document.getElementById("pong-button")!;
-const qmatch_button 	= 	document.getElementById("quick-match-button")!;
-const tournament_button = 	document.getElementById("tournament-button")!;
+const pong_menu = document.getElementById("pong-menu") as HTMLDivElement;
+const pong_button = document.getElementById("pong-button")!;
+const qmatch_button = document.getElementById("quick-match-button")!;
+const tournament_button = document.getElementById("tournament-button")!;
 
-const enterPlayerNbr_text 	= 	document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
-const playerNbr_text 	= 	document.getElementById("playerNbr-text")! as HTMLHeadingElement;
-const playerIncr_button = 	document.getElementById("increasePlayer-button")!;
-const playerDecr_button = 	document.getElementById("decreasePlayer-button")!;
-const OK_button 		= 	document.getElementById("OK-button")!;
-const play_button 		= 	document.getElementById("play-button")!;
-const ready_text		=	document.getElementById("ready-text")!;
-const go_text			=	document.getElementById("go-text")!;
+const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
+const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
+const playerIncr_button = document.getElementById("increasePlayer-button")!;
+const playerDecr_button = document.getElementById("decreasePlayer-button")!;
+const OK_button = document.getElementById("OK-button")!;
+const play_button = document.getElementById("play-button")!;
+const ready_text = document.getElementById("ready-text")!;
+const go_text = document.getElementById("go-text")!;
 
 
-const playerName_container	= 	document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input		= 	document.getElementById("playerName-input")! as HTMLInputElement;
-const playersList 			= 	document.getElementById("players-list") as HTMLDivElement;
-const playerColors 			= 	["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
+const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
+const playersList = document.getElementById("players-list") as HTMLDivElement;
+const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
 
 class Player {
-  name: string = "";
-  paddle: HTMLDivElement | null = null;
-  point: number = 0;
-  gameWon: number = 0;
-  isAi: boolean = false;
+	name: string = "";
+	paddle: HTMLDivElement | null = null;
+	point: number = 0;
+	gameWon: number = 0;
+	isAi: boolean = false;
 
-  constructor(name: string, isAi: boolean) {
-    this.name = name;
-  }
+	constructor(name: string, isAi: boolean) {
+		this.name = name;
+	}
 };
 
 class Ball {
@@ -258,15 +260,15 @@ class Ball {
 		this.container = container;
 		this.size = size;
 		this.initBallPos();
-		
+
 	}
 
 	initBallPos() {
-		const w	= this.container.clientWidth;
-		const h	= this.container.clientHeight;
-		this.x	= w / 2 - this.size / 2;
-		this.y	= h / 2 - this.size / 2;
-		this.vx	= 0;
+		const w = this.container.clientWidth;
+		const h = this.container.clientHeight;
+		this.x = w / 2 - this.size / 2;
+		this.y = h / 2 - this.size / 2;
+		this.vx = 0;
 		this.vy = 0;
 		this.active = false;
 		this.render();
@@ -320,10 +322,10 @@ class Ball {
 		const plX = paddle_left.offsetLeft;
 		const plY = paddle_left.offsetTop;
 		if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
-			const	paddleCenter = plY + PADDLE_HEIGHT / 2;
-			const	ballCenter = this.y + this.size / 2;
-			const	relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const	bounceAngle = relative * (75 * Math.PI / 180);
+			const paddleCenter = plY + PADDLE_HEIGHT / 2;
+			const ballCenter = this.y + this.size / 2;
+			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
+			const bounceAngle = relative * (75 * Math.PI / 180);
 			this.speed = Math.min(this.speed + 20, 900);
 			this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
 			this.vy = this.speed * Math.sin(bounceAngle);
@@ -333,10 +335,10 @@ class Ball {
 		const prX = paddle_right.offsetLeft;
 		const prY = paddle_right.offsetTop;
 		if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
-			const	paddleCenter = prY + PADDLE_HEIGHT / 2;
-			const	ballCenter = this.y + this.size / 2;
-			const	relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const	bounceAngle = relative * (75 * Math.PI / 180);
+			const paddleCenter = prY + PADDLE_HEIGHT / 2;
+			const ballCenter = this.y + this.size / 2;
+			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
+			const bounceAngle = relative * (75 * Math.PI / 180);
 			this.speed = Math.min(this.speed + 20, 900);
 			this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
 			this.vy = this.speed * Math.sin(bounceAngle);
@@ -377,7 +379,7 @@ const keys = {
 };
 
 function delay(ms: number) {
-	return new Promise( resolve => setTimeout(resolve, ms) );
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 //Start count down when Pong button is pressed
@@ -424,17 +426,17 @@ document.addEventListener('keyup', (e) => {
 
 //Fonction pour bouger les paddles en fonction de la key press
 function updatePaddlePositions() {
-	if(keys.w && paddle_left.offsetTop > 0) {
+	if (keys.w && paddle_left.offsetTop > 0) {
 		paddle_left.style.top = `${paddle_left.offsetTop - PADDLE_SPEED}px`;
 	}
-	if(keys.s && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+	if (keys.s && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
 		paddle_left.style.top = `${paddle_left.offsetTop + PADDLE_SPEED}px`;
 	}
-	
-	if(keys.ArrowUp && paddle_right.offsetTop > 0) {
+
+	if (keys.ArrowUp && paddle_right.offsetTop > 0) {
 		paddle_right.style.top = `${paddle_right.offsetTop - PADDLE_SPEED}px`;
 	}
-	if(keys.ArrowDown && paddle_right.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+	if (keys.ArrowDown && paddle_right.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
 		paddle_right.style.top = `${paddle_right.offsetTop + PADDLE_SPEED}px`;
 	}
 
@@ -449,7 +451,7 @@ p2.paddle = paddle_right
 
 
 function initBallPos() {
-	
+
 }
 
-	requestAnimationFrame(updatePaddlePositions);
+requestAnimationFrame(updatePaddlePositions);

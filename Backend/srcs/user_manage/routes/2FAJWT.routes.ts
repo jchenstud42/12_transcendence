@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import prisma from "../prisma/client.js";
 import { twoFAService } from "../../module_security/2FA.js";
 import { verifyToken, signAccessToken } from "../../module_security/jwtUtils.js";
+import { FastifyCookie } from "@fastify/cookie";
 
 const twofa = new twoFAService();
 
@@ -20,6 +21,14 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 				data: { status: "ONLINE" },
 			});
 
+			reply.setCookie("refreshToken", tokens.refreshToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax",
+				path: "/",
+				maxAge: 60 * 60 * 24 * 7
+			});
+
 			return (reply.send({ message: "2FA successful", tokens }));
 		}
 		catch (err) {
@@ -30,7 +39,10 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 	fastify.post("/refresh", async (req, reply) => {
 		try {
-			const { refreshToken } = req.body as { refreshToken: string };
+			const refreshToken = req.cookies.refreshToken;
+			if (!refreshToken)
+				return reply.status(401).send({ error: "Missing refresh token" });
+
 			const payload = verifyToken(refreshToken);
 
 			if (!payload || payload.tokenType !== "refresh")

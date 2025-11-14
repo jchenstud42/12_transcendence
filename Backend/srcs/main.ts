@@ -5,6 +5,8 @@ import swaggerUI from '@fastify/swagger-ui';
 import itemsRoutes from './tests/routes/items.js';
 import twofaRoutes from './user_manage/routes/2FAJWT.routes.js';
 import twofaTestRoutes from './tests/routes/2fa_test.js';
+import authRoutes from './user_manage/routes/auth.routes.js';
+import fastifyCookie from "@fastify/cookie";
 
 
 // Creation de l'instance du serv Fastify
@@ -28,6 +30,12 @@ await fastify.register(swaggerUI, {
 	routePrefix: '/docs',
 });
 
+if (!process.env.COOKIE_SECRET)
+	throw new Error("Missing COOKIE_SECRET in environment variables");
+await fastify.register(fastifyCookie, {
+	secret: process.env.COOKIE_SECRET,
+});
+
 // Route simple (.get, .post, .put, ...)
 fastify.get('/', async (request, reply) => {
 	return { message: 'Fastify fonctionne, transcendence incoming!' };
@@ -37,6 +45,8 @@ fastify.get('/', async (request, reply) => {
 fastify.register(itemsRoutes, { prefix: '/items' });
 
 fastify.register(twofaTestRoutes);
+
+fastify.register(authRoutes);
 
 // Démarrage du server
 const start = async (): Promise<void> => {
