@@ -31,6 +31,7 @@ model User {
     // Relations
     friendsInitiated Friend[] @relation("UserFriends")
     friendsReceived  Friend[] @relation("FriendUser")
+	//Matchs
     matchesAsPlayer1 Match[]  @relation("Player1")
     matchesAsPlayer2 Match[]  @relation("Player2")
     matchesWon       Match[]  @relation("Winner")

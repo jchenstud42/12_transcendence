@@ -7,6 +7,9 @@ import twofaRoutes from './user_manage/routes/2FAJWT.routes.js';
 import twofaTestRoutes from './tests/routes/2fa_test.js';
 import authRoutes from './user_manage/routes/auth.routes.js';
 import fastifyCookie from "@fastify/cookie";
+import userRoutes from './user_manage/routes/user.routes.js';
+import friendRoutes from './user_manage/routes/friend.routes.js';
+import matchRoutes from './user_manage/routes/match.routes.js';
 
 
 // Creation de l'instance du serv Fastify
@@ -30,11 +33,11 @@ await fastify.register(swaggerUI, {
 	routePrefix: '/docs',
 });
 
-if (!process.env.COOKIE_SECRET)
-	throw new Error("Missing COOKIE_SECRET in environment variables");
-await fastify.register(fastifyCookie, {
-	secret: process.env.COOKIE_SECRET,
-});
+// if (!process.env.COOKIE_SECRET)
+// 	throw new Error("Missing COOKIE_SECRET in environment variables");
+// await fastify.register(fastifyCookie, {
+// 	secret: process.env.COOKIE_SECRET,
+// });
 
 // Route simple (.get, .post, .put, ...)
 fastify.get('/', async (request, reply) => {
@@ -44,9 +47,13 @@ fastify.get('/', async (request, reply) => {
 // Integrez vos routes ici
 fastify.register(itemsRoutes, { prefix: '/items' });
 
-fastify.register(twofaTestRoutes);
+// fastify.register(twofaTestRoutes);
 
 fastify.register(authRoutes);
+
+fastify.register(userRoutes, { prefix: '/user' });
+fastify.register(friendRoutes, { prefix: '/friend' });
+fastify.register(matchRoutes, { prefix: '/match' });
 
 // Démarrage du server
 const start = async (): Promise<void> => {

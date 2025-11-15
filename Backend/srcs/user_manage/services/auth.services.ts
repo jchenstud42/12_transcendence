@@ -11,8 +11,7 @@ export class AuthService {
 		const cleanEmail = sanitizeInput(email);
 
 		const existingUser = await prisma.user.findFirst({
-			where:
-			{
+			where: {
 				OR: [{ email: cleanEmail }, { username: cleanUsername }]
 			},
 		});
@@ -30,8 +29,7 @@ export class AuthService {
 	async login(identifier: string, password: string) {
 		const cleanIdentifier = sanitizeInput(identifier);
 		const user = await prisma.user.findFirst({
-			where:
-			{
+			where: {
 				OR: [{ email: cleanIdentifier }, { username: cleanIdentifier }]
 			},
 		});

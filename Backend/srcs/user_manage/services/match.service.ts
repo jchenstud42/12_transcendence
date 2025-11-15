@@ -9,8 +9,14 @@ export class MatchService {
 
 	async getMatchHistory(userId: number) {
 		return (await prisma.match.findMany({
-			where: { OR: [{ player1Id: userId }, { player2Id: userId }] },
-			include: {
+			where: {
+				OR: [{ player1Id: userId }, { player2Id: userId }] },
+			select: {
+				id : true,
+				score1 :true,
+				score2 : true,
+				winnerId : true,
+				date : true,
 				player1: { select: { username: true } },
 				player2: { select: { username: true } },
 			},

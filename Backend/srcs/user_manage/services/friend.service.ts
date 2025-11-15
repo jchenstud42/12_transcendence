@@ -2,18 +2,25 @@ import prisma from "../prisma/client.js";
 
 export class FriendService {
 	async addFriend(userId: number, friendId: number) {
-		if (userId === friendId)
+		if (userId == friendId)
 			throw new Error("You cannot add yourself as a friend");
 
 		const existing = await prisma.friend.findFirst({
-			where: { userId, friendId },
+			where: {
+			OR: [
+				{ userId, friendId },
+				{ userId: friendId, friendId: userId }
+			]
+			}
 		});
 		if (existing)
 			throw new Error("Already friends");
 
-		return (await prisma.friend.create({
-			data: { userId, friendId },
-		}));
+		//prisma.$transaction permet de faire plusieurs actions en meme temps, et si l'une echoue, ca rollback et rien n'est accepte
+		return (await prisma.$transaction([
+			prisma.friend.create({ data: { userId, friendId } }),
+			prisma.friend.create({ data: { userId: friendId, friendId: userId } }),
+		]));
 	}
 
 	async removeFriend(userId: number, friendId: number) {
