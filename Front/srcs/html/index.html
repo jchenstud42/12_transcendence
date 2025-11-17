@@ -55,7 +55,7 @@
 	<title>PONG</title>
 </head>
 
-<body id="page" class="relative min-h-screen overflow-hidden m-0 p-0">
+<body id="page" class="relative min-h-screen overflow-x-hidden m-0 p-0">
 	<img src="../assets/b5.jpeg" alt="Background" class="absolute inset-0 w-full h-full object-cover object-center z-0" />
 
 	<div class="absolute top-4 right-4 z-10">
@@ -72,6 +72,25 @@
 					login
 			</button>
 		</div>
+		<!--Profile button-->
+		<div id="profile-container" class="relative"> <!--mettre hidden plus tard-->
+			<button id="profile-button" class="flex items-center space-x-2 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+				<img id="profile-avatar" src="../assets/default-avatar.png" alt="Avatar" class="w-10 h-10 rounded-full">	
+			</button>
+			<div id="profile-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
+				<div class="p-4">
+					<p class="font-bold text-lg" id="menu-username">TEST</p>
+					<p class="text-sm text-gray-500" id="menu-email">TEST@test.com</p>
+				</div>
+				<hr>
+				<div class="p-4 space-y-2">
+					<button id="menu-friends" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Friends</button>
+					<button id="menu-history" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Match History</button>
+					<button id="menu-logout" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded text-red-500">Logout</button>
+				</div>
+			</div>
+		</div>
+
 		<div class="absolute right-0">
 			<!--Register form-->
 			<div id="register-form" class="hidden w-80">
@@ -97,6 +116,7 @@
 					<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
 				</form>
 			</div>
+			<!--Profile-->
 		</div>
 	</div>
 
