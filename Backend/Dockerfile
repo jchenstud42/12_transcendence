@@ -18,7 +18,6 @@ RUN npm ci
 COPY prisma ./prisma
 RUN npx prisma generate
 
-
 # Copie du reste du projet
 COPY tsconfig.json ./
 COPY srcs ./srcs
@@ -46,6 +45,9 @@ RUN npm ci --omit=dev
 
 # On récupère le build du stage "build"
 COPY --from=build /app/dist ./dist
+
+# Crée le dossier database pour SQLite
+RUN mkdir -p /app/database
 
 EXPOSE 3000
 

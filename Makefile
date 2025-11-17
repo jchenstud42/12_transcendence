@@ -60,7 +60,6 @@ clean:
 	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
-
 re: clean build up
 
 .PHONY : all build dev up down ps logs clean re
