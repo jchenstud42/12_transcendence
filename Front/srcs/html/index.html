@@ -7,44 +7,49 @@
 	<script src="https://cdn.tailwindcss.com"></script>
 	<style>
 			:root {
-				--game-width: 800px;
-				--game-height: 600px;
+	 			--game-width: 800px;
+				--game-height: 60%;
 				--paddle-width: 10px;
 				--paddle-height: 100px;
 				--ball-size: 10px;
-			}
+	  		}
 			.play-btn {
-				width: calc(var(--game-width) * 0.2);
-				height: calc(var(--game-height) * 0.1);
-			}
-			.quick-match-btn {
-				width: calc(var(--game-width) * 0.25);
-				height: calc(var(--game-height) * 0.1);
-			}
-			.tournament-btn {
-				width: calc(var(--game-width) * 0.25);
-				height: calc(var(--game-height) * 0.1);
-			}
+	    		width: calc(var(--game-width) * 0.2);
+	    		height: calc(var(--game-height) * 0.1);
+	  		}
+	  		.quick-match-btn {
+	    		width: calc(var(--game-width) * 0.25);
+	    		height: calc(var(--game-height) * 0.1);
+	  		}
+	  		.tournament-btn {
+	    		width: calc(var(--game-width) * 0.25);
+	    		height: calc(var(--game-height) * 0.1);
+	  		}
 			.triangle-right {
-				width: 0;
-				height: 0;
-				border-top: calc(var(--game-height) * 0.05) solid transparent;
-				border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-				border-left: calc(var(--game-width) * 0.05) solid white;
+		  		width: 0;
+		  		height: 0;
+		  		border-top: calc(var(--game-height) * 0.05) solid transparent;
+		  		border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+		  		border-left: calc(var(--game-width) * 0.05) solid white;
 			}
 			.triangle-left {
-				width: 0;
-				height: 0;
-				border-top: calc(var(--game-height) * 0.05) solid transparent;
-				border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-				border-right: calc(var(--game-width) * 0.05) solid white;
+		  		width: 0;
+		  		height: 0;
+		  		border-top: calc(var(--game-height) * 0.05) solid transparent;
+		  		border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+		  		border-right: calc(var(--game-width) * 0.05) solid white;
 			}
 			.player-name-item {
+				background-color: #374151;
 			    color: #ff4d4d;           /* pink */
-				font-size: 24px;          /* about text-2xl */
+				font-size: 15px;          /* about text-2xl */
 				font-weight: 700;         /* bold */
 				font-family: "Courier New", monospace;
-				padding: 0 8px;
+
+				padding: 4px 12px;
+				border-radius: 8px;
+
+				width: calc(var(--game-width) * 0.2);
 			}
 		</style>
 	<title>PONG</title>
@@ -120,13 +125,23 @@
 				</button>
 
 				<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
+				<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
 				<h1 	id="enterPlayerNbr-text"
 						class="absolute text-center text-white text-2xl font-bold tracking-widest hidden"
 						style="top: 30%; left: 50%; transform: translate(-50%, -50%);">How many Player(s):</h1>
 
 				<h2 	id="playerNbr-text"
 						class="absolute text-white text-6xl font-bold tracking-widest hidden"
-						style="top: 50%; left: 50%; transform: translate(-50%, -50%);">1</h2>
+						style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
+
+
+				<div 	id="ai-counter"
+     					class="absolute text-center text-white font-bold tracking-widest hidden"
+     					style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
+
+  						<div class="text-xs">AI</div>
+  						<div id="aiNbr-text" class="text-xl">0</div>
+				</div>
 
 				<div 	id="decreasePlayer-button" 
 						class="triangle-left absolute shadow-md hidden"
@@ -152,14 +167,22 @@
 					<input 	id="playerName-input"
 							type="text"
 							maxlength="8"
-							class="text-center text-black text-xl font-bold"
-							class="px-3 py-2 rounded bg-white text-black w-48 text-center">
+							class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
 				</div>
 
 				<div id="players-list"
-     				class="top-4 left-4 flex flex-row gap-1 text-white text-lg hidden"
-					style="position: absolute; top: 75%; left: 50%; transform: translate(-50%, -50%);">
+     				class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
 				</div>
+
+				<div id="final-list"
+     				class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
+				</div>
+
+				<div id="winner-name"
+     				class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
+				</div>
+
+				<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden"/>
 
 				<button id="play-button"
 						class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
