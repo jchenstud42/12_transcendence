@@ -1,9 +1,12 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
+import { shuffleArray } from "./utils/utils.js";
 const page = document.getElementById("page")!;
 const register_form = document.getElementById("register-form")! as HTMLFormElement | null;
 const login_form = document.getElementById("login-form")! as HTMLFormElement | null;
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
+const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
+const profile_button = document.getElementById("profile-button")!;	
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
@@ -28,6 +31,15 @@ login_button.addEventListener("click", () => {
 	}
 	else if (login_form) {
 		login_form.classList.add("hidden");
+	}
+});
+
+profile_button.addEventListener("click", () => {
+	if (profile_menu && profile_menu.classList.contains("hidden")) {
+		profile_menu.classList.remove("hidden");
+	}
+	else if (profile_menu) {
+		profile_menu.classList.add("hidden");
 	}
 });
 
@@ -221,26 +233,34 @@ const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as H
 const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
 const playerIncr_button = document.getElementById("increasePlayer-button")!;
 const playerDecr_button = document.getElementById("decreasePlayer-button")!;
+const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
+const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;	
 const OK_button = document.getElementById("OK-button")!;
 const play_button = document.getElementById("play-button")!;
 const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
 
-const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
-const playersList = document.getElementById("players-list") as HTMLDivElement;
-const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playerName_container	= 	document.getElementById("playerName-container")! as HTMLDivElement;
+const playerName_input		= 	document.getElementById("playerName-input")! as HTMLInputElement;
+const playerColors 			= 	["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playersList 			= 	document.getElementById("players-list")! as HTMLDivElement;
+const finalList 			= 	document.getElementById("final-list")! as HTMLDivElement;
+const winnerName			= 	document.getElementById("winner-name")! as HTMLDivElement;
+const crownImage			=	document.getElementById("crown-image")! as HTMLImageElement;
 
 class Player {
 	name: string = "";
+	playerNbr: number = 0;
 	paddle: HTMLDivElement | null = null;
 	point: number = 0;
 	gameWon: number = 0;
-	isAi: boolean = false;
+	isAi: boolean = false
 
-	constructor(name: string, isAi: boolean) {
-		this.name = name;
+	constructor(name: string, isAi: boolean, playerNbr: number) {
+	this.name = name;
+	this.isAi = isAi;
+	this.playerNbr = playerNbr;
 	}
 };
 
@@ -378,10 +398,6 @@ const keys = {
 	ArrowDown: false
 };
 
-function delay(ms: number) {
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 //Start count down when Pong button is pressed
 function startGame() {
 	// si le bouton est déjà caché, on ne relance pas le countdown
@@ -403,14 +419,14 @@ function startGame() {
 	}, 1000);
 }
 
-pong_button.addEventListener("click", startGame);
+// pong_button.addEventListener("click", startGame);
 
-document.addEventListener("keydown", (e) => {
-	if (e.key !== "Enter") return;
-	const active = document.activeElement as HTMLElement | null;
-	if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
-	startGame();
-});
+// document.addEventListener("keydown", (e) => {
+// 	if (e.key !== "Enter") return;
+// 	const active = document.activeElement as HTMLElement | null;
+// 	if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
+// 	startGame();
+// });
 
 //Set true or False wether a key is press among the "keys" list
 document.addEventListener('keydown', (e) => {
@@ -443,15 +459,199 @@ function updatePaddlePositions() {
 	requestAnimationFrame(updatePaddlePositions);
 }
 
+requestAnimationFrame(updatePaddlePositions);
 
-let p1 = new Player("Paul", false);
-p1.paddle = paddle_left
-let p2 = new Player("Allan", false);
-p2.paddle = paddle_right
+class Game {
+	players: Player[] = [];
+	winner: Player | null = null;
+
+	constructor(playersName: [string, boolean][]) {
+		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
+		if (playersName.length > 2)
+			this.createTournament();
+		/* else play a normal game */
+	}
+
+	public createTournament() {
+		const shuffled: Player[] = shuffleArray(this.players);
+		playersList.innerHTML = "";
+		shuffled.forEach(({name, playerNbr, isAi}) => {
+			addPlayerNameLabel(name, playerNbr, isAi);
+		});
+		showTournamentMatch();
+	}
+}
 
 
-function initBallPos() {
+pong_button.addEventListener("click", () => {
+	pong_button.classList.add("hidden");
+	qmatch_button.classList.remove("hidden");
+	tournament_button.classList.remove("hidden");
+});
+
+let isTournament = false;
+let playerNbr = 2; 
+let maxPlayer = 2;
+let aiNbr = 0;
+
+qmatch_button.addEventListener("click", () => {
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+	enterPlayerNbr();
+});
+
+tournament_button.addEventListener("click", () => {
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+	isTournament = true;
+	playerNbr = 4;
+	maxPlayer = 4;
+	playerNbr_text.textContent = playerNbr.toString();
+	enterPlayerNbr();
+});
+
+
+function enterPlayerNbr() {
+	enterPlayerNbr_text.classList.remove("hidden");
+	playerNbr_text.classList.remove("hidden");
+	playerIncr_button.classList.remove("hidden");
+	playerDecr_button.classList.remove("hidden");
+
+	aiCounter.classList.remove("hidden");
+
+	OK_button.classList.remove("hidden");
+}
+
+playerIncr_button.addEventListener("click", () => {
+	if (playerNbr < maxPlayer) {
+		playerNbr++;
+		playerNbr_text.textContent = playerNbr.toString();
+
+		aiNbr--;
+		aiNbr_text.textContent = aiNbr.toString();
+	}
+})
+
+playerDecr_button.addEventListener("click", () => {
+		if (playerNbr > 0) {
+			playerNbr--;
+			playerNbr_text.textContent = playerNbr.toString();
+
+			aiNbr++;
+			aiNbr_text.textContent = aiNbr.toString();
+		}
+})
+
+OK_button.addEventListener("click", () => {
+	hidePlayerNbrMenu();
+	playersList.classList.remove("hidden")
+
+	if (playerNbr > 0)
+		enterPlayerName();
+	else {
+		addAiNameLabel();
+		const game = new Game(playerNames);
+		startGame();
+	}
+})
+
+function hidePlayerNbrMenu() {
+	enterPlayerNbr_text.classList.add("hidden")
+	playerNbr_text.classList.add("hidden")
+	aiCounter.classList.add("hidden");
+	playerIncr_button.classList.add("hidden")
+	playerDecr_button.classList.add("hidden")
+	OK_button.classList.add("hidden")
+}
+
+let playerNames: [string, boolean][] = [];
+const aiNames = ["Nietzche", "Aurele", "Sun Tzu", "Socrate"]
+let nameEntered = 0;
+
+
+function enterPlayerName() {
+	playerName_container.classList.remove("hidden")
+}
+
+playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
+	if (event.key === "Enter") {
+		const playerName = playerName_input.value.trim();
+
+		const nameAlreadyUsed = playerNames.some(
+			([name, _isAI]) => name === playerName
+		);
+
+		if (playerName !== "" && !nameAlreadyUsed) {
+			playerName_input.value = "";
+			playerNames.push([playerName, false]);
+			addPlayerNameLabel(playerName, nameEntered, false);
+			nameEntered++;
+		}
+
+		if (nameEntered === playerNbr) {
+			playerName_container.classList.add("hidden")
+
+			addAiNameLabel();
+			const game = new Game(playerNames);
+		}
+	}
+})
+
+function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
+  	const label = document.createElement("div");
+
+  	const colorClass = playerColors[index];
+  	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+	if (!isAi)
+  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+	else
+  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
+
+	playersList.appendChild(label);
 
 }
 
-requestAnimationFrame(updatePaddlePositions);
+function addAiNameLabel() {
+	for (let y = 0; y < aiNbr; y++) {
+		const aiName = aiNames[y]
+	
+		addPlayerNameLabel(aiName, nameEntered + y, true);
+		playerNames.push([aiName, true]);
+	}
+}
+
+function showTournamentMatch() {
+	//Create/show Final Boxex (holder of the results of the first match)
+	for (let i = 0; i < 2; i++) {
+  		const label = document.createElement("div");
+
+  		label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
+
+		finalList.appendChild(label);
+	}
+	finalList.classList.remove("hidden");
+
+	//Create/show Winner Box (holder of the results of the second match)
+	const label = document.createElement("div");
+
+	label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+	label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
+
+	winnerName.appendChild(label);
+	winnerName.classList.remove("hidden");
+	crownImage.classList.remove("hidden");
+}
+
+function addFinalNameLabel(name: string, index: number, isAi: boolean) {
+  	const label = document.createElement("div");
+
+  	const colorClass = playerColors[index];
+  	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+	if (!isAi)
+  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+	else
+  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
+
+	playersList.appendChild(label);
+}
