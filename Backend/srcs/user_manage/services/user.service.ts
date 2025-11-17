@@ -27,6 +27,7 @@ export class UserService {
 		return (updated);
 	}
 
+	//Je sais pas si on garde, pas forcement utile sauf si on fait une page d'amis et on peut voir les gens ONLINE / OFFLINE (mais tout le monde en OFFLINE car pas de multijoueur)	
 	async getUserStatus(userId: number) {
 		const user = await prisma.user.findUnique({
 			where: { id: userId },
