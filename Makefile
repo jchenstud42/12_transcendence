@@ -1,10 +1,12 @@
 # make build = construit les images et compile les fichiers backend
-# make up = demarre les containeurs
+# make dev = construit, compile et demarre les containers en mode dev
+# make up = demarre les containeurs en mode prod
 # make ps = liste tout les containeurs actif
 # make logs = regarde les logs
 # make down = arrete les containeurs
-# make clean = supprime tout (meme volume)
-# make rebuild = supprime tout (meme volume) et relance tout.
+# make clean = supprime tout SAUF volumes
+# make fclean = supprime tout
+# make rebuild = supprime tout et relance tout.
 
 
 BACKEND_DIR 	= Backend
@@ -55,11 +57,19 @@ logs:
 
 clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
+	@docker compose down
+	@rm -rf $(BACKEND_DIR)/dist
+	@rm -rf $(FRONT_DIR)/srcs/js
+	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
+
+# Je te laisse refaire ton rainbow ici Mathou
+fclean:
+	@echo "Full $(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/dist
 	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
-re: clean build up
+re: fclean build up
 
-.PHONY : all build dev up down ps logs clean re
+.PHONY : all build dev up down ps logs clean fclean re

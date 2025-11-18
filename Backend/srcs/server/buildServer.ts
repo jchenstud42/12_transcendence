@@ -18,7 +18,7 @@ import testsRoutes from './routes/tests.js';
 export async function buildServer() {
 	const fastify = Fastify({ logger: true });
 
-	// Plugins -------------------------------------------------------------------------------
+	// Plugins ---------------------------------------------------------------------------------
 	await fastify.register(fastifyBetterSqlite3, {
 		pathToDb: "/app/database/database.sqlite",
 		betterSqlite3Options: {
@@ -41,7 +41,7 @@ export async function buildServer() {
 	});
 
 
-	// Creation des tables -------------------------------------------------------------------
+	// Creation des tables pour la database ----------------------------------------------------
 	fastify.after(() => {
 		fastify.betterSqlite3.exec(`
 	  CREATE TABLE IF NOT EXISTS users (

@@ -4,7 +4,7 @@ import { items } from "../data/items.js";
 
 export default async function testsRoutes(fastify: FastifyInstance) {
 
-	// TESTS ITEM
+	// TESTS ITEM ---------------------------------------------------------------------
 	fastify.get('/items/', async (_, reply) => {
 		reply.send(items);
 	})
@@ -25,10 +25,11 @@ export default async function testsRoutes(fastify: FastifyInstance) {
 
 
 
-	// TESTS USER
+	// TESTS USER ----------------------------------------------------------------------
 	fastify.get("/test_add-users", async () => {
 		const db = fastify.betterSqlite3;
-		const testUsers = [{ name: "Alice" }, { name: "Bob" }, { name: "Charlie" }];
+		const testUsers = [{ name: "Mathou Pitchou" }, { name: "Romaingue le p'tit loup" },
+		{ name: "Palulu is delulu" }, { name: "Dragon de metal aux yeux bleus" }];
 		const stmt = db.prepare("INSERT INTO users (name) VALUES (?)");
 
 		testUsers.forEach(user => stmt.run(user.name));
