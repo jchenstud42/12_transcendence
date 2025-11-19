@@ -31,10 +31,11 @@ model User {
     // Relations
     friendsInitiated Friend[] @relation("UserFriends")
     friendsReceived  Friend[] @relation("FriendUser")
-	//Matchs
+    //Matchs
     matchesAsPlayer1 Match[]  @relation("Player1")
     matchesAsPlayer2 Match[]  @relation("Player2")
     matchesWon       Match[]  @relation("Winner")
+    twoFAs           twoFA[]
 }
 
 model Friend {
@@ -63,4 +64,14 @@ model Match {
 
     winnerId Int?
     winner   User? @relation("Winner", fields: [winnerId], references: [id])
+}
+
+model twoFA {
+    userId      Int       @id
+    method      String
+    secret      String?
+    code        String?
+    expiresAt   DateTime?
+    destination String?
+    user        User      @relation(fields: [userId], references: [id])
 }

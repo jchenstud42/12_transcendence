@@ -35,7 +35,7 @@ export type JwtPayload = {
 */
 export function signAccessToken(userId: number, twoFA = false): string {
 	return jwt.sign(
-		{ sub: userId, twoFA },
+		{ sub: userId, tokenType: "access", twoFA },
 		JWT_SECRET,
 		{ algorithm: "HS256", expiresIn: ACCESS_EXPIRES_SEC }
 	);
@@ -45,7 +45,7 @@ export function signAccessToken(userId: number, twoFA = false): string {
 export function signRefreshToken(userId: number): string {
 	return jwt.sign(
 		{
-			sub: userId, tokenType: "refresh"
+			sub: userId, tokenType: "refresh",
 		},
 		JWT_SECRET,
 		{

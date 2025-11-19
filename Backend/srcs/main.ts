@@ -17,6 +17,7 @@ const start = async (): Promise<void> => {
 // C A KI CA??????
 //      |
 //      v
+// C A MWA, MATHOU, BISES
 // if (!process.env.COOKIE_SECRET)
 // 	throw new Error("Missing COOKIE_SECRET in environment variables");
 // await fastify.register(fastifyCookie, {
