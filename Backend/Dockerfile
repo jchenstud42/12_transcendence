@@ -15,6 +15,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+RUN npm install prisma@6.19.0 @prisma/client@6.19.0
+
 COPY prisma ./prisma
 RUN npx prisma generate
 
@@ -36,6 +38,8 @@ WORKDIR /app
 
 # Copie de package.json pour installer les dépendances
 COPY package*.json ./
+
+RUN npm install prisma@6.19.0 @prisma/client@6.19.0
 
 COPY prisma ./prisma
 RUN npx prisma generate
@@ -65,6 +69,8 @@ WORKDIR /app
 # Copie le package.json et installe toutes les dépendances
 COPY package*.json ./
 RUN npm ci
+
+RUN npm install prisma@6.19.0 @prisma/client@6.19.0
 
 COPY prisma ./prisma
 RUN npx prisma generate

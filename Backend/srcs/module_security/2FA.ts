@@ -1,4 +1,4 @@
-import speakeasy from "speakeasy";
+import speakeasy, { otpauthURL } from "speakeasy";
 import QRCode from "qrcode";
 import nodemailer from "nodemailer";
 import { signAccessToken, signRefreshToken } from "./jwtUtils.js";
@@ -8,20 +8,70 @@ export type twoFAMethod = "email" | "sms" | "totp";
 
 export class twoFAService {
 
+	async generateTOTPSecret(userId: number) {
+		const totpSecret = speakeasy.generateSecret({ name: "Transcendence", length: 20 });
+
+		await prisma.twoFA.upsert({
+			where: { userId },
+			update: {
+				method: "totp",
+				secret: totpSecret.base32,
+				code: null,
+				expiresAt: null,
+				destination: null
+			},
+			create: {
+				userId,
+				method: "totp",
+				secret: totpSecret.base32,
+				code: null,
+				expiresAt: null,
+				destination: null
+			}
+		});
+
+		const qrCode = await QRCode.toDataURL(totpSecret.otpauth_url!);
+
+		return {
+			secret: totpSecret.base32,
+			otpauthURL: totpSecret.otpauth_url,
+			qrCode,
+		};
+	}
+
+	async enableTOTP(userId: number, code: string): Promise<boolean> {
+		const data = await prisma.twoFA.findUnique({ where: { userId } });
+		if (!data || data.method !== "totp" || !data.secret)
+			return false;
+
+		const ok = speakeasy.totp.verify({
+			secret: data.secret,
+			encoding: "base32",
+			token: code,
+			window: 1
+		});
+
+		if (!ok)
+			return false;
+
+		await prisma.user.update({
+			where: { id: userId },
+			data: { isTwoFAEnabled: true },
+		});
+
+		return true;
+	}
+
 	async generate2FA(userId: number, method: twoFAMethod, destination?: string): Promise<string> {
 
 		let secret: string | undefined = undefined;
 		let code: string | undefined = undefined;
 		let expiresAt: Date | undefined = undefined;
 
-		if (method === "totp") {
-			const totpSecret = speakeasy.generateSecret({ length: 20 });
-			secret = totpSecret.base32;
-		}
-		else {
-			code = Math.floor(100000 + Math.random() * 900000).toString();
-			expiresAt = new Date(Date.now() + 5 * 60 * 1000);
-		}
+
+		code = Math.floor(100000 + Math.random() * 900000).toString();
+		expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
 
 		await prisma.twoFA.upsert({
 			where: { userId },
@@ -76,7 +126,7 @@ export class twoFAService {
 		else if (data.method === "totp") {
 			const otpUrl = speakeasy.otpauthURL({
 				secret: data.secret as string,
-				label: data.destination || "Transcendence",
+				label: "Transcendence",
 				issuer: "Transcendence",
 				encoding: "base32",
 			});
@@ -91,14 +141,13 @@ export class twoFAService {
 			return false;
 
 		if (data.method === "totp" && data.secret) {
-			const verified = speakeasy.totp.verify(
+			return speakeasy.totp.verify(
 				{
 					secret: data.secret,
 					encoding: "base32",
 					token: code,
 					window: 1
 				});
-			return Boolean(verified);
 		}
 		else if ((data.method === "email" || data.method === "sms") && data.code && data.expiresAt) {
 			return data.code === code && new Date() <= data.expiresAt;
@@ -108,7 +157,7 @@ export class twoFAService {
 	}
 
 	async complete2FA(userId: number, code: string) {
-		const verified = this.verify2FACode(userId, code);
+		const verified = await this.verify2FACode(userId, code);
 		if (!verified)
 			return null;
 
