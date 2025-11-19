@@ -11,7 +11,7 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 		try {
 			const { userId, code } = req.body as { userId: number; code: string };
 
-			const tokens = twofa.complete2FA(userId, code);
+			const tokens = await twofa.complete2FA(userId, code);
 
 			if (!tokens)
 				return (reply.status(401).send({ error: "Invalid 2FA code" }));
