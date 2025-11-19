@@ -32,6 +32,13 @@ export class AuthService {
 			where: {
 				OR: [{ email: cleanIdentifier }, { username: cleanIdentifier }]
 			},
+			select: {
+				id: true,
+				username: true,
+				email: true,
+				password: true,
+				isTwoFAEnabled: true,
+			},
 		});
 		if (!user)
 			throw new Error("User not found");
@@ -41,7 +48,18 @@ export class AuthService {
 			throw new Error("Invalid credentials");
 
 		await prisma.user.update({ where: { id: user.id }, data: { status: "ONLINE" } });
-		return ({ id: user.id, username: user.username, email: user.email });
+
+		type TwoFAMethod = "email" | "sms" | "totp";
+		let twoFAMethod: TwoFAMethod | null = null;
+		if (user.isTwoFAEnabled) {
+			const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
+			if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "totp") {
+				twoFAMethod = twoFAData.method;
+			}
+
+		}
+		return ({ id: user.id, username: user.username, email: user.email, isTwoFAEnabled: user.isTwoFAEnabled, twoFAMethod });
+
 	}
 
 	async logout(userId: number) {

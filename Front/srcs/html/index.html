@@ -6,52 +6,61 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<style>
-			:root {
-	 			--game-width: 800px;
-				--game-height: 60%;
-				--paddle-width: 10px;
-				--paddle-height: 100px;
-				--ball-size: 10px;
-	  		}
-			.play-btn {
-	    		width: calc(var(--game-width) * 0.2);
-	    		height: calc(var(--game-height) * 0.1);
-	  		}
-	  		.quick-match-btn {
-	    		width: calc(var(--game-width) * 0.25);
-	    		height: calc(var(--game-height) * 0.1);
-	  		}
-	  		.tournament-btn {
-	    		width: calc(var(--game-width) * 0.25);
-	    		height: calc(var(--game-height) * 0.1);
-	  		}
-			.triangle-right {
-		  		width: 0;
-		  		height: 0;
-		  		border-top: calc(var(--game-height) * 0.05) solid transparent;
-		  		border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-		  		border-left: calc(var(--game-width) * 0.05) solid white;
-			}
-			.triangle-left {
-		  		width: 0;
-		  		height: 0;
-		  		border-top: calc(var(--game-height) * 0.05) solid transparent;
-		  		border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-		  		border-right: calc(var(--game-width) * 0.05) solid white;
-			}
-			.player-name-item {
-				background-color: #374151;
-			    color: #ff4d4d;           /* pink */
-				font-size: 15px;          /* about text-2xl */
-				font-weight: 700;         /* bold */
-				font-family: "Courier New", monospace;
+		:root {
+			--game-width: 800px;
+			--game-height: 60%;
+			--paddle-width: 10px;
+			--paddle-height: 100px;
+			--ball-size: 10px;
+		}
 
-				padding: 4px 12px;
-				border-radius: 8px;
+		.play-btn {
+			width: calc(var(--game-width) * 0.2);
+			height: calc(var(--game-height) * 0.1);
+		}
 
-				width: calc(var(--game-width) * 0.2);
-			}
-		</style>
+		.quick-match-btn {
+			width: calc(var(--game-width) * 0.25);
+			height: calc(var(--game-height) * 0.1);
+		}
+
+		.tournament-btn {
+			width: calc(var(--game-width) * 0.25);
+			height: calc(var(--game-height) * 0.1);
+		}
+
+		.triangle-right {
+			width: 0;
+			height: 0;
+			border-top: calc(var(--game-height) * 0.05) solid transparent;
+			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+			border-left: calc(var(--game-width) * 0.05) solid white;
+		}
+
+		.triangle-left {
+			width: 0;
+			height: 0;
+			border-top: calc(var(--game-height) * 0.05) solid transparent;
+			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+			border-right: calc(var(--game-width) * 0.05) solid white;
+		}
+
+		.player-name-item {
+			background-color: #374151;
+			color: #ff4d4d;
+			/* pink */
+			font-size: 15px;
+			/* about text-2xl */
+			font-weight: 700;
+			/* bold */
+			font-family: "Courier New", monospace;
+
+			padding: 4px 12px;
+			border-radius: 8px;
+
+			width: calc(var(--game-width) * 0.2);
+		}
+	</style>
 	<title>PONG</title>
 </head>
 
@@ -61,21 +70,17 @@
 	<div class="absolute top-4 right-4 z-10">
 		<!--register & login button-->
 		<div class="flex justify-end space-x-4 mb-2">
-			<button id="register-button"
-					class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-					type="button">
-					register
+			<button id="register-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+				register
 			</button>
-			<button id="login-button"
-					class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-					type="button">
-					login
+			<button id="login-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+				login
 			</button>
 		</div>
 		<!--Profile button + quelques options-->
 		<div id="profile-container" class="relative"> <!--mettre hidden plus tard-->
 			<button id="profile-button" class="flex items-center space-x-2 bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-				<img id="profile-avatar" src="../assets/default-avatar.png" alt="Avatar" class="w-10 h-10 rounded-full">	
+				<img id="profile-avatar" src="../assets/default-avatar.png" alt="Avatar" class="w-10 h-10 rounded-full">
 			</button>
 			<div id="profile-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
 				<div class="p-4">
@@ -105,7 +110,7 @@
 						<h2 class="text-xl font-bold mb-2">Match History</h2>
 						<p>Test match</p>
 					</div>
-					
+
 					<!--2FA MENU-->
 					<button id="2FA-button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">
 						2FA
@@ -122,176 +127,143 @@
 					<!-- CHOIX 2FA TYPE -->
 					<div id="2fa-type-menu" class="hidden fixed top-52 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-4">Choisir le type de 2FA</h2>
-					
-						<button id="2fa-email"
-								class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded mb-2">
+
+						<button id="2fa-email" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded mb-2">
 							Email
 						</button>
-					
-						<button id="2fa-sms"
-								class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded mb-2">
+
+						<button id="2fa-sms" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded mb-2">
 							SMS
 						</button>
-					
-						<button id="2fa-qr"
-								class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded">
+
+						<button id="2fa-qr" class="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded">
 							QR Code (Google Authenticator)
 						</button>
 					</div>
 					<button id="menu-logout" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded text-red-500">Logout</button>
 				</div>
-		</div>
-
-		<div class="absolute right-0">
-			<!--Register form-->
-			<div id="register-form" class="hidden w-80">
-				<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
-					<label for="name">Username :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
-					<label for="name">Email :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="email" placeholder="Email" required><br><br>
-					<label for="name">Password :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
-					<label for="name">Confirm Password :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="confirm-password" placeholder="Confirm Password" required><br><br>
-					<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">register</button>
-				</form>
 			</div>
-			<!--Login form-->
-			<div id="login-form" class="hidden w-80">
-				<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
-					<label for="name">Username :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-id" placeholder="Login-ID" required><br><br>
-					<label for="name">Password :</label><br>
-					<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-password" placeholder="Login-Password" required><br><br>
-					<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
-				</form>
+
+			<!-- Formulaire 2FA -->
+			<form id="twofa-form" class="hidden">
+				<h2>Two-Factor Authentication</h2>
+				<label for="twofa-code">Enter your 2FA code:</label>
+				<input type="text" id="twofa-code" maxlength="6" required />
+				<button type="submit">Verify</button>
+			</form>
+
+
+			<div class="absolute right-0">
+				<!--Register form-->
+				<div id="register-form" class="hidden w-80">
+					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
+						<label for="name">Username :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
+						<label for="name">Email :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="email" placeholder="Email" required><br><br>
+						<label for="name">Password :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="password" placeholder="Password" required><br><br>
+						<label for="name">Confirm Password :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="confirm-password" placeholder="Confirm Password" required><br><br>
+						<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">register</button>
+					</form>
+				</div>
+				<!--Login form-->
+				<div id="login-form" class="hidden w-80">
+					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
+						<label for="name">Username :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-id" placeholder="Login-ID" required><br><br>
+						<label for="name">Password :</label><br>
+						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-password" placeholder="Login-Password" required><br><br>
+						<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
+					</form>
+				</div>
+				<!--Profile-->
 			</div>
-			<!--Profile-->
 		</div>
-	</div>
 
-	<div id="pong-menu"
-				class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black overflow-hidden"
-				style="width: var(--game-width); height: var(--game-height);">
+		<div id="pong-menu" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black overflow-hidden" style="width: var(--game-width); height: var(--game-height);">
 
-				<!-- Play Buttons + Choose the type of match (Quick or Tournament Button)-->
-				<button id="pong-button"
-						class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200"
-						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						PONG
-				</button>
+			<!-- Play Buttons + Choose the type of match (Quick or Tournament Button)-->
+			<button id="pong-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				PONG
+			</button>
 
-				<button id="quick-match-button"
-						class="quick-match-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
-						style="position: absolute; top: 50%; left: 33%; transform: translate(-50%, -50%);">
-						QUICK
-						MATCH	
-				</button>
+			<button id="quick-match-button" class="quick-match-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 33%; transform: translate(-50%, -50%);">
+				QUICK
+				MATCH
+			</button>
 
-				<button id="tournament-button"
-						class="tournament-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
-						style="position: absolute; top: 50%; left: 66%; transform: translate(-50%, -50%);">
-						TOURNAMENT
-				</button>
+			<button id="tournament-button" class="tournament-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 66%; transform: translate(-50%, -50%);">
+				TOURNAMENT
+			</button>
 
-				<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
-				<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
-				<h1 	id="enterPlayerNbr-text"
-						class="absolute text-center text-white text-2xl font-bold tracking-widest hidden"
-						style="top: 30%; left: 50%; transform: translate(-50%, -50%);">How many Player(s):</h1>
+			<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
+			<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
+			<h1 id="enterPlayerNbr-text" class="absolute text-center text-white text-2xl font-bold tracking-widest hidden" style="top: 30%; left: 50%; transform: translate(-50%, -50%);">How many Player(s):</h1>
 
-				<h2 	id="playerNbr-text"
-						class="absolute text-white text-6xl font-bold tracking-widest hidden"
-						style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
+			<h2 id="playerNbr-text" class="absolute text-white text-6xl font-bold tracking-widest hidden" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
 
 
-				<div 	id="ai-counter"
-     					class="absolute text-center text-white font-bold tracking-widest hidden"
-     					style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
+			<div id="ai-counter" class="absolute text-center text-white font-bold tracking-widest hidden" style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
 
-  						<div class="text-xs">AI</div>
-  						<div id="aiNbr-text" class="text-xl">0</div>
-				</div>
+				<div class="text-xs">AI</div>
+				<div id="aiNbr-text" class="text-xl">0</div>
+			</div>
 
-				<div 	id="decreasePlayer-button" 
-						class="triangle-left absolute shadow-md hidden"
-						style="right: 60%; top: 47%"></div>
+			<div id="decreasePlayer-button" class="triangle-left absolute shadow-md hidden" style="right: 60%; top: 47%"></div>
 
-				<div 	id="increasePlayer-button"
-						class="triangle-right absolute shadow-md hidden"
-						style="right: 36%; top: 47%"></div>
+			<div id="increasePlayer-button" class="triangle-right absolute shadow-md hidden" style="right: 36%; top: 47%"></div>
 
-				<button id="OK-button"
-						class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
-						style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
-						OK
-				</button>
+			<button id="OK-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
+				OK
+			</button>
 
-				<!-- Enter Player Names: Label + Input + Button -->
-				<div	id="playerName-container"
-						class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
+			<!-- Enter Player Names: Label + Input + Button -->
+			<div id="playerName-container" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
 
-					<label for="player-name-input" class="text-white text-xl font-bold">
-    					Enter player name:
-  					</label>
-					<input 	id="playerName-input"
-							type="text"
-							maxlength="8"
-							class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
-				</div>
+				<label for="player-name-input" class="text-white text-xl font-bold">
+					Enter player name:
+				</label>
+				<input id="playerName-input" type="text" maxlength="8" class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
+			</div>
 
-				<div id="players-list"
-     				class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
-				</div>
+			<div id="players-list" class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
+			</div>
 
-				<div id="final-list"
-     				class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
-				</div>
+			<div id="final-list" class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
+			</div>
 
-				<div id="winner-name"
-     				class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
-				</div>
+			<div id="winner-name" class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
+			</div>
 
-				<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden"/>
+			<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden" />
 
-				<button id="play-button"
-						class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
-						style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
-						PLAY
-				</button>
-				
-				<div	id="ready-text"
-						class="absolute text-white font-bold text-lg text-6xl hidden"
-						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						READY ?
-				</div>
+			<button id="play-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
+				PLAY
+			</button>
 
-				<div	id="go-text"
-						class="absolute text-white font-bold text-lg text-6xl hidden"
-						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						GOOOO !!!
-				</div>
+			<div id="ready-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				READY ?
+			</div>
 
-				<!-- Pong Elements (Paddle, ball...)-->
-				
-				<div	id="left-paddle"
-						class="absolute bg-white hidden"
-						style="width: var(--paddle-width); height: var(--paddle-height); left: 5%; top: 40%;">
-				</div>	
+			<div id="go-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				GOOOO !!!
+			</div>
 
-				<div	id="right-paddle"
-						class="absolute bg-white hidden"
-						style="width: var(--paddle-width); height: var(--paddle-height); right: 5%; top: 40%">
-				</div>	
+			<!-- Pong Elements (Paddle, ball...)-->
 
-				<div	id="ball"
-						class="absolute bg-white rounded hidden"
-						style="width: var(--ball-size); height: var(--ball-size); left: 50%; top:50%">
-				</div>	
+			<div id="left-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); left: 5%; top: 40%;">
+			</div>
+
+			<div id="right-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); right: 5%; top: 40%">
+			</div>
+
+			<div id="ball" class="absolute bg-white rounded hidden" style="width: var(--ball-size); height: var(--ball-size); left: 50%; top:50%">
+			</div>
 
 		</div>
-	<script type="module" src="../js/main.js"></script>
+		<script type="module" src="../js/main.js"></script>
 </body>
 
 </html>

@@ -6,24 +6,28 @@ const login_form = document.getElementById("login-form")! as HTMLFormElement | n
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
 
-//Profile
-const profile_menu		= document.getElementById("profile-menu")! as HTMLDivElement | null;
-const edit_menu			= document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
-const friends_menu		= document.getElementById("friends-menu")! as HTMLDivElement | null;
-const history_menu		= document.getElementById("history-menu")! as HTMLDivElement | null;
-const profile_button	= document.getElementById("profile-button")!;
-const edit_button		= document.getElementById("edit-profile-button")!;
-const friends_button	= document.getElementById("friends-button")!;
-const history_button	= document.getElementById("history-button")!;
+// 2FA Elements
+const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
+let storedUserId: number | null = null; // pour stocker l'ID de l'utilisateur après login
 
-const twoFA_menu		= document.getElementById("2fa-menu")! as HTMLDivElement | null;
-const twoFA_profile_button		= document.getElementById("2FA-button")!;
-const twofaToggleBtn	= document.getElementById("2fa-toggle-btn")!;
-const twofaStatusText	= document.getElementById("2fa-status-text")!;
-const twofaTypeMenu		= document.getElementById("2fa-type-menu")!;
-const btnEmail			= document.getElementById("2fa-email")!;
-const btnSMS			= document.getElementById("2fa-sms")!;
-const btnQR				= document.getElementById("2fa-qr")!;
+//Profile
+const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
+const edit_menu = document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
+const friends_menu = document.getElementById("friends-menu")! as HTMLDivElement | null;
+const history_menu = document.getElementById("history-menu")! as HTMLDivElement | null;
+const profile_button = document.getElementById("profile-button")!;
+const edit_button = document.getElementById("edit-profile-button")!;
+const friends_button = document.getElementById("friends-button")!;
+const history_button = document.getElementById("history-button")!;
+
+const twoFA_menu = document.getElementById("2fa-menu")! as HTMLDivElement | null;
+const twoFA_profile_button = document.getElementById("2FA-button")!;
+const twofaToggleBtn = document.getElementById("2fa-toggle-btn")!;
+const twofaStatusText = document.getElementById("2fa-status-text")!;
+const twofaTypeMenu = document.getElementById("2fa-type-menu")!;
+const btnEmail = document.getElementById("2fa-email")!;
+const btnSMS = document.getElementById("2fa-sms")!;
+const btnQR = document.getElementById("2fa-qr")!;
 
 let is2FAEnabled = false;
 
@@ -125,7 +129,7 @@ twofaToggleBtn.addEventListener("click", () => {
 		twofaToggleBtn.textContent = "Désactiver";
 		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
 		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		 twofaTypeMenu.classList.remove("hidden");
+		twofaTypeMenu.classList.remove("hidden");
 	}
 	else {
 		// 2FA désactivée
@@ -133,7 +137,7 @@ twofaToggleBtn.addEventListener("click", () => {
 		twofaToggleBtn.textContent = "Activer";
 		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
 		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
-		 twofaTypeMenu.classList.add("hidden");
+		twofaTypeMenu.classList.add("hidden");
 	}
 });
 
@@ -314,14 +318,20 @@ else {
 						},
 						body: JSON.stringify(sendBack),
 					});
+
+					const data = await res.json();
 					if (res.ok) {
-						alert("Login successful, have fun!");
-						login_form.reset();
+						if (data.message === "2FA required") {
+							storedUserId = data.userId;
+							twofaForm.classList.remove("hidden");
+						}
+						// else {
+						// storeToken(data.accessToken); FONCTION A FAIRE OU PAS --------------
+						// login_form.reset();
+						// }
 					}
-					else {
-						const err = await res.json().catch(() => null);
-						alert("Server error: " + (err?.message || res.statusText));
-					}
+					else
+						alert("Server error: " + (data?.error || res.statusText));
 				}
 				catch (err) {
 					console.error("Fetch error:", err);
@@ -337,6 +347,28 @@ else {
 		});
 	}
 }
+
+twofaForm.addEventListener("submit", async (e) => {
+	e.preventDefault();
+	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
+	const code = codeInput.value.trim();
+	if (!code) return alert("Enter the 2FA code");
+
+	const res = await fetch("http://localhost:3000/verify-2fa", {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ userId: storedUserId, code }),
+	});
+	const data = await res.json();
+	if (res.ok) {
+		// storeToken(data.tokens.accessToken); FONCTION A FAIRE OU PAS ---------------------
+		alert("Login successful with 2FA!");
+		twofaForm.reset();
+		twofaForm.classList.add("hidden");
+	} else alert("Invalid 2FA code");
+});
+
 
 
 // POOOONNNNNNNG
@@ -361,20 +393,20 @@ const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeading
 const playerIncr_button = document.getElementById("increasePlayer-button")!;
 const playerDecr_button = document.getElementById("decreasePlayer-button")!;
 const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
-const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;	
+const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
 const OK_button = document.getElementById("OK-button")!;
 const play_button = document.getElementById("play-button")!;
 const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
 
-const playerName_container	= 	document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input		= 	document.getElementById("playerName-input")! as HTMLInputElement;
-const playerColors 			= 	["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
-const playersList 			= 	document.getElementById("players-list")! as HTMLDivElement;
-const finalList 			= 	document.getElementById("final-list")! as HTMLDivElement;
-const winnerName			= 	document.getElementById("winner-name")! as HTMLDivElement;
-const crownImage			=	document.getElementById("crown-image")! as HTMLImageElement;
+const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
+const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
+const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playersList = document.getElementById("players-list")! as HTMLDivElement;
+const finalList = document.getElementById("final-list")! as HTMLDivElement;
+const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
+const crownImage = document.getElementById("crown-image")! as HTMLImageElement;
 
 class Player {
 	name: string = "";
@@ -385,9 +417,9 @@ class Player {
 	isAi: boolean = false
 
 	constructor(name: string, isAi: boolean, playerNbr: number) {
-	this.name = name;
-	this.isAi = isAi;
-	this.playerNbr = playerNbr;
+		this.name = name;
+		this.isAi = isAi;
+		this.playerNbr = playerNbr;
 	}
 };
 
@@ -602,7 +634,7 @@ class Game {
 	public createTournament() {
 		const shuffled: Player[] = shuffleArray(this.players);
 		playersList.innerHTML = "";
-		shuffled.forEach(({name, playerNbr, isAi}) => {
+		shuffled.forEach(({ name, playerNbr, isAi }) => {
 			addPlayerNameLabel(name, playerNbr, isAi);
 		});
 		showTournamentMatch();
@@ -617,7 +649,7 @@ pong_button.addEventListener("click", () => {
 });
 
 let isTournament = false;
-let playerNbr = 2; 
+let playerNbr = 2;
 let maxPlayer = 2;
 let aiNbr = 0;
 
@@ -660,13 +692,13 @@ playerIncr_button.addEventListener("click", () => {
 })
 
 playerDecr_button.addEventListener("click", () => {
-		if (playerNbr > 0) {
-			playerNbr--;
-			playerNbr_text.textContent = playerNbr.toString();
+	if (playerNbr > 0) {
+		playerNbr--;
+		playerNbr_text.textContent = playerNbr.toString();
 
-			aiNbr++;
-			aiNbr_text.textContent = aiNbr.toString();
-		}
+		aiNbr++;
+		aiNbr_text.textContent = aiNbr.toString();
+	}
 })
 
 OK_button.addEventListener("click", () => {
@@ -725,14 +757,14 @@ playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 })
 
 function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
-  	const label = document.createElement("div");
+	const label = document.createElement("div");
 
-  	const colorClass = playerColors[index];
-  	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+	const colorClass = playerColors[index];
+	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
 	if (!isAi)
-  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else
-  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 
 	playersList.appendChild(label);
 
@@ -741,7 +773,7 @@ function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 function addAiNameLabel() {
 	for (let y = 0; y < aiNbr; y++) {
 		const aiName = aiNames[y]
-	
+
 		addPlayerNameLabel(aiName, nameEntered + y, true);
 		playerNames.push([aiName, true]);
 	}
@@ -750,9 +782,9 @@ function addAiNameLabel() {
 function showTournamentMatch() {
 	//Create/show Final Boxex (holder of the results of the first match)
 	for (let i = 0; i < 2; i++) {
-  		const label = document.createElement("div");
+		const label = document.createElement("div");
 
-  		label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+		label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
 
 		finalList.appendChild(label);
@@ -771,14 +803,14 @@ function showTournamentMatch() {
 }
 
 function addFinalNameLabel(name: string, index: number, isAi: boolean) {
-  	const label = document.createElement("div");
+	const label = document.createElement("div");
 
-  	const colorClass = playerColors[index];
-  	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+	const colorClass = playerColors[index];
+	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
 	if (!isAi)
-  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else
-  		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 
 	playersList.appendChild(label);
 }
