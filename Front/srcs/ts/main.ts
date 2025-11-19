@@ -8,15 +8,24 @@ const login_button = document.getElementById("login-button")!;
 
 //Profile
 const profile_menu		= document.getElementById("profile-menu")! as HTMLDivElement | null;
-const edit_menu			= document.getElementById("edit-profile-menu")! as HTMLDivElement | null;;
-const friends_menu		= document.getElementById("friends-menu")! as HTMLDivElement | null;;
-const history_menu		= document.getElementById("history-menu")! as HTMLDivElement | null;;
-const twoFA_menu		= document.getElementById("2fa-menu")! as HTMLDivElement | null;;
+const edit_menu			= document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
+const friends_menu		= document.getElementById("friends-menu")! as HTMLDivElement | null;
+const history_menu		= document.getElementById("history-menu")! as HTMLDivElement | null;
 const profile_button	= document.getElementById("profile-button")!;
 const edit_button		= document.getElementById("edit-profile-button")!;
 const friends_button	= document.getElementById("friends-button")!;
 const history_button	= document.getElementById("history-button")!;
-const twoFA_button		= document.getElementById("2FA-button")!;
+
+const twoFA_menu		= document.getElementById("2fa-menu")! as HTMLDivElement | null;
+const twoFA_profile_button		= document.getElementById("2FA-button")!;
+const twofaToggleBtn	= document.getElementById("2fa-toggle-btn")!;
+const twofaStatusText	= document.getElementById("2fa-status-text")!;
+const twofaTypeMenu		= document.getElementById("2fa-type-menu")!;
+const btnEmail			= document.getElementById("2fa-email")!;
+const btnSMS			= document.getElementById("2fa-sms")!;
+const btnQR				= document.getElementById("2fa-qr")!;
+
+let is2FAEnabled = false;
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
@@ -107,7 +116,28 @@ history_button.addEventListener("click", () => {
 	}
 });
 
-twoFA_button.addEventListener("click", () => {
+twofaToggleBtn.addEventListener("click", () => {
+	is2FAEnabled = !is2FAEnabled;
+
+	if (is2FAEnabled) {
+		// 2FA activée
+		twofaStatusText.textContent = "2FA est activée.";
+		twofaToggleBtn.textContent = "Désactiver";
+		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+		 twofaTypeMenu.classList.remove("hidden");
+	}
+	else {
+		// 2FA désactivée
+		twofaStatusText.textContent = "2FA est désactivée.";
+		twofaToggleBtn.textContent = "Activer";
+		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
+		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+		 twofaTypeMenu.classList.add("hidden");
+	}
+});
+
+twoFA_profile_button.addEventListener("click", () => {
 	if (edit_menu && !edit_menu.classList.contains("hidden")) {
 		edit_menu.classList.add("hidden");
 	}
@@ -123,6 +153,21 @@ twoFA_button.addEventListener("click", () => {
 	else if (twoFA_menu) {
 		twoFA_menu.classList.add("hidden");
 	}
+});
+
+btnEmail.addEventListener("click", () => {
+	alert("2FA par Email sélectionnée !");
+	twofaTypeMenu.classList.add("hidden");
+});
+
+btnSMS.addEventListener("click", () => {
+	alert("2FA par SMS sélectionnée !");
+	twofaTypeMenu.classList.add("hidden");
+});
+
+btnQR.addEventListener("click", () => {
+	alert("2FA par QR Code sélectionnée !");
+	twofaTypeMenu.classList.add("hidden");
 });
 
 
