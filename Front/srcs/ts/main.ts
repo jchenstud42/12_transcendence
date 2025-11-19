@@ -528,7 +528,7 @@ const keys = {
 //Start count down when Pong button is pressed
 function startGame() {
 	// si le bouton est déjà caché, on ne relance pas le countdown
-	if (pong_button.classList.contains("hidden")) return;
+	// if (pong_button.classList.contains("hidden")) return;
 
 	pong_button.classList.add("hidden");
 	paddle_left.classList.remove("hidden");
@@ -673,12 +673,12 @@ OK_button.addEventListener("click", () => {
 	hidePlayerNbrMenu();
 	playersList.classList.remove("hidden")
 
-	if (playerNbr > 0)
+	if (playerNbr > 0) {
 		enterPlayerName();
+	}
 	else {
 		addAiNameLabel();
 		const game = new Game(playerNames);
-		startGame();
 	}
 })
 

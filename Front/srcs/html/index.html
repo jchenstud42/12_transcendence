@@ -8,7 +8,7 @@
 	<style>
 			:root {
 	 			--game-width: 800px;
-				--game-height: 60%;
+				--game-height: 600px;
 				--paddle-width: 10px;
 				--paddle-height: 100px;
 				--ball-size: 10px;
@@ -22,8 +22,8 @@
 	    		height: calc(var(--game-height) * 0.1);
 	  		}
 	  		.tournament-btn {
-	    		width: calc(var(--game-width) * 0.25);
-	    		height: calc(var(--game-height) * 0.1);
+				width: calc(var(--game-width) * 0.25);
+				height: calc(var(--game-height) * 0.1);
 	  		}
 			.triangle-right {
 		  		width: 0;
@@ -207,11 +207,11 @@
 
 
 				<div 	id="ai-counter"
-     					class="absolute text-center text-white font-bold tracking-widest hidden"
-     					style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
+						class="absolute text-center text-white font-bold tracking-widest hidden"
+						style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
 
-  						<div class="text-xs">AI</div>
-  						<div id="aiNbr-text" class="text-xl">0</div>
+						<div class="text-xs">AI</div>
+						<div id="aiNbr-text" class="text-xl">0</div>
 				</div>
 
 				<div 	id="decreasePlayer-button" 
@@ -233,8 +233,8 @@
 						class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
 
 					<label for="player-name-input" class="text-white text-xl font-bold">
-    					Enter player name:
-  					</label>
+						Enter player name:
+					</label>
 					<input 	id="playerName-input"
 							type="text"
 							maxlength="8"
@@ -242,15 +242,15 @@
 				</div>
 
 				<div id="players-list"
-     				class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
+					class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
 				</div>
 
 				<div id="final-list"
-     				class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
+					class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
 				</div>
 
 				<div id="winner-name"
-     				class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
+					class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
 				</div>
 
 				<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden"/>
