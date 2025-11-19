@@ -5,8 +5,18 @@ const register_form = document.getElementById("register-form")! as HTMLFormEleme
 const login_form = document.getElementById("login-form")! as HTMLFormElement | null;
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
-const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
-const profile_button = document.getElementById("profile-button")!;	
+
+//Profile
+const profile_menu		= document.getElementById("profile-menu")! as HTMLDivElement | null;
+const edit_menu			= document.getElementById("edit-profile-menu")! as HTMLDivElement | null;;
+const friends_menu		= document.getElementById("friends-menu")! as HTMLDivElement | null;;
+const history_menu		= document.getElementById("history-menu")! as HTMLDivElement | null;;
+const twoFA_menu		= document.getElementById("2fa-menu")! as HTMLDivElement | null;;
+const profile_button	= document.getElementById("profile-button")!;
+const edit_button		= document.getElementById("edit-profile-button")!;
+const friends_button	= document.getElementById("friends-button")!;
+const history_button	= document.getElementById("history-button")!;
+const twoFA_button		= document.getElementById("2FA-button")!;
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
@@ -40,6 +50,78 @@ profile_button.addEventListener("click", () => {
 	}
 	else if (profile_menu) {
 		profile_menu.classList.add("hidden");
+	}
+});
+
+edit_button.addEventListener("click", () => {
+	if (twoFA_menu && !twoFA_menu.classList.contains("hidden")) {
+		twoFA_menu.classList.add("hidden");
+	}
+	if (friends_menu && !friends_menu.classList.contains("hidden")) {
+		friends_menu.classList.add("hidden");
+	}
+	if (history_menu && !history_menu.classList.contains("hidden")) {
+		history_menu.classList.add("hidden");
+	}
+	if (edit_menu && edit_menu.classList.contains("hidden")) {
+		edit_menu.classList.remove("hidden");
+	}
+	else if (edit_menu) {
+		edit_menu.classList.add("hidden");
+	}
+});
+
+friends_button.addEventListener("click", () => {
+	if (twoFA_menu && !twoFA_menu.classList.contains("hidden")) {
+		twoFA_menu.classList.add("hidden");
+	}
+	if (edit_menu && !edit_menu.classList.contains("hidden")) {
+		edit_menu.classList.add("hidden");
+	}
+	if (history_menu && !history_menu.classList.contains("hidden")) {
+		history_menu.classList.add("hidden");
+	}
+	if (friends_menu && friends_menu.classList.contains("hidden")) {
+		friends_menu.classList.remove("hidden");
+	}
+	else if (friends_menu) {
+		friends_menu.classList.add("hidden");
+	}
+});
+
+history_button.addEventListener("click", () => {
+	if (twoFA_menu && !twoFA_menu.classList.contains("hidden")) {
+		twoFA_menu.classList.add("hidden");
+	}
+	if (friends_menu && !friends_menu.classList.contains("hidden")) {
+		friends_menu.classList.add("hidden");
+	}
+	if (edit_menu && !edit_menu.classList.contains("hidden")) {
+		edit_menu.classList.add("hidden");
+	}
+	if (history_menu && history_menu.classList.contains("hidden")) {
+		history_menu.classList.remove("hidden");
+	}
+	else if (history_menu) {
+		history_menu.classList.add("hidden");
+	}
+});
+
+twoFA_button.addEventListener("click", () => {
+	if (edit_menu && !edit_menu.classList.contains("hidden")) {
+		edit_menu.classList.add("hidden");
+	}
+	if (friends_menu && !friends_menu.classList.contains("hidden")) {
+		friends_menu.classList.add("hidden");
+	}
+	if (history_menu && !history_menu.classList.contains("hidden")) {
+		history_menu.classList.add("hidden");
+	}
+	if (twoFA_menu && twoFA_menu.classList.contains("hidden")) {
+		twoFA_menu.classList.remove("hidden");
+	}
+	else if (twoFA_menu) {
+		twoFA_menu.classList.add("hidden");
 	}
 });
 
