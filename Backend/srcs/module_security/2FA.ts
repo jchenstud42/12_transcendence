@@ -168,4 +168,16 @@ export class twoFAService {
 
 		return { accessToken, refreshToken };
 	}
+
+	async verifyTOTP(userId: number, code: string): Promise<boolean> {
+		const data = await prisma.twoFA.findUnique({ where: { userId } });
+		if (!data || data.method !== "totp" || !data.secret) return false;
+
+		return speakeasy.totp.verify({
+			secret: data.secret,
+			encoding: "base32",
+			token: code,
+			window: 1,
+		});
+	}
 }

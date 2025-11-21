@@ -136,11 +136,10 @@ history_button.addEventListener("click", () => {
 	}
 });
 
-twofaToggleBtn.addEventListener("click", () => {
+twofaToggleBtn.addEventListener("click", async () => {
 	is2FAEnabled = !is2FAEnabled;
 
 	if (is2FAEnabled) {
-		// 2FA en attente de sélection
 		twofaStatusText.textContent = "2FA en cours de configuration...";
 		twofaToggleBtn.textContent = "Annuler";
 		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
@@ -148,13 +147,18 @@ twofaToggleBtn.addEventListener("click", () => {
 		twofaTypeMenu.classList.remove("hidden");
 	}
 	else {
-		// Désactiver/Annuler la configuration
 		twofaStatusText.textContent = "2FA est désactivée.";
 		twofaToggleBtn.textContent = "Activer";
 		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
 		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
 		twofaTypeMenu.classList.add("hidden");
 		selected2FAType = null;
+
+		await fetch("http://localhost:3000/user/disable-2fa", {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+		});
 	}
 });
 
@@ -214,17 +218,33 @@ btnSMS.addEventListener("click", async () => {
 btnQR.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "qr";
-	alert("2FA par QR Code sélectionnée !");
 	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = "2FA est activée (QR Code).";
-	twofaToggleBtn.textContent = "Désactiver";
+	twofaStatusText.textContent = "2FA en cours de configuration (QR Code)...";
+	twofaToggleBtn.textContent = "Annuler";
 
-	await fetch("http://localhost:3000/user/enable-2fa", {
-		method: "POST",
-		credentials: "include",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ type: selected2FAType })
-	});
+	try {
+		const res = await fetch("http://localhost:3000/user/enable-2fa", {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ type: "qr" })
+		});
+
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error || "Failed to enable 2FA");
+
+		const qrContainer = document.getElementById("qr-container")!;
+		qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan this QR code in your Authenticator app" />`;
+
+		twofaForm.classList.remove("hidden");
+		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré.";
+	} catch (err: any) {
+		alert(err.message);
+		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
+		is2FAEnabled = false;
+		selected2FAType = null;
+		twofaToggleBtn.textContent = "Activer";
+	}
 });
 
 
@@ -407,21 +427,39 @@ twofaForm.addEventListener("submit", async (e) => {
 	const code = codeInput.value.trim();
 	if (!code) return alert("Enter the 2FA code");
 
-	const res = await fetch("http://localhost:3000/verify-2fa", {
-		method: "POST",
-		credentials: "include",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ userId: storedUserId, code }),
-	});
-	const data = await res.json();
-	if (res.ok) {
+	try {
+		let res: Response;
+
+		if (selected2FAType === "email" || selected2FAType === "sms") {
+			res = await fetch("http://localhost:3000/verify-2fa", {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId: storedUserId, code }),
+			});
+		} else if (selected2FAType === "qr") {
+			res = await fetch("http://localhost:3000/verify-totp", {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ code }),
+			});
+		} else {
+			throw new Error("2FA method not selected");
+		}
+
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error || "Invalid 2FA code");
+
 		storeToken(data.accessToken);
 		alert("Login successful with 2FA!");
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
-	} else
-		alert("Invalid 2FA code");
+	} catch (err: any) {
+		alert(err.message);
+	}
 });
+
 
 const logoutButton = document.getElementById("menu-logout")!;
 logoutButton.addEventListener("click", async () => {
