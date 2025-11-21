@@ -3,9 +3,8 @@
 		"strict": true,
 		"noImplicitAny": true,
 		"forceConsistentCasingInFileNames": true,
-		// File Layout
-		"rootDir": "ts",
-		"outDir": "js",
+		"rootDir": "srcs/ts",
+		"outDir": "dist/js",
 		"target": "ES2017",
 		"lib": [
 			"DOM",
@@ -18,7 +17,7 @@
 		"skipLibCheck": true
 	},
 	"include": [
-		"ts/**/*"
+		"srcs/ts/**/*"
 	],
 	"exclude": [
 		"node_modules"

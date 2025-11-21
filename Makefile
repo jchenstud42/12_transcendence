@@ -59,7 +59,7 @@ clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down
 	@rm -rf $(BACKEND_DIR)/dist
-	@rm -rf $(FRONT_DIR)/srcs/js
+	@rm -rf $(FRONT_DIR)/dist/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 # Je te laisse refaire ton rainbow ici Mathou
@@ -67,7 +67,7 @@ fclean:
 	@echo "Full $(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/dist
-	@rm -rf $(FRONT_DIR)/srcs/js
+	@rm -rf $(FRONT_DIR)/dist/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 re: fclean build up

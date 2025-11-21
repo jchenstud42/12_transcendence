@@ -1,14 +1,35 @@
 services:
+  frontend:
+    build: ./Front
+    container_name: front_dev
+    volumes:
+      - ./Front:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+
   backend:
     build:
       context: ./Backend
       target: development
+    container_name: back_dev
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+     - NODE_ENV=development
     volumes:
-      - ./Backend/srcs:/app/srcs
-      - ./Backend/prisma:/app/prisma
+      - ./Backend:/app
       - ./Backend/database:/app/database
-    command: npm run dev
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_dev
+    ports:
+      - "8443:443"
+      - "8080:80"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      -frontend
+      -backend

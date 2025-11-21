@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"dev": "tsc --watch & tailwindcss -i ./srcs/assets/input.css -o ./dist/css/output.css --watch",
+		"build": "tsc && tailwindcss -i ./srcs/assets/input.css -o ./dist/css/output.css"
+	},
+	"dependencies": {
+		"tailwindcss": "^4.1.16",
+		"typescript": "^5.9.3"
+	}
+}
