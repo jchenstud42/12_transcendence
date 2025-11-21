@@ -527,10 +527,8 @@ const keys = {
 
 //Start count down when Pong button is pressed
 function startGame() {
-	// si le bouton est déjà caché, on ne relance pas le countdown
-	// if (pong_button.classList.contains("hidden")) return;
-
-	pong_button.classList.add("hidden");
+	playersList.classList.add("hidden")
+	play_button.classList.add("hidden");
 	paddle_left.classList.remove("hidden");
 	paddle_right.classList.remove("hidden");
 	ready_text.classList.remove("hidden");
@@ -546,7 +544,7 @@ function startGame() {
 	}, 1000);
 }
 
-// pong_button.addEventListener("click", startGame);
+play_button.addEventListener("click", startGame);
 
 // document.addEventListener("keydown", (e) => {
 // 	if (e.key !== "Enter") return;
@@ -596,6 +594,8 @@ class Game {
 		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
 		if (playersName.length > 2)
 			this.createTournament();
+		else
+			play_button.classList.remove("hidden");
 		/* else play a normal game */
 	}
 
