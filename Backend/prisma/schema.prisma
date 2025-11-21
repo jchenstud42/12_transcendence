@@ -34,24 +34,43 @@ model User {
     // Relations
     friendsInitiated Friend[] @relation("UserFriends")
     friendsReceived  Friend[] @relation("FriendUser")
+	sentRequests     FriendRequest[] @relation("SentRequests")
+    receivedRequests FriendRequest[] @relation("ReceivedRequests")
     //Matchs
     matchesAsPlayer1 Match[]  @relation("Player1")
     matchesAsPlayer2 Match[]  @relation("Player2")
     matchesWon       Match[]  @relation("Winner")
+
+	//2FA
     twoFAs           twoFA[]
+
+	@@map("users")
 }
 
 model Friend {
     id        Int      @id @default(autoincrement())
-    // status    UserStatus @default()
-    createdAt DateTime @default(now())
-
     userId   Int
     friendId Int
+    createdAt DateTime @default(now())
     user     User @relation("UserFriends", fields: [userId], references: [id])
     friend   User @relation("FriendUser", fields: [friendId], references: [id])
 
     @@unique([userId, friendId])
+	@@map("friends")
+}
+
+model FriendRequest {
+	id        Int      @id @default(autoincrement())
+	senderById  Int
+	receiverById Int
+	status    String @default("pending")
+	createdAt DateTime @default(now())
+
+	sendBy   User @relation("SentRequests", fields: [senderById], references: [id])
+	receiverBy User @relation("ReceivedRequests", fields: [receiverById], references: [id])
+
+	@@unique([senderById, receiverById])
+	@@map("friend_requests")
 }
 
 model Match {
@@ -67,6 +86,8 @@ model Match {
 
     winnerId Int?
     winner   User? @relation("Winner", fields: [winnerId], references: [id])
+
+	@@map("matches")
 }
 
 model twoFA {
@@ -77,4 +98,6 @@ model twoFA {
     expiresAt   DateTime?
     destination String?
     user        User      @relation(fields: [userId], references: [id])
+
+	@@map("two_fa")
 }
