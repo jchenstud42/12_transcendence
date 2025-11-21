@@ -4,6 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
 	<script src="https://cdn.tailwindcss.com"></script>
 	<style>
 		:root {
@@ -92,21 +93,21 @@
 
 					<button id="edit-profile-button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Edit</button>
 					<!-- EDIT PROFILE MENU -->
-					<div id="edit-profile-menu" class="hidden fixed top-40 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="edit-profile-menu" class="hidden fixed top-40 right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-2">Edit Profile</h2>
 						<p>Edit profile</p>
 					</div>
 
 					<button id="friends-button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Friends</button>
 					<!-- FRIENDS MENU -->
-					<div id="friends-menu" class="hidden fixed top-40 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="friends-menu" class="hidden fixed top-40 right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-2">Friends</h2>
 						<p>Test friends</p>
 					</div>
 
 					<button id="history-button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Match History</button>
 					<!-- HISTORY MENU -->
-					<div id="history-menu" class="hidden fixed top-40 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="history-menu" class="hidden fixed top-40 right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-2">Match History</h2>
 						<p>Test match</p>
 					</div>
@@ -116,7 +117,7 @@
 						2FA
 					</button>
 
-					<div id="2fa-menu" class="hidden fixed top-40 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="2fa-menu" class="hidden fixed top-40 right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-2">Two-Factor Authentication</h2>
 						<p id="2fa-status-text" class="text-gray-600 mb-4">2FA est désactivée.</p>
 						<button id="2fa-toggle-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded">
@@ -125,7 +126,7 @@
 					</div>
 
 					<!-- CHOIX 2FA TYPE -->
-					<div id="2fa-type-menu" class="hidden fixed top-52 right-80 w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="2fa-type-menu" class="hidden fixed top-[300px] right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-4">Choisir le type de 2FA</h2>
 
 						<button id="2fa-email" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded mb-2">
@@ -152,10 +153,9 @@
 				<button type="submit">Verify</button>
 			</form>
 
-
 			<div class="absolute right-0">
 				<!--Register form-->
-				<div id="register-form" class="hidden w-80">
+				<div id="register-form" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
 					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
 						<label for="name">Username :</label><br>
 						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
@@ -169,7 +169,7 @@
 					</form>
 				</div>
 				<!--Login form-->
-				<div id="login-form" class="hidden w-80">
+				<div id="login-form" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
 					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
 						<label for="name">Username :</label><br>
 						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-id" placeholder="Login-ID" required><br><br>
@@ -178,7 +178,6 @@
 						<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
 					</form>
 				</div>
-				<!--Profile-->
 			</div>
 		</div>
 
