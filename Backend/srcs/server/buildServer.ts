@@ -26,6 +26,13 @@ export async function buildServer() {
 		},
 	});
 
+	await fastify.register(fastifyCookie, {
+		secret: process.env.COOKIE_SECRET || "dev-secret",
+		hook: "onRequest",
+		parseOptions: {}
+	});
+
+
 	await fastify.register(swagger, {
 		openapi: {
 			info: {
@@ -59,6 +66,7 @@ export async function buildServer() {
 	fastify.register(userRoutes, { prefix: '/user' });
 	fastify.register(friendRoutes, { prefix: '/friend' });
 	fastify.register(matchRoutes, { prefix: '/match' });
+	fastify.register(twofaRoutes);
 	// fastify.register(twofaTestRoutes);
 
 

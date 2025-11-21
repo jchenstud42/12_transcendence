@@ -7,6 +7,30 @@ import { FastifyCookie } from "@fastify/cookie";
 const twofa = new twoFAService();
 
 export default async function twofaRoutes(fastify: FastifyInstance) {
+
+	fastify.post("/enable-2fa", async (req, reply) => {
+		try {
+			const refreshToken = req.cookies.refreshToken;
+			if (!refreshToken)
+				return reply.status(401).send({ error: "Unauthorized or missing refresh token" });
+
+			const payload = verifyToken(refreshToken);
+
+			if (!payload || payload.tokenType !== "refresh")
+				return (reply.status(401).send({ error: "Invalid refresh token" }));
+
+			const userId = payload.sub;
+			const { type } = req.body as { type: string };
+			await prisma.user.update({
+				where: { id: userId },
+				data: { isTwoFAEnabled: true, twoFAMethod: type },
+			});
+			return reply.send({ message: "2FA enabled successfully" });
+		} catch (err) {
+			req.log.error(err);
+			return (reply.status(500).send({ error: "Internal server error" }));
+		}
+	})
 	fastify.post("/verify-2fa", async (req, reply) => {
 		try {
 			const { userId, code } = req.body as { userId: number; code: string };
@@ -29,7 +53,10 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 				maxAge: 60 * 60 * 24 * 7
 			});
 
-			return (reply.send({ message: "2FA successful", tokens }));
+			return (reply.send({
+				message: "2FA successful",
+				accessToken: tokens.accessToken
+			}));
 		}
 		catch (err) {
 			req.log.error(err);

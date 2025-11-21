@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { AuthService } from "../services/auth.services.js";
 import { signAccessToken, signRefreshToken } from "../../module_security/jwtUtils.js";
 import { twoFAService } from "../../module_security/2FA.js";
+import prisma from "../prisma/client.js";
 
 const twofa = new twoFAService();
 
@@ -69,6 +70,11 @@ export default async function authRoutes(fastify: FastifyInstance) {
 		try {
 			const { userId } = req.body as RegisterBody;
 			const res = await authService.logout(userId);
+			reply.clearCookie("refreshToken", { path: "/" });
+			await prisma.user.update({
+				where: { id: userId },
+				data: { status: "OFFLINE" },
+			})
 			return (reply.send(res));
 		}
 		catch (err: any) {

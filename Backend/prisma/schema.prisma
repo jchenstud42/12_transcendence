@@ -29,6 +29,7 @@ model User {
     createdAt DateTime   @default(now())
 
     isTwoFAEnabled Boolean @default(false)
+    twoFAMethod    String?
 
     // Relations
     friendsInitiated Friend[] @relation("UserFriends")

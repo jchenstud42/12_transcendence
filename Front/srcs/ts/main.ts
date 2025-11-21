@@ -8,7 +8,7 @@ const login_button = document.getElementById("login-button")!;
 
 // 2FA Elements
 const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
-let storedUserId: number | null = null; // pour stocker l'ID de l'utilisateur après login
+let storedUserId: number | null = null;
 
 //Profile
 const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
@@ -34,6 +34,11 @@ let is2FAEnabled = false;
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
+
+function storeToken(accessToken: string) {
+	localStorage.setItem("accessToken", accessToken);
+}
+
 
 register_button.addEventListener("click", () => {
 	if (login_form && !login_form.classList.contains("hidden")) {
@@ -174,31 +179,52 @@ twoFA_profile_button.addEventListener("click", () => {
 	}
 });
 
-btnEmail.addEventListener("click", () => {
+btnEmail.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "email";
 	alert("2FA par Email sélectionnée !");
 	twofaTypeMenu.classList.add("hidden");
 	twofaStatusText.textContent = "2FA est activée (Email).";
 	twofaToggleBtn.textContent = "Désactiver";
+
+	await fetch("http://localhost:3000/user/enable-2fa", {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ type: selected2FAType })
+	});
 });
 
-btnSMS.addEventListener("click", () => {
+btnSMS.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "sms";
 	alert("2FA par SMS sélectionnée !");
 	twofaTypeMenu.classList.add("hidden");
 	twofaStatusText.textContent = "2FA est activée (SMS).";
 	twofaToggleBtn.textContent = "Désactiver";
+
+	await fetch("http://localhost:3000/user/enable-2fa", {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ type: selected2FAType })
+	});
 });
 
-btnQR.addEventListener("click", () => {
+btnQR.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "qr";
 	alert("2FA par QR Code sélectionnée !");
 	twofaTypeMenu.classList.add("hidden");
 	twofaStatusText.textContent = "2FA est activée (QR Code).";
 	twofaToggleBtn.textContent = "Désactiver";
+
+	await fetch("http://localhost:3000/user/enable-2fa", {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ type: selected2FAType })
+	});
 });
 
 
@@ -352,10 +378,10 @@ else {
 							storedUserId = data.userId;
 							twofaForm.classList.remove("hidden");
 						}
-						// else {
-						// storeToken(data.accessToken); FONCTION A FAIRE OU PAS --------------
-						// login_form.reset();
-						// }
+						else {
+							storeToken(data.accessToken);
+							login_form.reset();
+						}
 					}
 					else
 						alert("Server error: " + (data?.error || res.statusText));
@@ -389,12 +415,41 @@ twofaForm.addEventListener("submit", async (e) => {
 	});
 	const data = await res.json();
 	if (res.ok) {
-		// storeToken(data.tokens.accessToken); FONCTION A FAIRE OU PAS ---------------------
+		storeToken(data.accessToken);
 		alert("Login successful with 2FA!");
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
-	} else alert("Invalid 2FA code");
+	} else
+		alert("Invalid 2FA code");
 });
+
+const logoutButton = document.getElementById("menu-logout")!;
+logoutButton.addEventListener("click", async () => {
+	try {
+		const res = await fetch("http://localhost:3000/logout", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ userId: storedUserId })
+		});
+
+		if (res.ok) {
+			storedUserId = null;
+			localStorage.removeItem("accessToken");
+			alert("Logout successful");
+			location.reload();
+		} else {
+			const err = await res.json().catch(() => null);
+			alert("Error logging out: " + (err?.error || res.statusText));
+		}
+	} catch (err) {
+		console.error(err);
+		alert("Network error. Try again later.");
+	}
+});
+
 
 
 
