@@ -72,10 +72,13 @@
 		<!--register & login button-->
 		<div class="flex justify-end space-x-4 mb-2">
 			<button id="register-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-				register
+				Register
 			</button>
 			<button id="login-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
-				login
+				Login
+			</button>
+			<button id ="language-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+				Language
 			</button>
 		</div>
 		<!--Profile button + quelques options-->
@@ -144,7 +147,7 @@
 							QR Code (Google Authenticator)
 						</button>
 					</div>
-					<button id="menu-logout" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded text-red-500">Logout</button>
+					<button id="logout_button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded text-red-500">Logout</button>
 				</div>
 			</div>
 
@@ -181,6 +184,14 @@
 						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-password" placeholder="Login-Password" required><br><br>
 						<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">login</button>
 					</form>
+				</div>
+				<!--Language Selection Menu-->
+				<div id="language-menu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
+					<dropdown class="flex flex-col p-2 space-y-2">
+						<button class="hover:bg-gray-100 px-2 py-1 rounded w-full text-left">English 🇬🇧</button>
+						<button class="hover:bg-gray-100 px-2 py-1 rounded w-full text-left">Français 🇫🇷</button>
+						<button class="hover:bg-gray-100 px-2 py-1 rounded w-full text-left">Español 🇪🇦</button>
+					</dropdown>
 				</div>
 			</div>
 		</div>

@@ -5,10 +5,10 @@ const register_form = document.getElementById("register-form")! as HTMLFormEleme
 const login_form = document.getElementById("login-form")! as HTMLFormElement | null;
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
+const logout_button = document.getElementById("logout-button")!;
+const language_button = document.getElementById("language-button")!;
+const language_menu = document.getElementById("language-menu")!;
 
-// 2FA Elements
-const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
-let storedUserId: number | null = null;
 
 //Profile
 const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
@@ -19,6 +19,14 @@ const profile_button = document.getElementById("profile-button")!;
 const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
 const history_button = document.getElementById("history-button")!;
+const add_friend_button = document.getElementById("btn-add-friend")!;
+const your_friends_button = document.getElementById("btn-your-friends")!;
+const pending_friends_button = document.getElementById("btn-pending-friends")!;
+
+
+// 2FA Elements
+const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
+let storedUserId: number | null = null;
 
 const twoFA_menu = document.getElementById("2fa-menu")! as HTMLDivElement | null;
 const twoFA_profile_button = document.getElementById("2FA-button")!;
@@ -32,6 +40,88 @@ const btnQR = document.getElementById("2fa-qr")!;
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
+const translations = {
+	en: {
+		register: "Register",
+		login: "Login",
+		editProfile: "Edit Profile",
+		friends: "Friends",
+		matchHistory: "Match History",
+		logout: "Logout",
+		language: "Language",
+		username: "Username",
+		email: "Email",
+		password: "Password",
+		confirmPassword: "Confirm Password",
+		registrationSuccess: "Registration successful! You can now log in.",
+		invalidEmail: "Invalid email",
+		passwordRequirements: "Password must have 8 characters, one uppercase letter and one number",
+		invalidUsername: "Invalid username",
+		passwordsNotMatch: "Passwords do not match",
+		errors: "Errors",
+		registering: "Registering...",
+		loginId: "Username or Email",
+		loggingIn: "Logging in...",
+		logoutSuccess: "Logout successful",
+		errorLoggingOut: "Error logging out",
+		networkError: "Network error. Try again later.",
+	},
+	fr: {
+		register: "S'inscrire",
+		login: "Connexion",
+		editProfile: "Modifier le profil",
+		friends: "Amis",
+		matchHistory: "Historique des matchs",
+		logout: "Déconnexion",
+		language: "Langue",
+		username: "Nom d'utilisateur",
+		email: "Email",
+		password: "Mot de passe",
+		confirmPassword: "Confirmer le mot de passe",
+		registrationSuccess: "Inscription réussie ! Vous pouvez maintenant vous connecter.",
+		invalidEmail: "Email invalide",
+		passwordRequirements: "Le mot de passe doit avoir 8 caractères, une majuscule et un chiffre",
+		invalidUsername: "Nom d'utilisateur invalide",
+		passwordsNotMatch: "Les mots de passe ne correspondent pas",
+		errors: "Erreurs",
+		registering: "Inscription en cours...",
+		loginId: "Nom d'utilisateur ou Email",
+		loggingIn: "Connexion en cours...",
+		logoutSuccess: "Déconnexion réussie",
+		errorLoggingOut: "Erreur lors de la déconnexion",
+		networkError: "Erreur réseau. Réessayez plus tard.",
+	},
+	es: {
+		register: "Registrarse",
+		login: "Iniciar sesión",
+		editProfile: "Editar perfil",
+		friends: "Amigos",
+		matchHistory: "Historial de partidas",
+		logout: "Cerrar sesión",
+		language: "Idioma",
+		username: "Nombre de usuario",
+		email: "Correo electrónico",
+		password: "Contraseña",
+		confirmPassword: "Confirmar contraseña",
+		registrationSuccess: "¡Registro exitoso! Ahora puede iniciar sesión.",
+		invalidEmail: "Email inválido",
+		passwordRequirements: "La contraseña debe tener 8 caracteres, una mayúscula y un número",
+		invalidUsername: "Nombre de usuario inválido",
+		passwordsNotMatch: "Las contraseñas no coinciden",
+		errors: "Errores",
+		registering: "Registrando...",
+		loginId: "Nombre de usuario o correo",
+		loggingIn: "Iniciando sesión...",
+		logoutSuccess: "Sesión cerrada exitosamente",
+		errorLoggingOut: "Error al cerrar sesión",
+		networkError: "Error de red. Inténtelo más tarde.",
+	}
+};
+
+let currentLang = localStorage.getItem("lang") || "en";
+
+
+
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
 
@@ -39,10 +129,45 @@ function storeToken(accessToken: string) {
 	localStorage.setItem("accessToken", accessToken);
 }
 
+//translation pas encore finis
+// function translate(key: string): string {
+// 	return (translations[currentLang as keyof typeof translations]?.[key as keyof typeof translations.en] || key);
+// }
+
+// function updatePageLanguage() {
+// 	register_button.textContent = translate("register");
+// 	login_button.textContent = translate("login");
+// 	language_button.textContent = translate("language");
+// 	logout_button.textContent = translate("logout");
+
+// 	edit_button.textContent = translate("editProfile");
+// 	friends_button.textContent = translate("friends");
+// 	history_button.textContent = translate("matchHistory");
+
+// 	const regLabels = register_form?.querySelectorAll("label");
+// 	if (regLabels) {
+// 		regLabels[0].textContent = translate("username");
+// 		regLabels[1].textContent = translate("email");
+// 		regLabels[2].textContent = translate("password");
+// 		regLabels[3].textContent = translate("confirmPassword");
+// 	}
+// 	const regBtn = register_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+// 	if (regBtn) regBtn.textContent = translate("register");
+// 	const logLabels = login_form?.querySelectorAll("label");
+// 	if (logLabels) {
+// 		logLabels[0].textContent = translate("loginId");
+// 		logLabels[1].textContent = translate("password");
+// 	}
+// 	const logBtn = login_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+// 	if (logBtn) logBtn.textContent = translate("login");
+// }
 
 register_button.addEventListener("click", () => {
 	if (login_form && !login_form.classList.contains("hidden")) {
 		login_form.classList.add("hidden");
+	}
+	if (language_menu && !language_menu.classList.contains("hidden")) {
+		language_menu.classList.add("hidden");
 	}
 	if (register_form && register_form.classList.contains("hidden")) {
 		register_form.classList.remove("hidden");
@@ -56,12 +181,28 @@ login_button.addEventListener("click", () => {
 	if (register_form && !register_form.classList.contains("hidden")) {
 		register_form.classList.add("hidden");
 	}
+	if (language_menu && !language_menu.classList.contains("hidden")) {
+		language_menu.classList.add("hidden");
+	}
 	if (login_form && login_form.classList.contains("hidden")) {
 		login_form.classList.remove("hidden");
 	}
 	else if (login_form) {
 		login_form.classList.add("hidden");
 	}
+});
+
+language_button.addEventListener("click", () => {
+	if (register_form && !register_form.classList.contains("hidden")) {
+		register_form.classList.add("hidden");
+	}
+	if (login_form && !login_form.classList.contains("hidden")) {
+		login_form.classList.add("hidden");
+	}
+	if (language_menu && language_menu.classList.contains("hidden"))
+		language_menu.classList.remove("hidden");
+	else if (language_menu)
+		language_menu.classList.add("hidden");
 });
 
 profile_button.addEventListener("click", () => {
@@ -113,6 +254,18 @@ friends_button.addEventListener("click", () => {
 	else if (friends_menu) {
 		friends_menu.classList.add("hidden");
 	}
+});
+
+add_friend_button.addEventListener("click", () => {
+
+});
+
+your_friends_button.addEventListener("click", () => {
+
+});
+
+pending_friends_button.addEventListener("click", () => {
+
 });
 
 history_button.addEventListener("click", () => {
@@ -270,8 +423,9 @@ else {
 		const inUsername = document.getElementById("username") as HTMLInputElement | null;
 		const inEmail = document.getElementById("email") as HTMLInputElement | null;
 		const inPassword = document.getElementById("password") as HTMLInputElement | null;
+		const inConfirmPassword = document.getElementById("confirm-password") as HTMLInputElement | null;
 
-		if (!inUsername || !inEmail || !inPassword) {
+		if (!inUsername || !inEmail || !inPassword || !inConfirmPassword) {
 			console.error("Missing elements in the form");
 			return;
 		}
@@ -279,6 +433,7 @@ else {
 		const username = inUsername.value;
 		const email = inEmail.value;
 		const password = inPassword.value;
+		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
 		if (!validateEmail(email))
@@ -287,6 +442,8 @@ else {
 			errors.push("Password must have 8 characters, one uppercase letter and one number");
 		if (!validateTextInput(username, 20))
 			errors.push("Invalid username");
+		if (password != confirmPassword)
+			errors.push("Passwords do not match");
 
 		if (errors.length > 0) {
 			alert("Errors:\n" + errors.join("\n"));
@@ -320,6 +477,7 @@ else {
 				if (res.ok) {
 					alert("Registration successful! You can now log in.");
 					register_form.reset();
+					profile_button.classList.remove("hidden");
 				}
 				else {
 					const err = await res.json().catch(() => null);
@@ -402,6 +560,7 @@ else {
 						else {
 							storeToken(data.accessToken);
 							login_form.reset();
+							profile_button.classList.remove("hidden");
 						}
 					}
 					else
@@ -421,6 +580,7 @@ else {
 		});
 	}
 }
+
 
 twofaForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
@@ -456,14 +616,13 @@ twofaForm.addEventListener("submit", async (e) => {
 		alert("Login successful with 2FA!");
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
+		profile_button.classList.remove("hidden");
 	} catch (err: any) {
 		alert(err.message);
 	}
 });
 
-
-const logoutButton = document.getElementById("menu-logout")!;
-logoutButton.addEventListener("click", async () => {
+logout_button.addEventListener("click", async () => {
 	try {
 		const res = await fetch("http://localhost:3000/logout", {
 			method: "POST",
