@@ -16,8 +16,7 @@ RUN npm run build
 RUN ls -la /app/srcs/js  # vérifie que main.js est présent
 
 # ---------- NGINX STAGE ----------
-FROM
-:alpine
+FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
