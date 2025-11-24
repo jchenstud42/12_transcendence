@@ -1,10 +1,12 @@
+version: "3.9"
 services:
   frontend:
-    build: ./Front
+    build:
+      context: ./Front
+      target: runtime
     container_name: frontend_prod
     volumes:
-      - frontend_build:/app/dist
-    command: ["npm", "run", "build"]
+      - frontend_build:/usr/share/nginx/html
     restart: on-failure
 
   backend:
@@ -13,25 +15,25 @@ services:
       target: runtime
     container_name: backend_prod
     env_file:
-      - Backend/.env
+      - ./Backend/.env
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
     volumes:
       - backend_db:/app/database
-    command: ["node", "dist/main.js"]
     restart: on-failure
 
   nginx:
     image: nginx:latest
     container_name: nginx_prod
     ports:
-      - "8443:443"
       - "8080:80"
+      - "8443:443"
     volumes:
       - frontend_build:/usr/share/nginx/html
       - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - frontend
       - backend

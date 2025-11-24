@@ -1,6 +1,6 @@
 import { buildServer } from './server/buildServer.js';
 
-const PORT = 3000;
+const PORT = 8080;
 
 // Démarrage du server
 const start = async (): Promise<void> => {

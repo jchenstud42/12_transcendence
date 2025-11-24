@@ -30,6 +30,7 @@ all: build up
 
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
+	@cd Front && node ./node_modules/tailwindcss/lib/cli.js -i ./srcs/ts/input.css -o ./dist/css/output.css
 	@docker compose build && cd Backend && npx tsc
 	@cd Front/srcs/ && npx tsc
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
@@ -71,5 +72,7 @@ fclean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 re: fclean build up
+
+reDev: fclean dev
 
 .PHONY : all build dev up down ps logs clean fclean re

@@ -1,7 +1,7 @@
 {
 	"scripts": {
-		"dev": "tsc --watch & tailwindcss -i ./srcs/assets/input.css -o ./dist/css/output.css --watch",
-		"build": "tsc && tailwindcss -i ./srcs/assets/input.css -o ./dist/css/output.css"
+		"build": "tsc && tailwindcss -i ./srcs/ts/input.css -o ./dist/css/output.css",
+		"dev": "tsc --watch && tailwindcss -i ./srcs/ts/input.css -o ./dist/css/output.css --watch"
 	},
 	"dependencies": {
 		"tailwindcss": "^4.1.16",

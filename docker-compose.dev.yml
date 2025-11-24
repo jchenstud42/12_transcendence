@@ -19,7 +19,6 @@ services:
     volumes:
       - ./Backend:/app
       - ./Backend/database:/app/database
-      - /app/node_modules
     command: ["npm", "run", "dev"]
 
   nginx:
