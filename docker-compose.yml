@@ -1,4 +1,11 @@
 services:
+  frontend:
+    build:
+      context: ./Front
+    ports:
+      - "3000:80"
+    restart: on-failure
+
   backend:
     build:
       context: ./Backend
@@ -6,7 +13,7 @@ services:
     env_file:
       - Backend/.env
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
     volumes:
