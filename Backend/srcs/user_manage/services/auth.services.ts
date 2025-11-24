@@ -49,11 +49,11 @@ export class AuthService {
 
 		await prisma.user.update({ where: { id: user.id }, data: { status: "ONLINE" } });
 
-		type TwoFAMethod = "email" | "sms" | "totp";
+		type TwoFAMethod = "email" | "sms" | "qr";
 		let twoFAMethod: TwoFAMethod | null = null;
 		if (user.isTwoFAEnabled) {
 			const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
-			if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "totp") {
+			if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "qr") {
 				twoFAMethod = twoFAData.method;
 			}
 

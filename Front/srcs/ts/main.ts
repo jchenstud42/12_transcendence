@@ -396,6 +396,7 @@ else {
 					if (res.ok) {
 						if (data.message === "2FA required") {
 							storedUserId = data.userId;
+							selected2FAType = data.method;
 							twofaForm.classList.remove("hidden");
 						}
 						else {

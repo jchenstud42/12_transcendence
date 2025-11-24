@@ -21,14 +21,14 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 			const userId = payload.sub;
 			const { code } = req.body as { code: string };
-			if (!code) return reply.status(400).send({ error: "TOTP code required" });
+			if (!code) return reply.status(400).send({ error: "QR code required" });
 
 			const isValid = await twofa.verifyTOTP(userId, code);
-			if (!isValid) return reply.status(400).send({ error: "Invalid TOTP code" });
+			if (!isValid) return reply.status(400).send({ error: "Invalid QR code" });
 
 			const accessToken = signAccessToken(userId, true);
 
-			return reply.send({ message: "TOTP verified", accessToken });
+			return reply.send({ message: "QR code verified", accessToken });
 		} catch (err) {
 			req.log.error(err);
 			return reply.status(500).send({ error: "Internal server error" });
@@ -50,19 +50,19 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 			const { code } = req.body as { code: string };
 
 			if (!code)
-				return reply.status(400).send({ error: "TOTP code required" });
+				return reply.status(400).send({ error: "QR code required" });
 
 			const ok = await twofa.enableTOTP(userId, code);
 
 			if (!ok)
-				return reply.status(400).send({ error: "Invalid TOTP code" });
+				return reply.status(400).send({ error: "Invalid QR code" });
 
 			await prisma.user.update({
 				where: { id: userId },
 				data: { isTwoFAEnabled: true, twoFAMethod: "qr" }
 			});
 
-			return reply.send({ message: "TOTP enabled successfully" });
+			return reply.send({ message: "QR code enabled successfully" });
 		}
 		catch (err) {
 			req.log.error(err);
@@ -114,7 +114,7 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 			if (type === "qr") {
 				const totpData = await twofa.generateTOTPSecret(userId);
 				return reply.send({
-					message: "2FA TOTP enabled",
+					message: "2FA QR code enabled",
 					method: "qr",
 					otpauthURL: totpData.otpauthURL,
 					qrCode: totpData.qrCode,

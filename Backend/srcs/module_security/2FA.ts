@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import { signAccessToken, signRefreshToken } from "./jwtUtils.js";
 import prisma from "../user_manage/prisma/client.js";
 
-export type twoFAMethod = "email" | "sms" | "totp";
+export type twoFAMethod = "email" | "sms" | "qr";
 
 export class twoFAService {
 
@@ -14,7 +14,7 @@ export class twoFAService {
 		await prisma.twoFA.upsert({
 			where: { userId },
 			update: {
-				method: "totp",
+				method: "qr",
 				secret: totpSecret.base32,
 				code: null,
 				expiresAt: null,
@@ -22,7 +22,7 @@ export class twoFAService {
 			},
 			create: {
 				userId,
-				method: "totp",
+				method: "qr",
 				secret: totpSecret.base32,
 				code: null,
 				expiresAt: null,
@@ -41,7 +41,7 @@ export class twoFAService {
 
 	async enableTOTP(userId: number, code: string): Promise<boolean> {
 		const data = await prisma.twoFA.findUnique({ where: { userId } });
-		if (!data || data.method !== "totp" || !data.secret)
+		if (!data || data.method !== "qr" || !data.secret)
 			return false;
 
 		const ok = speakeasy.totp.verify({
@@ -123,7 +123,7 @@ export class twoFAService {
 			console.log('[2FA SMS] Code sent to', data.destination, ':', data.code);
 		}
 
-		else if (data.method === "totp") {
+		else if (data.method === "qr") {
 			const otpUrl = speakeasy.otpauthURL({
 				secret: data.secret as string,
 				label: "Transcendence",
@@ -140,7 +140,7 @@ export class twoFAService {
 		if (!data)
 			return false;
 
-		if (data.method === "totp" && data.secret) {
+		if (data.method === "qr" && data.secret) {
 			return speakeasy.totp.verify(
 				{
 					secret: data.secret,
@@ -171,7 +171,7 @@ export class twoFAService {
 
 	async verifyTOTP(userId: number, code: string): Promise<boolean> {
 		const data = await prisma.twoFA.findUnique({ where: { userId } });
-		if (!data || data.method !== "totp" || !data.secret) return false;
+		if (!data || data.method !== "qr" || !data.secret) return false;
 
 		return speakeasy.totp.verify({
 			secret: data.secret,

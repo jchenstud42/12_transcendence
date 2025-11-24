@@ -14,10 +14,10 @@ interface RegisterBody {
 	password: string;
 }
 
-type TwoFAMethod = "email" | "sms" | "totp";
+type TwoFAMethod = "email" | "sms" | "qr";
 
 function assertTwoFAMethod(method: string | null): TwoFAMethod {
-	if (method === "email" || method === "sms" || method === "totp") return method;
+	if (method === "email" || method === "sms" || method === "qr") return method;
 	throw new Error("Invalid 2FA method");
 }
 
@@ -42,10 +42,17 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			if (user.isTwoFAEnabled) {
 
 				const twoFAMethod = assertTwoFAMethod(user.twoFAMethod);
+				if (twoFAMethod === "qr") {
+					return reply.send({
+						message: "2FA required",
+						userId: user.id,
+						method: "qr"
+					});
+				}
 				await twofa.generate2FA(user.id, twoFAMethod, user.email);
 				await twofa.send2FACode(user.id);
 
-				return (reply.status(200).send({ message: "2FA required", userId: user.id }));
+				return (reply.status(200).send({ message: "2FA required", userId: user.id, method: twoFAMethod }));
 			}
 
 			const accessToken = signAccessToken(user.id, true);
