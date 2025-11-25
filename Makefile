@@ -62,10 +62,11 @@ clean:
 	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
-# Je te laisse refaire ton rainbow ici Mathou
+# PAR PITIE LAISSE LES RM -RF JULIE JE TE CONNAIS TU VAS VOULOIR FAIRE LE MENAGE MAIS TOUCHE A RIEN !!!!!!!!!!
 fclean:
 	@echo "Full $(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down --volumes --rmi all
+	@rm -rf $(BACKEND_DIR)/database/* || true
 	@rm -rf $(BACKEND_DIR)/dist
 	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"

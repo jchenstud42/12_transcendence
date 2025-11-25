@@ -3,7 +3,7 @@ services:
     build:
       context: ./Front
     ports:
-      - "3000:80"
+      - "3001:80"
     restart: on-failure
 
   backend:
@@ -13,13 +13,13 @@ services:
     env_file:
       - Backend/.env
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
     volumes:
-      - database:/app/database
-    command: npm start
+      - ./Backend/database:/app/database
+    command: sh -c "npx prisma migrate deploy --schema=./prisma/schema.prisma && npm start"
     restart: on-failure
 
-volumes:
-  database:
+# Persist DB on host to avoid accidental volume removal during rebuilds
+# (we bind-mount ./Backend/database into the backend service)

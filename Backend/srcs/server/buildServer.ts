@@ -12,6 +12,7 @@ import userRoutes from '../user_manage/routes/user.routes.js';
 import friendRoutes from '../user_manage/routes/friend.routes.js';
 import matchRoutes from '../user_manage/routes/match.routes.js';
 import testsRoutes from './routes/tests.js';
+import fastifyCors from '@fastify/cors';
 
 
 
@@ -60,8 +61,15 @@ export async function buildServer() {
 
 
 	// Routes ----------------------------------------------------------------------------------
+	// LAISSER CETTE ROUTE AVANT LES AUTRES PITIE
+	await fastify.register(fastifyCors, {
+		origin: "http://localhost:3001",
+		credentials: true,
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+	});
+
 	fastify.get('/', async () => { return { message: 'Transcendence!' } });
-	fastify.register(testsRoutes)	// test, a retirer
+	// fastify.register(testsRoutes)	// test, a retirer
 	fastify.register(authRoutes);
 	fastify.register(userRoutes, { prefix: '/user' });
 	fastify.register(friendRoutes, { prefix: '/friend' });

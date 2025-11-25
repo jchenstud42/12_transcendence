@@ -6,56 +6,61 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="icon" type="image/x-icon" href="../assets/favicon.ico">
 	<script src="https://cdn.tailwindcss.com"></script>
+	<script type="module" src="../js/main.js"></script>
+
 	<style>
-			:root {
-				--game-width: 800px;
-				--game-height: 600px;
-				--paddle-width: 10px;
-				--paddle-height: 100px;
-				--ball-size: 10px;
-			}
+		:root {
+			--game-width: 800px;
+			--game-height: 600px;
+			--paddle-width: 10px;
+			--paddle-height: 100px;
+			--ball-size: 10px;
+		}
 
-			.play-btn {
-				width: calc(var(--game-width) * 0.2);
-				height: calc(var(--game-height) * 0.1);
-			}
+		.play-btn {
+			width: calc(var(--game-width) * 0.2);
+			height: calc(var(--game-height) * 0.1);
+		}
 
-			.quick-match-btn {
-				width: calc(var(--game-width) * 0.25);
-				height: calc(var(--game-height) * 0.1);
-			}
+		.quick-match-btn {
+			width: calc(var(--game-width) * 0.25);
+			height: calc(var(--game-height) * 0.1);
+		}
 
-			.tournament-btn {
-				width: calc(var(--game-width) * 0.25);
-				height: calc(var(--game-height) * 0.1);
-			}
+		.tournament-btn {
+			width: calc(var(--game-width) * 0.25);
+			height: calc(var(--game-height) * 0.1);
+		}
 
-			.triangle-right {
-				width: 0;
-				height: 0;
-				border-top: calc(var(--game-height) * 0.05) solid transparent;
-				border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-				border-left: calc(var(--game-width) * 0.05) solid white;
-			}
+		.triangle-right {
+			width: 0;
+			height: 0;
+			border-top: calc(var(--game-height) * 0.05) solid transparent;
+			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+			border-left: calc(var(--game-width) * 0.05) solid white;
+		}
 
-			.triangle-left {
-				width: 0;
-				height: 0;
-				border-top: calc(var(--game-height) * 0.05) solid transparent;
-				border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-				border-right: calc(var(--game-width) * 0.05) solid white;
-			}
+		.triangle-left {
+			width: 0;
+			height: 0;
+			border-top: calc(var(--game-height) * 0.05) solid transparent;
+			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
+			border-right: calc(var(--game-width) * 0.05) solid white;
+		}
 
-			.player-name-item {
-				background-color: #374151;
-				color: #ff4d4d;           /* pink */
-				font-size: 15px;          /* about text-2xl */
-				font-weight: 700;         /* bold */
-				font-family: "Courier New", monospace;
-				padding: 4px 12px;
-				border-radius: 8px;
-				width: calc(var(--game-width) * 0.2);
-			}
+		.player-name-item {
+			background-color: #374151;
+			color: #ff4d4d;
+			/* pink */
+			font-size: 15px;
+			/* about text-2xl */
+			font-weight: 700;
+			/* bold */
+			font-family: "Courier New", monospace;
+			padding: 4px 12px;
+			border-radius: 8px;
+			width: calc(var(--game-width) * 0.2);
+		}
 	</style>
 	<title>PONG</title>
 </head>
@@ -72,7 +77,7 @@
 			<button id="login-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 				Login
 			</button>
-			<button id ="language-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
+			<button id="language-button" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="button">
 				Language
 			</button>
 		</div>
@@ -157,8 +162,9 @@
 
 			<div class="absolute right-0">
 				<!--Register form-->
+				<!-- Pitier mettez pas action = submit, et changez pas les id register_form et login_form merci-->
 				<div id="register-form" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
-					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
+					<form id="register_form" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
 						<label for="name">Username :</label><br>
 						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="username" placeholder="Username" required><br><br>
 						<label for="name">Email :</label><br>
@@ -172,7 +178,7 @@
 				</div>
 				<!--Login form-->
 				<div id="login-form" class="hidden absolute right-0 mt-2 w-64 bg-white rounded shadow-lg z-50">
-					<form id="getForm" method="POST" action="/submit" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
+					<form id="login_form" class="bg-white shadow-md rounded px-8 pt-6 pb-8">
 						<label for="name">Username :</label><br>
 						<input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" id="login-id" placeholder="Login-ID" required><br><br>
 						<label for="name">Password :</label><br>
@@ -214,13 +220,11 @@
 			<h2 id="playerNbr-text" class="absolute text-white text-6xl font-bold tracking-widest hidden" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
 
 
-				<div 	id="ai-counter"
-						class="absolute text-center text-white font-bold tracking-widest hidden"
-						style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
+			<div id="ai-counter" class="absolute text-center text-white font-bold tracking-widest hidden" style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
 
-						<div class="text-xs">AI</div>
-						<div id="aiNbr-text" class="text-xl">0</div>
-				</div>
+				<div class="text-xs">AI</div>
+				<div id="aiNbr-text" class="text-xl">0</div>
+			</div>
 
 			<div id="decreasePlayer-button" class="triangle-left absolute shadow-md hidden" style="right: 60%; top: 47%"></div>
 
@@ -233,40 +237,30 @@
 			<!-- Enter Player Names: Label + Input + Button -->
 			<div id="playerName-container" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
 
-					<label for="player-name-input" class="text-white text-xl font-bold">
-						Enter player name:
-					</label>
-					<input 	id="playerName-input"
-							type="text"
-							maxlength="8"
-							class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
-				</div>
+				<label for="player-name-input" class="text-white text-xl font-bold">
+					Enter player name:
+				</label>
+				<input id="playerName-input" type="text" maxlength="8" class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
+			</div>
 
-				<div id="players-list"
-					class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
-				</div>
+			<div id="players-list" class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-row gap-2 text-white text-lg hidden">
+			</div>
 
-				<div id="final-list"
-					class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
-				</div>
+			<div id="final-list" class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
+			</div>
 
-				<div id="winner-name"
-					class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
-				</div>
+			<div id="winner-name" class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
+			</div>
 
 			<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden" />
 
-				<button id="play-button"
-						class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden"
-						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						PLAY
-				</button>
-				
-				<div	id="ready-text"
-						class="absolute text-white font-bold text-lg text-6xl hidden"
-						style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						READY ?
-				</div>
+			<button id="play-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				PLAY
+			</button>
+
+			<div id="ready-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				READY ?
+			</div>
 
 			<div id="go-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
 				GOOOO !!!
@@ -284,7 +278,6 @@
 			</div>
 
 		</div>
-		<script type="module" src="../js/main.js"></script>
 </body>
 
 </html>

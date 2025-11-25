@@ -1,14 +1,20 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
 import { shuffleArray } from "./utils/utils.js";
 const page = document.getElementById("page")!;
-const register_form = document.getElementById("register-form")! as HTMLFormElement | null;
-const login_form = document.getElementById("login-form")! as HTMLFormElement | null;
+
+// CA C LE DIV DANS LE HTML
+const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
+const loginContainer = document.getElementById("login-form") as HTMLDivElement | null;
+// CA C LE <FORM> DANS LE HTML, FAITES LA DIFFERENCE A CHAQUE FOIS MERCI
+const register_form = document.getElementById("register_form") as HTMLFormElement | null;
+const login_form = document.getElementById("login_form") as HTMLFormElement | null;
+
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
-const logout_button = document.getElementById("logout-button")!;
-const language_button = document.getElementById("language-button")!;
-const language_menu = document.getElementById("language-menu")!;
 
+// 2FA Elements
+const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
+let storedUserId: number | null = null;
 
 //Profile
 const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
@@ -19,14 +25,6 @@ const profile_button = document.getElementById("profile-button")!;
 const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
 const history_button = document.getElementById("history-button")!;
-const add_friend_button = document.getElementById("btn-add-friend")!;
-const your_friends_button = document.getElementById("btn-your-friends")!;
-const pending_friends_button = document.getElementById("btn-pending-friends")!;
-
-
-// 2FA Elements
-const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
-let storedUserId: number | null = null;
 
 const twoFA_menu = document.getElementById("2fa-menu")! as HTMLDivElement | null;
 const twoFA_profile_button = document.getElementById("2FA-button")!;
@@ -40,88 +38,6 @@ const btnQR = document.getElementById("2fa-qr")!;
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
-const translations = {
-	en: {
-		register: "Register",
-		login: "Login",
-		editProfile: "Edit Profile",
-		friends: "Friends",
-		matchHistory: "Match History",
-		logout: "Logout",
-		language: "Language",
-		username: "Username",
-		email: "Email",
-		password: "Password",
-		confirmPassword: "Confirm Password",
-		registrationSuccess: "Registration successful! You can now log in.",
-		invalidEmail: "Invalid email",
-		passwordRequirements: "Password must have 8 characters, one uppercase letter and one number",
-		invalidUsername: "Invalid username",
-		passwordsNotMatch: "Passwords do not match",
-		errors: "Errors",
-		registering: "Registering...",
-		loginId: "Username or Email",
-		loggingIn: "Logging in...",
-		logoutSuccess: "Logout successful",
-		errorLoggingOut: "Error logging out",
-		networkError: "Network error. Try again later.",
-	},
-	fr: {
-		register: "S'inscrire",
-		login: "Connexion",
-		editProfile: "Modifier le profil",
-		friends: "Amis",
-		matchHistory: "Historique des matchs",
-		logout: "Déconnexion",
-		language: "Langue",
-		username: "Nom d'utilisateur",
-		email: "Email",
-		password: "Mot de passe",
-		confirmPassword: "Confirmer le mot de passe",
-		registrationSuccess: "Inscription réussie ! Vous pouvez maintenant vous connecter.",
-		invalidEmail: "Email invalide",
-		passwordRequirements: "Le mot de passe doit avoir 8 caractères, une majuscule et un chiffre",
-		invalidUsername: "Nom d'utilisateur invalide",
-		passwordsNotMatch: "Les mots de passe ne correspondent pas",
-		errors: "Erreurs",
-		registering: "Inscription en cours...",
-		loginId: "Nom d'utilisateur ou Email",
-		loggingIn: "Connexion en cours...",
-		logoutSuccess: "Déconnexion réussie",
-		errorLoggingOut: "Erreur lors de la déconnexion",
-		networkError: "Erreur réseau. Réessayez plus tard.",
-	},
-	es: {
-		register: "Registrarse",
-		login: "Iniciar sesión",
-		editProfile: "Editar perfil",
-		friends: "Amigos",
-		matchHistory: "Historial de partidas",
-		logout: "Cerrar sesión",
-		language: "Idioma",
-		username: "Nombre de usuario",
-		email: "Correo electrónico",
-		password: "Contraseña",
-		confirmPassword: "Confirmar contraseña",
-		registrationSuccess: "¡Registro exitoso! Ahora puede iniciar sesión.",
-		invalidEmail: "Email inválido",
-		passwordRequirements: "La contraseña debe tener 8 caracteres, una mayúscula y un número",
-		invalidUsername: "Nombre de usuario inválido",
-		passwordsNotMatch: "Las contraseñas no coinciden",
-		errors: "Errores",
-		registering: "Registrando...",
-		loginId: "Nombre de usuario o correo",
-		loggingIn: "Iniciando sesión...",
-		logoutSuccess: "Sesión cerrada exitosamente",
-		errorLoggingOut: "Error al cerrar sesión",
-		networkError: "Error de red. Inténtelo más tarde.",
-	}
-};
-
-let currentLang = localStorage.getItem("lang") || "en";
-
-
-
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
 
@@ -129,80 +45,146 @@ function storeToken(accessToken: string) {
 	localStorage.setItem("accessToken", accessToken);
 }
 
-//translation pas encore finis
-// function translate(key: string): string {
-// 	return (translations[currentLang as keyof typeof translations]?.[key as keyof typeof translations.en] || key);
-// }
+function storeUser(user: any) {
+	try {
+		localStorage.setItem('user', JSON.stringify(user));
+	} catch (e) {
+		console.warn('Failed to store user', e);
+	}
+}
 
-// function updatePageLanguage() {
-// 	register_button.textContent = translate("register");
-// 	login_button.textContent = translate("login");
-// 	language_button.textContent = translate("language");
-// 	logout_button.textContent = translate("logout");
+function applyLoggedInState(user: { id: number; username: string; email: string; }) {
+	try {
+		(register_button as HTMLElement).classList.add('hidden');
+		(login_button as HTMLElement).classList.add('hidden');
+	} catch (e) { }
 
-// 	edit_button.textContent = translate("editProfile");
-// 	friends_button.textContent = translate("friends");
-// 	history_button.textContent = translate("matchHistory");
+	const menuUsername = document.getElementById('menu-username');
+	const menuEmail = document.getElementById('menu-email');
+	const profileAvatar = document.getElementById('profile-avatar') as HTMLImageElement | null;
+	if (menuUsername) menuUsername.textContent = user.username || '';
+	if (menuEmail) menuEmail.textContent = user.email || '';
+	if (profileAvatar) {
+		profileAvatar.src = profileAvatar.src || '../assets/default-avatar.png';
+	}
 
-// 	const regLabels = register_form?.querySelectorAll("label");
-// 	if (regLabels) {
-// 		regLabels[0].textContent = translate("username");
-// 		regLabels[1].textContent = translate("email");
-// 		regLabels[2].textContent = translate("password");
-// 		regLabels[3].textContent = translate("confirmPassword");
-// 	}
-// 	const regBtn = register_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-// 	if (regBtn) regBtn.textContent = translate("register");
-// 	const logLabels = login_form?.querySelectorAll("label");
-// 	if (logLabels) {
-// 		logLabels[0].textContent = translate("loginId");
-// 		logLabels[1].textContent = translate("password");
-// 	}
-// 	const logBtn = login_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-// 	if (logBtn) logBtn.textContent = translate("login");
-// }
+	const profileBtn = document.getElementById('profile-button');
+	if (profileBtn) profileBtn.classList.remove('hidden');
+
+	try {
+		if (registerContainer) registerContainer.classList.add('hidden');
+		if (loginContainer) loginContainer.classList.add('hidden');
+	} catch (e) { }
+
+	const logoutBtn = document.getElementById('logout-button');
+	if (logoutBtn) logoutBtn.classList.remove('hidden');
+}
+
+function applyLoggedOutState() {
+	try {
+		(register_button as HTMLElement).classList.remove('hidden');
+		(login_button as HTMLElement).classList.remove('hidden');
+	} catch (e) { }
+
+	const profileBtn = document.getElementById('profile-button');
+	if (profileBtn) profileBtn.classList.add('hidden');
+
+	const logoutBtn = document.getElementById('logout-button');
+	if (logoutBtn) logoutBtn.classList.add('hidden');
+
+	storedUserId = null;
+}
+
+try {
+	const storedUserJson = localStorage.getItem('user');
+	if (storedUserJson) {
+		const u = JSON.parse(storedUserJson);
+		if (u) {
+			if (typeof u.id === 'number') storedUserId = u.id;
+
+			const idToCheck = (typeof storedUserId === 'number' && !Number.isNaN(storedUserId))
+				? storedUserId
+				: (typeof u.id === 'number' ? u.id : null);
+
+			if (typeof idToCheck === 'number') {
+				(async () => {
+					try {
+						const token = localStorage.getItem('accessToken');
+						const headers: Record<string, string> = {};
+						if (token) headers['Authorization'] = 'Bearer ' + token;
+
+						const res = await fetch(`/user/profile/${idToCheck}`, {
+							method: 'GET',
+							headers,
+							credentials: 'include'
+						});
+
+						if (res.ok) {
+							const serverUser = await res.json().catch(() => null);
+							if (serverUser) {
+								storeUser(serverUser);
+								applyLoggedInState(serverUser);
+								return;
+							}
+						}
+
+						let serverBody: any = null;
+						try {
+							serverBody = await res.json().catch(() => null);
+						} catch (_) {
+							serverBody = null;
+						}
+						const bodyMsg = (serverBody && (serverBody.error || serverBody.message || serverBody.msg)) || '';
+
+						if (res.status === 404 || (res.status === 400 && /user not found/i.test(String(bodyMsg)))) {
+							localStorage.removeItem('accessToken');
+							localStorage.removeItem('user');
+							applyLoggedOutState();
+							return;
+						}
+
+						console.warn('Session validation failed but not definitive, keeping local session', res.status, bodyMsg);
+						if (u) applyLoggedInState(u);
+						return;
+					} catch (err) {
+						console.warn('Failed to validate session on startup', err);
+
+					}
+				})();
+			} else {
+				localStorage.removeItem('accessToken');
+				localStorage.removeItem('user');
+				applyLoggedOutState();
+			}
+		}
+	}
+} catch (e) {
+	console.warn('Error parsing stored user data', e);
+}
+
 
 register_button.addEventListener("click", () => {
-	if (login_form && !login_form.classList.contains("hidden")) {
-		login_form.classList.add("hidden");
+	if (loginContainer && !loginContainer.classList.contains("hidden")) {
+		loginContainer.classList.add("hidden");
 	}
-	if (language_menu && !language_menu.classList.contains("hidden")) {
-		language_menu.classList.add("hidden");
+	if (registerContainer && registerContainer.classList.contains("hidden")) {
+		registerContainer.classList.remove("hidden");
 	}
-	if (register_form && register_form.classList.contains("hidden")) {
-		register_form.classList.remove("hidden");
-	}
-	else if (register_form) {
-		register_form.classList.add("hidden");
+	else if (registerContainer) {
+		registerContainer.classList.add("hidden");
 	}
 });
 
 login_button.addEventListener("click", () => {
-	if (register_form && !register_form.classList.contains("hidden")) {
-		register_form.classList.add("hidden");
+	if (registerContainer && !registerContainer.classList.contains("hidden")) {
+		registerContainer.classList.add("hidden");
 	}
-	if (language_menu && !language_menu.classList.contains("hidden")) {
-		language_menu.classList.add("hidden");
+	if (loginContainer && loginContainer.classList.contains("hidden")) {
+		loginContainer.classList.remove("hidden");
 	}
-	if (login_form && login_form.classList.contains("hidden")) {
-		login_form.classList.remove("hidden");
+	else if (loginContainer) {
+		loginContainer.classList.add("hidden");
 	}
-	else if (login_form) {
-		login_form.classList.add("hidden");
-	}
-});
-
-language_button.addEventListener("click", () => {
-	if (register_form && !register_form.classList.contains("hidden")) {
-		register_form.classList.add("hidden");
-	}
-	if (login_form && !login_form.classList.contains("hidden")) {
-		login_form.classList.add("hidden");
-	}
-	if (language_menu && language_menu.classList.contains("hidden"))
-		language_menu.classList.remove("hidden");
-	else if (language_menu)
-		language_menu.classList.add("hidden");
 });
 
 profile_button.addEventListener("click", () => {
@@ -256,18 +238,6 @@ friends_button.addEventListener("click", () => {
 	}
 });
 
-add_friend_button.addEventListener("click", () => {
-
-});
-
-your_friends_button.addEventListener("click", () => {
-
-});
-
-pending_friends_button.addEventListener("click", () => {
-
-});
-
 history_button.addEventListener("click", () => {
 	if (twoFA_menu && !twoFA_menu.classList.contains("hidden")) {
 		twoFA_menu.classList.add("hidden");
@@ -307,7 +277,7 @@ twofaToggleBtn.addEventListener("click", async () => {
 		twofaTypeMenu.classList.add("hidden");
 		selected2FAType = null;
 
-		await fetch("http://localhost:3000/user/disable-2fa", {
+		await fetch("/user/disable-2fa", {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },
@@ -344,7 +314,7 @@ btnEmail.addEventListener("click", async () => {
 	twofaStatusText.textContent = "2FA est activée (Email).";
 	twofaToggleBtn.textContent = "Désactiver";
 
-	await fetch("http://localhost:3000/user/enable-2fa", {
+	await fetch("/user/enable-2fa", {
 		method: "POST",
 		credentials: "include",
 		headers: { "Content-Type": "application/json" },
@@ -360,7 +330,7 @@ btnSMS.addEventListener("click", async () => {
 	twofaStatusText.textContent = "2FA est activée (SMS).";
 	twofaToggleBtn.textContent = "Désactiver";
 
-	await fetch("http://localhost:3000/user/enable-2fa", {
+	await fetch("/user/enable-2fa", {
 		method: "POST",
 		credentials: "include",
 		headers: { "Content-Type": "application/json" },
@@ -376,7 +346,7 @@ btnQR.addEventListener("click", async () => {
 	twofaToggleBtn.textContent = "Annuler";
 
 	try {
-		const res = await fetch("http://localhost:3000/user/enable-2fa", {
+		const res = await fetch("/user/enable-2fa", {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },
@@ -423,41 +393,25 @@ else {
 		const inUsername = document.getElementById("username") as HTMLInputElement | null;
 		const inEmail = document.getElementById("email") as HTMLInputElement | null;
 		const inPassword = document.getElementById("password") as HTMLInputElement | null;
-		const inConfirmPassword = document.getElementById("confirm-password") as HTMLInputElement | null;
 
-		if (!inUsername || !inEmail || !inPassword || !inConfirmPassword) {
+		if (!inUsername || !inEmail || !inPassword) {
 			console.error("Missing elements in the form");
 			return;
 		}
 
-		const username = inUsername.value;
-		const email = inEmail.value;
+		const username = inUsername.value.trim();
+		const email = inEmail.value.trim();
 		const password = inPassword.value;
-		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
-		if (!validateEmail(email))
-			errors.push("Invalid email");
-		if (!validatePassword(password))
-			errors.push("Password must have 8 characters, one uppercase letter and one number");
-		if (!validateTextInput(username, 20))
-			errors.push("Invalid username");
-		if (password != confirmPassword)
-			errors.push("Passwords do not match");
+		if (!validateEmail(email)) errors.push("Invalid email");
+		if (!validatePassword(password)) errors.push("Password must have 8 characters, one uppercase letter and one number");
+		if (!validateTextInput(username, 20)) errors.push("Invalid username");
 
 		if (errors.length > 0) {
 			alert("Errors:\n" + errors.join("\n"));
 			return;
 		}
-
-		const safeUsername = sanitizeInput(username);
-		const safeEmail = sanitizeInput(email);
-
-		const sendBack = {
-			username: safeUsername,
-			email: safeEmail,
-			password: password
-		};
 
 		const submit = register_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 		if (submit) {
@@ -465,8 +419,90 @@ else {
 			const originalTxt = submit.textContent;
 			submit.textContent = "Registering...";
 			try {
-				// ------------------------------------- A CHANGER ICI LE PATH TO REGISTER SI BESOIN------------------------------------------------------
-				const res = await fetch("http://localhost:3000/register", {
+				const payload = {
+					username: sanitizeInput(username),
+					email: sanitizeInput(email),
+					password: password
+				};
+
+				const res = await fetch("/register", {
+					method: "POST",
+					credentials: "include",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload),
+				});
+
+				const data = await res.json().catch(() => null);
+				if (res.ok) {
+					if (data?.accessToken) storeToken(data.accessToken);
+					if (data?.user) {
+						storeUser(data.user);
+						if (typeof data.user.id === 'number') storedUserId = data.user.id;
+					}
+					applyLoggedInState(data?.user || { id: 0, username: '', email: '' });
+					register_form.reset();
+					alert("Registration successful, you are now logged in");
+				} else {
+					alert("Server error: " + (data?.error || res.statusText));
+				}
+			} catch (err) {
+				console.error("Register fetch error:", err);
+				alert("Network error. Try again later.");
+			} finally {
+				if (submit) {
+					submit.disabled = false;
+					submit.textContent = originalTxt ?? "Register";
+				}
+			}
+		}
+	});
+}
+
+/* Vraiment pareil que le cote register
+	On ecoute le submit du formulaire de login, on valide les inputs, on sanitize le tout, on envoie au backend sur la bonne route
+	et on gere les erreurs ou le succes
+	 - Toujours bisous, Mathis
+	*/
+if (!login_form)
+	console.warn("Login form not found");
+else {
+	login_form.addEventListener("submit", async (e) => {
+		e.preventDefault();
+		const inLogin = document.getElementById("login-id") as HTMLInputElement | null;
+		const inPassword = document.getElementById("login-password") as HTMLInputElement | null;
+
+		if (!inLogin || !inPassword) {
+			console.error("Missing elements to login");
+			return;
+		}
+
+		const loginId = inLogin.value;
+		const loginPass = inPassword.value;
+
+		const err: string[] = [];
+		if (!(validateEmail(loginId) || validateTextInput(loginId, 50)))
+			err.push("Invalid username or email");
+		if (!validatePassword(loginPass))
+			err.push("Invalid password");
+
+		if (err.length > 0) {
+			alert("Errors:\n" + err.join("\n"));
+			return;
+		}
+
+		const safeLoginId = sanitizeInput(loginId);
+
+		const sendBack = {
+			identifier: safeLoginId,
+			password: loginPass
+		};
+		const submit = login_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+		if (submit) {
+			submit.disabled = true;
+			const originalTxt = submit.textContent;
+			submit.textContent = "Logging in...";
+			try {
+				const res = await fetch("/login", {
 					method: "POST",
 					credentials: "include",
 					headers: {
@@ -474,15 +510,28 @@ else {
 					},
 					body: JSON.stringify(sendBack),
 				});
+
+				const data = await res.json();
 				if (res.ok) {
-					alert("Registration successful! You can now log in.");
-					register_form.reset();
-					profile_button.classList.remove("hidden");
+					if (data.message === "2FA required") {
+						storedUserId = data.userId;
+						selected2FAType = data.method;
+						twofaForm.classList.remove("hidden");
+					}
+					else {
+						storeToken(data.accessToken);
+						if (data.user) {
+							storeUser(data.user);
+							if (typeof data.user.id === 'number') storedUserId = data.user.id;
+						}
+						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
+						login_form.reset();
+						console.log("Hourray");
+						alert("Login successful1");
+					}
 				}
-				else {
-					const err = await res.json().catch(() => null);
-					alert("Server error: " + (err?.message || res.statusText));
-				}
+				else
+					alert("Server error: " + (data?.error || res.statusText));
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
@@ -491,96 +540,12 @@ else {
 			finally {
 				if (submit) {
 					submit.disabled = false;
-					submit.textContent = originalTxt ?? "Register";
+					submit.textContent = originalTxt ?? "Login";
 				}
 			}
 		}
 	});
-
-	/* Vraiment pareil que le cote register
-	On ecoute le submit du formulaire de login, on valide les inputs, on sanitize le tout, on envoie au backend sur la bonne route
-	et on gere les erreurs ou le succes
-	 - Toujours bisous, Mathis
-	*/
-	if (!login_form)
-		console.warn("Login form not found");
-	else {
-		login_form.addEventListener("submit", async (e) => {
-			e.preventDefault();
-			const inLogin = document.getElementById("login-id") as HTMLInputElement | null;
-			const inPassword = document.getElementById("login-password") as HTMLInputElement | null;
-
-			if (!inLogin || !inPassword) {
-				console.error("Missing elements to login");
-				return;
-			}
-
-			const loginId = inLogin.value;
-			const loginPass = inPassword.value;
-
-			const err: string[] = [];
-			if (!(validateEmail(loginId) || validateTextInput(loginId, 50)))
-				err.push("Invalid username or email");
-			if (!validatePassword(loginPass))
-				err.push("Invalid password");
-
-			if (err.length > 0) {
-				alert("Errors:\n" + err.join("\n"));
-				return;
-			}
-
-			const safeLoginId = sanitizeInput(loginId);
-
-			const sendBack = {
-				identifier: safeLoginId,
-				password: loginPass
-			};
-			const submit = login_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
-			if (submit) {
-				submit.disabled = true;
-				const originalTxt = submit.textContent;
-				submit.textContent = "Logging in...";
-				try {
-					const res = await fetch("http://localhost:3000/login", {
-						method: "POST",
-						credentials: "include",
-						headers: {
-							"Content-Type": "application/json"
-						},
-						body: JSON.stringify(sendBack),
-					});
-
-					const data = await res.json();
-					if (res.ok) {
-						if (data.message === "2FA required") {
-							storedUserId = data.userId;
-							selected2FAType = data.method;
-							twofaForm.classList.remove("hidden");
-						}
-						else {
-							storeToken(data.accessToken);
-							login_form.reset();
-							profile_button.classList.remove("hidden");
-						}
-					}
-					else
-						alert("Server error: " + (data?.error || res.statusText));
-				}
-				catch (err) {
-					console.error("Fetch error:", err);
-					alert("Network error. Try again later.");
-				}
-				finally {
-					if (submit) {
-						submit.disabled = false;
-						submit.textContent = originalTxt ?? "Login";
-					}
-				}
-			}
-		});
-	}
 }
-
 
 twofaForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
@@ -592,14 +557,14 @@ twofaForm.addEventListener("submit", async (e) => {
 		let res: Response;
 
 		if (selected2FAType === "email" || selected2FAType === "sms") {
-			res = await fetch("http://localhost:3000/verify-2fa", {
+			res = await fetch("/verify-2fa", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ userId: storedUserId, code }),
 			});
 		} else if (selected2FAType === "qr") {
-			res = await fetch("http://localhost:3000/verify-totp", {
+			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
@@ -613,40 +578,81 @@ twofaForm.addEventListener("submit", async (e) => {
 		if (!res.ok) throw new Error(data.error || "Invalid 2FA code");
 
 		storeToken(data.accessToken);
+		if (data.user) storeUser(data.user);
+		applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 		alert("Login successful with 2FA!");
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
-		profile_button.classList.remove("hidden");
 	} catch (err: any) {
 		alert(err.message);
 	}
 });
 
-logout_button.addEventListener("click", async () => {
-	try {
-		const res = await fetch("http://localhost:3000/logout", {
-			method: "POST",
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			body: JSON.stringify({ userId: storedUserId })
-		});
 
-		if (res.ok) {
-			storedUserId = null;
-			localStorage.removeItem("accessToken");
-			alert("Logout successful");
-			location.reload();
-		} else {
-			const err = await res.json().catch(() => null);
-			alert("Error logging out: " + (err?.error || res.statusText));
+const logoutButton = document.getElementById("logout-button") as HTMLButtonElement | null;
+if (logoutButton) {
+	logoutButton.addEventListener("click", async () => {
+		try {
+			let idToSend: number | null = storedUserId;
+			if (!idToSend) {
+				try {
+					const s = localStorage.getItem('user');
+					if (s) {
+						const parsed = JSON.parse(s);
+						if (parsed && typeof parsed.id === 'number') idToSend = parsed.id;
+					}
+				} catch (err) {
+					console.warn('Failed to parse stored user for logout', err);
+				}
+			}
+
+			if (!idToSend) {
+				alert('Cannot logout: missing user id. Try refreshing the page and retry.');
+				return;
+			}
+
+			const res = await fetch("/logout", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({ userId: idToSend })
+			});
+
+			if (res.ok) {
+				storedUserId = null;
+				localStorage.removeItem("accessToken");
+				alert("Logout successful");
+				localStorage.removeItem('user');
+				location.reload();
+			} else {
+				let serverBody: any = null;
+				try {
+					serverBody = await res.json().catch(() => null);
+				} catch (_) {
+					serverBody = null;
+				}
+
+				const bodyMsg = (serverBody && (serverBody.error || serverBody.message || serverBody.msg)) || "";
+				if (res.status === 404 || res.status === 400 && /user not found/i.test(String(bodyMsg))) {
+					storedUserId = null;
+					localStorage.removeItem("accessToken");
+					localStorage.removeItem('user');
+					alert("Logout: user not found on server — local session cleared.");
+					location.reload();
+					return;
+				}
+
+				const err = serverBody || { error: res.statusText };
+				alert("Error logging out: " + (err?.error || err?.message || res.statusText));
+			}
+		} catch (err) {
+			console.error(err);
+			alert("Network error. Try again later.");
 		}
-	} catch (err) {
-		console.error(err);
-		alert("Network error. Try again later.");
-	}
-});
+	});
+}
 
 
 
@@ -713,8 +719,6 @@ class Ball {
 	vy = 0;
 	speed = 300;
 	active = false;
-	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
-
 
 	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
 		this.el = el;
@@ -807,32 +811,35 @@ class Ball {
 		}
 
 		if (this.x + this.size < 0) {
-			console.debug('Ball out left -> right player scores');
-			if (this.onScore) this.onScore('right'); // notifier le Game
 			this.reset();
 		}
 		if (this.x > w) {
-			console.debug('Ball out right -> left player scores');
-			if (this.onScore) this.onScore('left'); // notifier le Game
 			this.reset();
 		}
 		this.render();
 	}
 };
 
-const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+let gameBall: Ball | null = null;
+// Initialize PONG only if DOM elements exist
+if (paddle_left && paddle_right && ball && pong_menu) {
+	gameBall = new Ball(ball, pong_menu, BALL_SIZE);
 
-//game loop to update ball position;
-let lastTime = performance.now();
-function gameLoop(now = performance.now()) {
-	const dt = (now - lastTime) / 1000;
-	lastTime = now;
+	//game loop to update ball position;
+	let lastTime = performance.now();
+	function gameLoop(now = performance.now()) {
+		const dt = (now - lastTime) / 1000;
+		lastTime = now;
 
-	gameBall.update(dt);
+		gameBall && gameBall.update(dt);
 
+		requestAnimationFrame(gameLoop);
+	}
 	requestAnimationFrame(gameLoop);
+} else {
+	console.warn('PONG elements missing; PONG disabled');
 }
-requestAnimationFrame(gameLoop);
+
 
 //keys list
 const keys = {
@@ -844,7 +851,10 @@ const keys = {
 
 //Start count down when Pong button is pressed
 function startGame() {
-	play_button.classList.add("hidden");
+	// si le bouton est déjà caché, on ne relance pas le countdown
+	if (pong_button.classList.contains("hidden")) return;
+
+	pong_button.classList.add("hidden");
 	paddle_left.classList.remove("hidden");
 	paddle_right.classList.remove("hidden");
 	ready_text.classList.remove("hidden");
@@ -855,12 +865,12 @@ function startGame() {
 		setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
-			gameBall.serve();
+			if (gameBall) gameBall.serve();
 		}, 1000);
 	}, 1000);
 }
 
-play_button.addEventListener("click", startGame);
+// pong_button.addEventListener("click", startGame);
 
 // document.addEventListener("keydown", (e) => {
 // 	if (e.key !== "Enter") return;
@@ -908,26 +918,10 @@ class Game {
 
 	constructor(playersName: [string, boolean][]) {
 		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
-
-		gameBall.onScore = (playerSide: 'left' | 'right') => {
-			this.addPoint(playerSide);
-		};
-
 		if (playersName.length > 2)
 			this.createTournament();
-		else
-			play_button.classList.remove("hidden");
+		/* else play a normal game */
 	}
-
-	public addPoint(playerSide: 'left' | 'right') {
-		// À adapter selon ta logique (2 joueurs vs tournament)
-		const pointIndex = playerSide === 'left' ? 0 : 1;
-		if (this.players[pointIndex]) {
-			this.players[pointIndex].point++;
-			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
-		}
-	}
-
 
 	public createTournament() {
 		const shuffled: Player[] = shuffleArray(this.players);
@@ -937,12 +931,8 @@ class Game {
 		});
 		showTournamentMatch();
 	}
-
-	public createQuickMatch() {
-		play_button.classList.remove("hidden");
-
-	}
 }
+
 
 pong_button.addEventListener("click", () => {
 	pong_button.classList.add("hidden");
@@ -1007,12 +997,12 @@ OK_button.addEventListener("click", () => {
 	hidePlayerNbrMenu();
 	playersList.classList.remove("hidden")
 
-	if (playerNbr > 0) {
+	if (playerNbr > 0)
 		enterPlayerName();
-	}
 	else {
 		addAiNameLabel();
 		const game = new Game(playerNames);
+		startGame();
 	}
 })
 
@@ -1062,7 +1052,7 @@ function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
 	const colorClass = playerColors[index];
-	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
+	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
 	if (!isAi)
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else
