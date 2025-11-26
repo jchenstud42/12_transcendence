@@ -62,9 +62,8 @@ clean:
 	@rm -rf $(FRONT_DIR)/srcs/js
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
-# PAR PITIE LAISSE LES RM -RF JULIE JE TE CONNAIS TU VAS VOULOIR FAIRE LE MENAGE MAIS TOUCHE A RIEN !!!!!!!!!!
 fclean:
-	@echo "Full $(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
+	@echo "$(RED)F$(YELLOW)u$(GREEN)l$(CYAN)l $(BLUE)"C"$(MAGENTA)"l"$(RED)"e"$(YELLOW)"a"$(GREEN)"n"$(CYAN)"i"$(BLUE)"n"$(MAGENTA)"g" $(RED)"."$(YELLOW)"."$(GREEN)"." " 🧹​​​" $(RESET)"
 	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/database/* || true
 	@rm -rf $(BACKEND_DIR)/dist

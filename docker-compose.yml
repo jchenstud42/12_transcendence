@@ -3,7 +3,7 @@ services:
     build:
       context: ./Front
     ports:
-      - "3001:80"
+      - "3001:443"
     restart: on-failure
 
   backend:

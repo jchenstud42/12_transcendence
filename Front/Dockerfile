@@ -20,6 +20,15 @@ FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
+RUN apk add --no-cache openssl bash
+RUN mkdir -p /etc/nginx/certs
+
+RUN openssl req -x509 -nodes -days 365 \
+    -newkey rsa:2048 \
+    -keyout /etc/nginx/certs/privkey.pem \
+    -out /etc/nginx/certs/fullchain.pem \
+    -subj "/CN=localhost"
+
 COPY srcs/html/index.html ./
 
 COPY --from=builder /app/srcs/js ./js
@@ -28,4 +37,4 @@ COPY --from=builder /app/srcs/assets ./assets
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 80 443
