@@ -141,7 +141,7 @@ try {
 						}
 						const bodyMsg = (serverBody && (serverBody.error || serverBody.message || serverBody.msg)) || '';
 
-						if (res.status === 404 || (res.status === 400 && /user not found/i.test(String(bodyMsg)))) {
+						if (res.status === 404 || res.status == 401 || (res.status === 400 && /user not found/i.test(String(bodyMsg)))) {
 							localStorage.removeItem('accessToken');
 							localStorage.removeItem('user');
 							applyLoggedOutState();
@@ -193,7 +193,7 @@ try {
 // 		errorLoggingOut: "Error logging out",
 // 		networkError: "Network error. Try again later."
 // 	},
-	
+
 // 	fr: {
 // 		register: "S'inscrire",
 // 		login: "Connexion",
@@ -221,7 +221,7 @@ try {
 // 	},
 
 // 	es: {
-		
+
 // 		register: "Registrarse",
 // 		login: "Iniciar sesión",
 // 		editProfile: "Editar perfil",
@@ -275,7 +275,7 @@ try {
 // 	}
 
 // 	const regBtn = register_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-// 	if (regBtn) 
+// 	if (regBtn)
 // 		regBtn.textContent = translate("register");
 
 // 	const logLabels = login_form?.querySelectorAll("label");
@@ -286,7 +286,7 @@ try {
 // 	}
 
 // 	const logBtn = login_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
-// 	if (logBtn) 
+// 	if (logBtn)
 // 		logBtn.textContent = translate("login");
 
 // }
