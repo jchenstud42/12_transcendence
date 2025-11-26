@@ -1,0 +1,60 @@
+import prisma from "../prisma/client.js";
+import { hashPassword, checkPassword } from "../../security/passHash.js";
+import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../../security/inputSecurity.js";
+export class AuthService {
+    async register(username, email, password) {
+        if (!validateEmail(email) || !validatePassword(password) || !validateTextInput(username))
+            throw new Error("Invalid input");
+        const cleanUsername = sanitizeInput(username);
+        const cleanEmail = sanitizeInput(email);
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [{ email: cleanEmail }, { username: cleanUsername }]
+            },
+        });
+        if (existingUser)
+            throw new Error("User already exists");
+        const hashedPassword = await hashPassword(password);
+        return (await prisma.user.create({
+            data: { username: cleanUsername, email: cleanEmail, password: hashedPassword },
+            select: { id: true, username: true, email: true, status: true, createdAt: true },
+        }));
+    }
+    async login(identifier, password) {
+        const cleanIdentifier = sanitizeInput(identifier);
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [{ email: cleanIdentifier }, { username: cleanIdentifier }]
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                password: true,
+                isTwoFAEnabled: true,
+            },
+        });
+        if (!user)
+            throw new Error("User not found");
+        const valid = await checkPassword(password, user.password);
+        if (!valid)
+            throw new Error("Invalid credentials");
+        await prisma.user.update({ where: { id: user.id }, data: { status: "ONLINE" } });
+        let twoFAMethod = null;
+        if (user.isTwoFAEnabled) {
+            const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
+            if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "qr") {
+                twoFAMethod = twoFAData.method;
+            }
+        }
+        return ({ id: user.id, username: user.username, email: user.email, isTwoFAEnabled: user.isTwoFAEnabled, twoFAMethod });
+    }
+    async logout(userId) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new Error("User not found");
+        await prisma.user.update({ where: { id: userId }, data: { status: "OFFLINE" } });
+        return ({ message: "User logged out successfully" });
+    }
+}
+//# sourceMappingURL=auth.services.js.map

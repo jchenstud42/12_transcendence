@@ -26,6 +26,11 @@ const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
 const history_button = document.getElementById("history-button")!;
 
+// const add_friend_button = document.getElementById("btn-add-friend")!;
+// const your_friends_button = document.getElementById("btn-your-friends")!;
+// const language_button = document.getElementById("language-button")!;
+// const language_menu = document.getElementById("language-menu")!;
+
 const twoFA_menu = document.getElementById("2fa-menu")! as HTMLDivElement | null;
 const twoFA_profile_button = document.getElementById("2FA-button")!;
 const twofaToggleBtn = document.getElementById("2fa-toggle-btn")!;
@@ -162,6 +167,129 @@ try {
 	console.warn('Error parsing stored user data', e);
 }
 
+// const translations = {
+// 	en: {
+// 		register: "Register",
+// 		login: "Login",
+// 		editProfile: "Edit Profile",
+// 		friends: "Friends",
+// 		matchHistory: "Match History",
+// 		logout: "Logout",
+// 		language: "Language",
+// 		username: "Username",
+// 		email: "Email",
+// 		password: "Password",
+// 		confirmPassword: "Confirm Password",
+// 		registrationSuccess: "Registration successful! You can now log in.",
+// 		invalidEmail: "Invalid email",
+// 		passwordRequirements: "Password must have 8 characters, one uppercase letter and one number",
+// 		invalidUsername: "Invalid username",
+// 		passwordsNotMatch: "Passwords do not match",
+// 		errors: "Errors",
+// 		registering: "Registering...",
+// 		loginId: "Username or Email",
+// 		loggingIn: "Logging in...",
+// 		logoutSuccess: "Logout successful",
+// 		errorLoggingOut: "Error logging out",
+// 		networkError: "Network error. Try again later."
+// 	},
+	
+// 	fr: {
+// 		register: "S'inscrire",
+// 		login: "Connexion",
+// 		editProfile: "Modifier le profil",
+// 		friends: "Amis",
+// 		matchHistory: "Historique des matchs",
+// 		logout: "Déconnexion",
+// 		language: "Langue",
+// 		username: "Nom d'utilisateur",
+// 		email: "Email",
+// 		password: "Mot de passe",
+// 		confirmPassword: "Confirmer le mot de passe",
+// 		registrationSuccess: "Inscription réussie ! Vous pouvez maintenant vous connecter.",
+// 		invalidEmail: "Email invalide",
+// 		passwordRequirements: "Le mot de passe doit avoir 8 caractères, une majuscule et un chiffre",
+// 		invalidUsername: "Nom d'utilisateur invalide",
+// 		passwordsNotMatch: "Les mots de passe ne correspondent pas",
+// 		errors: "Erreurs",
+// 		registering: "Inscription en cours...",
+// 		loginId: "Nom d'utilisateur ou Email",
+// 		loggingIn: "Connexion en cours...",
+// 		logoutSuccess: "Déconnexion réussie",
+// 		errorLoggingOut: "Erreur lors de la déconnexion",
+// 		networkError: "Erreur réseau. Réessayez plus tard.",
+// 	},
+
+// 	es: {
+		
+// 		register: "Registrarse",
+// 		login: "Iniciar sesión",
+// 		editProfile: "Editar perfil",
+// 		friends: "Amigos",
+// 		matchHistory: "Historial de partidas",
+// 		logout: "Cerrar sesión",
+// 		language: "Idioma",
+// 		username: "Nombre de usuario",
+// 		email: "Correo electrónico",
+// 		password: "Contraseña",
+// 		confirmPassword: "Confirmar contraseña",
+// 		registrationSuccess: "¡Registro exitoso! Ahora puede iniciar sesión.",
+// 		invalidEmail: "Email inválido",
+// 		passwordRequirements: "La contraseña debe tener 8 caracteres, una mayúscula y un número",
+// 		invalidUsername: "Nombre de usuario inválido",
+// 		passwordsNotMatch: "Las contraseñas no coinciden",
+// 		errors: "Errores",
+// 		registering: "Registrando...",
+// 		loginId: "Nombre de usuario o correo",
+// 		loggingIn: "Iniciando sesión...",
+// 		logoutSuccess: "Sesión cerrada exitosamente",
+// 		errorLoggingOut: "Error al cerrar sesión",
+// 		networkError: "Error de red. Inténtelo más tarde.",
+// 	}
+// };
+
+// let currentLang = localStorage.getItem("lang") || "en";
+
+// //translation pas encore finis
+
+// function translate(key: string): string {
+// 	return (translations[currentLang as keyof typeof translations]?.[key as keyof typeof translations.en] || key);
+// }
+
+// function updatePageLanguage() {
+// 	register_button.textContent = translate("register");
+// 	login_button.textContent = translate("login");
+// 	language_button.textContent = translate("language");
+// 	logoutButton.textContent = translate("logout");
+
+// 	edit_button.textContent = translate("editProfile");
+// 	friends_button.textContent = translate("friends");
+// 	history_button.textContent = translate("matchHistory");
+
+// 	const regLabels = register_form?.querySelectorAll("label");
+// 	if (regLabels) {
+// 	regLabels[0].textContent = translate("username");
+// 	regLabels[1].textContent = translate("email");
+// 	regLabels[2].textContent = translate("password");
+// 	regLabels[3].textContent = translate("confirmPassword");
+// 	}
+
+// 	const regBtn = register_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+// 	if (regBtn) 
+// 		regBtn.textContent = translate("register");
+
+// 	const logLabels = login_form?.querySelectorAll("label");
+
+// 	if (logLabels) {
+// 	logLabels[0].textContent = translate("loginId");
+// 	logLabels[1].textContent = translate("password");
+// 	}
+
+// 	const logBtn = login_form?.querySelector('button[type="submit"]') as HTMLButtonElement;
+// 	if (logBtn) 
+// 		logBtn.textContent = translate("login");
+
+// }
 
 register_button.addEventListener("click", () => {
 	if (loginContainer && !loginContainer.classList.contains("hidden")) {
@@ -393,8 +521,9 @@ else {
 		const inUsername = document.getElementById("username") as HTMLInputElement | null;
 		const inEmail = document.getElementById("email") as HTMLInputElement | null;
 		const inPassword = document.getElementById("password") as HTMLInputElement | null;
+		const inConfirmPassword = document.getElementById("confirm-password") as HTMLInputElement | null;
 
-		if (!inUsername || !inEmail || !inPassword) {
+		if (!inUsername || !inEmail || !inPassword || !inConfirmPassword) {
 			console.error("Missing elements in the form");
 			return;
 		}
@@ -402,11 +531,13 @@ else {
 		const username = inUsername.value.trim();
 		const email = inEmail.value.trim();
 		const password = inPassword.value;
+		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
 		if (!validateEmail(email)) errors.push("Invalid email");
 		if (!validatePassword(password)) errors.push("Password must have 8 characters, one uppercase letter and one number");
 		if (!validateTextInput(username, 20)) errors.push("Invalid username");
+		if (password !== confirmPassword) errors.push("Passwords do not match");
 
 		if (errors.length > 0) {
 			alert("Errors:\n" + errors.join("\n"));
@@ -589,7 +720,7 @@ twofaForm.addEventListener("submit", async (e) => {
 });
 
 
-const logoutButton = document.getElementById("logout-button") as HTMLButtonElement | null;
+const logoutButton = document.getElementById("logout-button") as HTMLButtonElement;
 if (logoutButton) {
 	logoutButton.addEventListener("click", async () => {
 		try {
