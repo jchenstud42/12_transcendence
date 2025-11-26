@@ -295,6 +295,9 @@ register_button.addEventListener("click", () => {
 	if (loginContainer && !loginContainer.classList.contains("hidden")) {
 		loginContainer.classList.add("hidden");
 	}
+	// if (language_menu && !language_menu.classList.contains("hidden")) {
+	// 	language_menu.classList.add("hidden");
+	// }
 	if (registerContainer && registerContainer.classList.contains("hidden")) {
 		registerContainer.classList.remove("hidden");
 	}
@@ -307,6 +310,9 @@ login_button.addEventListener("click", () => {
 	if (registerContainer && !registerContainer.classList.contains("hidden")) {
 		registerContainer.classList.add("hidden");
 	}
+	// if (language_menu && !language_menu.classList.contains("hidden")) {
+	// 	language_menu.classList.add("hidden");
+	// }
 	if (loginContainer && loginContainer.classList.contains("hidden")) {
 		loginContainer.classList.remove("hidden");
 	}
@@ -337,6 +343,9 @@ edit_button.addEventListener("click", () => {
 	if (twofaTypeMenu && !twofaTypeMenu.classList.contains("hidden")) {
 		twofaTypeMenu.classList.add("hidden");
 	}
+	// if (language_menu && !language_menu.classList.contains("hidden")) {
+	// 	language_menu.classList.add("hidden");
+	// }
 	if (edit_menu && edit_menu.classList.contains("hidden")) {
 		edit_menu.classList.remove("hidden");
 	}
@@ -358,6 +367,9 @@ friends_button.addEventListener("click", () => {
 	if (twofaTypeMenu && !twofaTypeMenu.classList.contains("hidden")) {
 		twofaTypeMenu.classList.add("hidden");
 	}
+	// if (language_menu && !language_menu.classList.contains("hidden")) {
+	// 	language_menu.classList.add("hidden");
+	// }
 	if (friends_menu && friends_menu.classList.contains("hidden")) {
 		friends_menu.classList.remove("hidden");
 	}
@@ -379,6 +391,9 @@ history_button.addEventListener("click", () => {
 	if (twofaTypeMenu && !twofaTypeMenu.classList.contains("hidden")) {
 		twofaTypeMenu.classList.add("hidden");
 	}
+	// if (language_menu && !language_menu.classList.contains("hidden")) {
+	// 	language_menu.classList.add("hidden");
+	// }
 	if (history_menu && history_menu.classList.contains("hidden")) {
 		history_menu.classList.remove("hidden");
 	}
@@ -386,6 +401,20 @@ history_button.addEventListener("click", () => {
 		history_menu.classList.add("hidden");
 	}
 });
+
+// language_button.addEventListener("click", () => {
+// 	if (register_form && !register_form.classList.contains("hidden")) {
+// 		register_form.classList.add("hidden");
+// 	}
+// 	if (login_form && !login_form.classList.contains("hidden")) {
+// 		login_form.classList.add("hidden");
+// 	}
+// 	if (language_menu && language_menu.classList.contains("hidden"))
+// 		language_menu.classList.remove("hidden");
+// 	else if (language_menu)
+// 		language_menu.classList.add("hidden");
+// });
+
 
 twofaToggleBtn.addEventListener("click", async () => {
 	is2FAEnabled = !is2FAEnabled;
