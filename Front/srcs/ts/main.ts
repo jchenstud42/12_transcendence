@@ -687,7 +687,7 @@ else {
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
 						console.log("Hourray");
-						alert("Login successful1");
+						alert("Login successful");
 					}
 				}
 				else
@@ -816,7 +816,6 @@ if (logoutButton) {
 
 
 
-
 // POOOONNNNNNNG
 const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
 const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
@@ -879,6 +878,8 @@ class Ball {
 	vy = 0;
 	speed = 300;
 	active = false;
+	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
+
 
 	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
 		this.el = el;
@@ -971,35 +972,32 @@ class Ball {
 		}
 
 		if (this.x + this.size < 0) {
+			console.debug('Ball out left -> right player scores');
+			if (this.onScore) this.onScore('right'); // notifier le Game
 			this.reset();
 		}
 		if (this.x > w) {
+			console.debug('Ball out right -> left player scores');
+			if (this.onScore) this.onScore('left'); // notifier le Game
 			this.reset();
 		}
 		this.render();
 	}
 };
 
-let gameBall: Ball | null = null;
-// Initialize PONG only if DOM elements exist
-if (paddle_left && paddle_right && ball && pong_menu) {
-	gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
 
-	//game loop to update ball position;
-	let lastTime = performance.now();
-	function gameLoop(now = performance.now()) {
-		const dt = (now - lastTime) / 1000;
-		lastTime = now;
+//game loop to update ball position;
+let lastTime = performance.now();
+function gameLoop(now = performance.now()) {
+	const dt = (now - lastTime) / 1000;
+	lastTime = now;
 
-		gameBall && gameBall.update(dt);
+	gameBall.update(dt);
 
-		requestAnimationFrame(gameLoop);
-	}
 	requestAnimationFrame(gameLoop);
-} else {
-	console.warn('PONG elements missing; PONG disabled');
 }
-
+requestAnimationFrame(gameLoop);
 
 //keys list
 const keys = {
@@ -1011,10 +1009,7 @@ const keys = {
 
 //Start count down when Pong button is pressed
 function startGame() {
-	// si le bouton est déjà caché, on ne relance pas le countdown
-	if (pong_button.classList.contains("hidden")) return;
-
-	pong_button.classList.add("hidden");
+	play_button.classList.add("hidden");
 	paddle_left.classList.remove("hidden");
 	paddle_right.classList.remove("hidden");
 	ready_text.classList.remove("hidden");
@@ -1025,12 +1020,12 @@ function startGame() {
 		setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
-			if (gameBall) gameBall.serve();
+			gameBall.serve();
 		}, 1000);
 	}, 1000);
 }
 
-// pong_button.addEventListener("click", startGame);
+play_button.addEventListener("click", startGame);
 
 // document.addEventListener("keydown", (e) => {
 // 	if (e.key !== "Enter") return;
@@ -1078,10 +1073,26 @@ class Game {
 
 	constructor(playersName: [string, boolean][]) {
 		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
+
+		gameBall.onScore = (playerSide: 'left' | 'right') => {
+			this.addPoint(playerSide);
+		};
+
 		if (playersName.length > 2)
 			this.createTournament();
-		/* else play a normal game */
+		else
+			play_button.classList.remove("hidden");
 	}
+
+	public addPoint(playerSide: 'left' | 'right') {
+		// À adapter selon ta logique (2 joueurs vs tournament)
+		const pointIndex = playerSide === 'left' ? 0 : 1;
+		if (this.players[pointIndex]) {
+			this.players[pointIndex].point++;
+			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
+		}
+	}
+
 
 	public createTournament() {
 		const shuffled: Player[] = shuffleArray(this.players);
@@ -1091,8 +1102,12 @@ class Game {
 		});
 		showTournamentMatch();
 	}
-}
 
+	public createQuickMatch() {
+		play_button.classList.remove("hidden");
+
+	}
+}
 
 pong_button.addEventListener("click", () => {
 	pong_button.classList.add("hidden");
@@ -1157,12 +1172,12 @@ OK_button.addEventListener("click", () => {
 	hidePlayerNbrMenu();
 	playersList.classList.remove("hidden")
 
-	if (playerNbr > 0)
+	if (playerNbr > 0) {
 		enterPlayerName();
+	}
 	else {
 		addAiNameLabel();
 		const game = new Game(playerNames);
-		startGame();
 	}
 })
 
@@ -1212,7 +1227,7 @@ function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
 	const colorClass = playerColors[index];
-	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
 	if (!isAi)
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else

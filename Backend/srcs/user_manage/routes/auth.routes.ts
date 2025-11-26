@@ -77,7 +77,19 @@ export default async function authRoutes(fastify: FastifyInstance) {
 		try {
 			const { userId } = req.body as RegisterBody;
 			const res = await authService.logout(userId);
-			reply.clearCookie("refreshToken", { path: "/" });
+			reply.clearCookie("refreshToken", {
+				httpOnly: true,
+				secure: false,
+				sameSite: "lax",
+				path: "/",
+			})
+			reply.setCookie("refreshToken", "", {
+				httpOnly: true,
+				secure: false,
+				sameSite: "lax",
+				expires: new Date(0),
+				path: "/",
+			});
 			await prisma.user.update({
 				where: { id: userId },
 				data: { status: "OFFLINE" },
