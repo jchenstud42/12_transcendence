@@ -1,5 +1,6 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
 import { shuffleArray } from "./utils/utils.js";
+import { initLanguage, setLanguage } from "./i18n.js";
 const page = document.getElementById("page")!;
 
 // CA C LE DIV DANS LE HTML
@@ -42,6 +43,8 @@ const btnQR = document.getElementById("2fa-qr")!;
 
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
+
+
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
@@ -359,15 +362,6 @@ btnQR.addEventListener("click", async () => {
 const saveProfileBtn = document.getElementById("btn-save-profile")!;
 saveProfileBtn.addEventListener("click", async () => {
 
-	let currentUser = null;
-	try {
-		const stored = localStorage.getItem('user');
-		if (stored) currentUser = JSON.parse(stored);
-	}
-	catch (e) {
-		console.warn('Failed to parse stored user', e);
-	}
-
 	const username = (document.getElementById("edit-username") as HTMLInputElement).value.trim();
 	const email = (document.getElementById("edit-email") as HTMLInputElement).value.trim();
 	const avatar = (document.getElementById("edit-avatar") as HTMLInputElement).value.trim();
@@ -400,26 +394,18 @@ saveProfileBtn.addEventListener("click", async () => {
 	if (password) payload.password = password;
 
 	const token = localStorage.getItem("accessToken");
-	let userId = storedUserId;
-	
-	if (!userId) {
-		try {
-			const user = JSON.parse(localStorage.getItem('user') || '{}');
-			userId = user.id;
-		} catch (e) {
-			alert("Error: Cannot find user ID");
-			return;
-		}
-	}
+
 	try {
-		const res = await fetch(`/user/profile/${userId}`, {
-			method: "PUT",
+		const res = await fetch("/user/update-profile", {
+			method: "PATCH",
 			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
+				"Authorization": token ? "Bearer " + token : ""
 			},
 			body: JSON.stringify(payload)
 		});
+
 		const data = await res.json();
 		if (!res.ok) {
 			alert("Server error: " + data.error);
@@ -432,12 +418,9 @@ saveProfileBtn.addEventListener("click", async () => {
 		const menuEmail = document.getElementById("menu-email");
 		const profileAvatar = document.getElementById("profile-avatar") as HTMLImageElement;
 
-		if (data.user.username)
-			menuUsername!.textContent = data.user.username;
-		if (data.user.email)
-			menuEmail!.textContent = data.user.email;
-		if (data.user.avatar)
-			profileAvatar.src = data.user.avatar;
+		if (data.user.username) menuUsername!.textContent = data.user.username;
+		if (data.user.email) menuEmail!.textContent = data.user.email;
+		if (data.user.avatar) profileAvatar.src = data.user.avatar;
 
 		alert("Profile updated!");
 
@@ -447,7 +430,39 @@ saveProfileBtn.addEventListener("click", async () => {
 	}
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+	initLanguage();
 
+	const language_button = document.getElementById("language-button");
+	const language_menu = document.getElementById("language-menu");
+
+	if (!language_button || !language_menu) {
+		console.error("Language menu elements not found in DOM.");
+		return;
+	}
+
+	language_button.addEventListener("click", () => {
+		language_menu.classList.toggle("show");
+	});
+
+	const enBtn = language_menu.querySelector(".en");
+	const frBtn = language_menu.querySelector(".fr");
+	const esBtn = language_menu.querySelector(".es");
+
+	if (enBtn) enBtn.addEventListener("click", () => setLanguage("en"));
+	if (frBtn) frBtn.addEventListener("click", () => setLanguage("fr"));
+	if (esBtn) esBtn.addEventListener("click", () => setLanguage("es"));
+
+	document.addEventListener("click", (e) => {
+		const target = e.target;
+
+		if (!(target instanceof Node))
+			return;
+
+		if (!language_button.contains(target) && !language_menu.contains(target))
+			language_menu.classList.remove("show");
+	});
+});
 
 /*- On regarde si on arrive a recuperer le formulaire
 - On ecoute si le formulaire est submit, si oui on preventDefault pour pas qu'il ne reload la page.
