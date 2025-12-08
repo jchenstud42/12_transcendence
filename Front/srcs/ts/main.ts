@@ -356,6 +356,98 @@ btnQR.addEventListener("click", async () => {
 	}
 });
 
+const saveProfileBtn = document.getElementById("btn-save-profile")!;
+saveProfileBtn.addEventListener("click", async () => {
+
+	let currentUser = null;
+	try {
+		const stored = localStorage.getItem('user');
+		if (stored) currentUser = JSON.parse(stored);
+	}
+	catch (e) {
+		console.warn('Failed to parse stored user', e);
+	}
+
+	const username = (document.getElementById("edit-username") as HTMLInputElement).value.trim();
+	const email = (document.getElementById("edit-email") as HTMLInputElement).value.trim();
+	const avatar = (document.getElementById("edit-avatar") as HTMLInputElement).value.trim();
+	const password = (document.getElementById("edit-password") as HTMLInputElement).value;
+	const confirmPass = (document.getElementById("edit-password-confirm") as HTMLInputElement).value;
+
+	const errors: string[] = [];
+
+	if (username && !validateTextInput(username, 20))
+		errors.push("Invalid username");
+
+	if (email && !validateEmail(email))
+		errors.push("Invalid email");
+
+	if (password && !validatePassword(password))
+		errors.push("Invalid password format");
+
+	if (password !== confirmPass)
+		errors.push("Passwords do not match");
+
+	if (errors.length > 0) {
+		alert("Errors:\n" + errors.join("\n"));
+		return;
+	}
+
+	const payload: Record<string, any> = {};
+	if (username) payload.username = sanitizeInput(username);
+	if (email) payload.email = sanitizeInput(email);
+	if (avatar) payload.avatar = sanitizeInput(avatar);
+	if (password) payload.password = password;
+
+	const token = localStorage.getItem("accessToken");
+	let userId = storedUserId;
+	
+	if (!userId) {
+		try {
+			const user = JSON.parse(localStorage.getItem('user') || '{}');
+			userId = user.id;
+		} catch (e) {
+			alert("Error: Cannot find user ID");
+			return;
+		}
+	}
+	try {
+		const res = await fetch(`/user/profile/${userId}`, {
+			method: "PUT",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(payload)
+		});
+		const data = await res.json();
+		if (!res.ok) {
+			alert("Server error: " + data.error);
+			return;
+		}
+
+		storeUser(data.user);
+
+		const menuUsername = document.getElementById("menu-username");
+		const menuEmail = document.getElementById("menu-email");
+		const profileAvatar = document.getElementById("profile-avatar") as HTMLImageElement;
+
+		if (data.user.username)
+			menuUsername!.textContent = data.user.username;
+		if (data.user.email)
+			menuEmail!.textContent = data.user.email;
+		if (data.user.avatar)
+			profileAvatar.src = data.user.avatar;
+
+		alert("Profile updated!");
+
+	} catch (err) {
+		console.error(err);
+		alert("Network error");
+	}
+});
+
+
 
 /*- On regarde si on arrive a recuperer le formulaire
 - On ecoute si le formulaire est submit, si oui on preventDefault pour pas qu'il ne reload la page.

@@ -1,3 +1,4 @@
+import { hashPassword } from "../../security/passHash.js";
 import prisma from "../prisma/client.js";
 
 export class UserService {
@@ -18,16 +19,25 @@ export class UserService {
 		return (user);
 	}
 
-	async updateProfile(userId: number, data: { username?: string; avatar?: string }) {
+	async updateProfile(userId: number, data: { username?: string; avatar?: string; email?: string; password?: string }) {
+		const updateData: any = {};
+		
+		if (data.username) updateData.username = data.username;
+		if (data.avatar) updateData.avatar = data.avatar;
+		if (data.email) updateData.email = data.email;
+
+		if (data.password) {
+			updateData.password = await hashPassword(data.password);
+		}
+
 		const updated = await prisma.user.update({
 			where: { id: userId },
-			data,
-			select: { id: true, username: true, avatar: true },
+			data: updateData,
+			select: { id: true, username: true, email: true, avatar: true },
 		});
 		return (updated);
 	}
 
-	//Je sais pas si on garde, pas forcement utile sauf si on fait une page d'amis et on peut voir les gens ONLINE / OFFLINE (mais tout le monde en OFFLINE car pas de multijoueur)	
 	async getUserStatus(userId: number) {
 		const user = await prisma.user.findUnique({
 			where: { id: userId },

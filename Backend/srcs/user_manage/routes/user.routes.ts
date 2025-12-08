@@ -15,10 +15,10 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		return reply.send(user);
 	});
 
-	fastify.put("/profile/:id", { preHandler: [authentizer()] }, async (req, reply) => {
+	fastify.put("/profile/:id", async (req, reply) => {
 		const body = req.body as { username?: string; avatar?: string };
 		const updated = await userService.updateProfile(Number((req.params as UserParams).id), body);
-		return reply.send(updated);
+		return reply.send({ user: updated });
 	});
 
 	fastify.get("/status/:id", { preHandler: [authentizer()] }, async (req, reply) => {
