@@ -1,0 +1,14 @@
+@font-face {
+	font-family: "Petrona-Regular";
+	src: url("assets/fonts/Petrona-Regular.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+}
+
+
+/* Police globale pour tout le projet */
+body {
+	font-family: "Petrona-Regular", sans-serif;
+	margin: 0;
+	padding: 0;
+}
