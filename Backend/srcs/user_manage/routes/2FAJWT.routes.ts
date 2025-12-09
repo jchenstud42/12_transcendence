@@ -1,8 +1,7 @@
 import { FastifyInstance } from "fastify";
 import prisma from "../prisma/client.js";
 import { twoFAService } from "../../module_security/2FA.js";
-import { verifyToken, signAccessToken } from "../../module_security/jwtUtils.js";
-import speakeasy from "speakeasy";
+import { verifyToken, signAccessToken, signRefreshToken } from "../../module_security/jwtUtils.js";
 
 const twofa = new twoFAService();
 
@@ -11,22 +10,35 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 	fastify.post("/verify-totp", async (req, reply) => {
 		try {
-			const refreshToken = req.cookies.refreshToken;
-			if (!refreshToken)
-				return reply.status(401).send({ error: "Unauthorized" });
+			const { twoFAToken, code } = req.body as { twoFAToken: string; code: string };
 
-			const payload = verifyToken(refreshToken);
-			if (!payload || payload.tokenType !== "refresh")
+			if (!twoFAToken)
+				return reply.status(401).send({ error: "Missing 2FA token" });
+
+			const payload = verifyToken(twoFAToken);
+			if (!payload || payload.twoFA !== false)
 				return reply.status(401).send({ error: "Invalid token" });
 
 			const userId = payload.sub;
-			const { code } = req.body as { code: string };
 			if (!code) return reply.status(400).send({ error: "QR code required" });
 
 			const isValid = await twofa.verifyTOTP(userId, code);
 			if (!isValid) return reply.status(400).send({ error: "Invalid QR code" });
 
 			const accessToken = signAccessToken(userId, true);
+			const refreshToken = signRefreshToken(userId);
+
+			reply.setCookie("refreshToken", refreshToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: "lax",
+				path: "/",
+				maxAge: 60 * 60 * 24 * 7
+			});
+			await prisma.user.update({
+				where: { id: userId },
+				data: { status: "ONLINE" },
+			});
 
 			return reply.send({ message: "QR code verified", accessToken });
 		} catch (err) {
@@ -73,11 +85,16 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 	fastify.post("/disable-2fa", async (req, reply) => {
 		try {
+			console.log("disable-2FA route called");
+
 			const refreshToken = req.cookies.refreshToken;
+			req.log.info(`Refresh token: ${req.cookies.refreshToken}`);
+
 			if (!refreshToken)
 				return reply.status(401).send({ error: "Unauthorized" });
 
 			const payload = verifyToken(refreshToken);
+			req.log.info(`Token payload: ${JSON.stringify(payload)}`);
 
 			if (!payload || payload.tokenType !== "refresh")
 				return (reply.status(401).send({ error: "Invalid refresh token" }));
@@ -113,32 +130,46 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 			if (type === "qr") {
 				const totpData = await twofa.generateTOTPSecret(userId);
+
+				await prisma.twoFA.upsert({
+					where: { userId },
+					update: { method: "qr", destination: null },
+					create: { userId, method: "qr", destination: null },
+				});
+
+				await prisma.user.update({
+					where: { id: userId },
+					data: {
+						isTwoFAEnabled: true,
+						twoFAMethod: "qr",
+						twoFAdestination: null
+					}
+				});
+
 				return reply.send({
-					message: "2FA QR code enabled",
-					method: "qr",
+					message: "2FA QR code enabled successfully",
+					method: type,
 					otpauthURL: totpData.otpauthURL,
-					qrCode: totpData.qrCode,
+					qrCode: totpData.qrCode
 				});
 			}
+			if (!destination)
+				return reply.status(400).send({ error: "Destination is required" });
+
+			await prisma.twoFA.upsert({
+				where: { userId },
+				update: { method: type, destination },
+				create: { userId, method: type, destination },
+			});
 
 			await prisma.user.update({
 				where: { id: userId },
-				data: { isTwoFAEnabled: true, twoFAMethod: type },
+				data: {
+					isTwoFAEnabled: true,
+					twoFAMethod: type,
+					twoFAdestination: destination
+				}
 			});
-
-			if (type === "email" || type === "sms") {
-				if (!destination)
-					return reply.status(400).send({ error: "Destination is required for email or sms 2FA" });
-				await twofa.generate2FA(userId, type, destination);
-				await twofa.send2FACode(userId);
-
-				return reply.send({
-					message: "2FA enabled successfully",
-					method: type,
-				});
-			}
-
-
 		} catch (err) {
 			req.log.error(err);
 			return (reply.status(500).send({ error: "Internal server error" }));

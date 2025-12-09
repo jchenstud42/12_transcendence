@@ -16,9 +16,9 @@ interface RegisterBody {
 
 type TwoFAMethod = "email" | "sms" | "qr";
 
-function assertTwoFAMethod(method: string | null): TwoFAMethod {
+export function assertTwoFAMethod(method: any): "email" | "sms" | "qr" | null {
 	if (method === "email" || method === "sms" || method === "qr") return method;
-	throw new Error("Invalid 2FA method");
+	return null;
 }
 
 export default async function authRoutes(fastify: FastifyInstance) {
@@ -42,17 +42,27 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			if (user.isTwoFAEnabled) {
 
 				const twoFAMethod = assertTwoFAMethod(user.twoFAMethod);
+				const twoFAtoken = signAccessToken(user.id, false);
+
+				if (!twoFAMethod) {
+					return reply.status(400).send({
+						error: "2FA is enabled but no valid 2FA method is stored for this user."
+					});
+				}
 				if (twoFAMethod === "qr") {
 					return reply.send({
 						message: "2FA required",
 						userId: user.id,
+						twoFAtoken,
 						method: "qr"
 					});
 				}
-				await twofa.generate2FA(user.id, twoFAMethod, user.email);
+				const destination = user.twoFAdestination || user.email;
+
+				await twofa.generate2FA(user.id, twoFAMethod, destination);
 				await twofa.send2FACode(user.id);
 
-				return (reply.status(200).send({ message: "2FA required", userId: user.id, method: twoFAMethod }));
+				return (reply.status(200).send({ message: "2FA required", userId: user.id, method: twoFAMethod, twoFAtoken }));
 			}
 
 			const accessToken = signAccessToken(user.id, true);

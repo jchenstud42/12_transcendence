@@ -1,6 +1,7 @@
 import prisma from "../prisma/client.js";
 import { hashPassword, checkPassword } from "../../security/passHash.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../../security/inputSecurity.js";
+import { assertTwoFAMethod } from "../routes/auth.routes.js";
 
 export class AuthService {
 	async register(username: string, email: string, password: string) {
@@ -38,6 +39,8 @@ export class AuthService {
 				email: true,
 				password: true,
 				isTwoFAEnabled: true,
+				twoFAMethod: true,
+				twoFAdestination: true
 			},
 		});
 		if (!user)
@@ -50,15 +53,16 @@ export class AuthService {
 		await prisma.user.update({ where: { id: user.id }, data: { status: "ONLINE" } });
 
 		type TwoFAMethod = "email" | "sms" | "qr";
-		let twoFAMethod: TwoFAMethod | null = null;
-		if (user.isTwoFAEnabled) {
-			const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
-			if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "qr") {
-				twoFAMethod = twoFAData.method;
-			}
+		const twoFAMethod: TwoFAMethod | null = assertTwoFAMethod(user.twoFAMethod);
+		const destination = user.twoFAdestination || user.email;
+		// if (user.isTwoFAEnabled) {
+		// 	const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
+		// 	if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "qr") {
+		// 		twoFAMethod = twoFAData.method;
+		// 	}
 
-		}
-		return ({ id: user.id, username: user.username, email: user.email, isTwoFAEnabled: user.isTwoFAEnabled, twoFAMethod });
+		// }
+		return ({ id: user.id, username: user.username, email: user.email, isTwoFAEnabled: user.isTwoFAEnabled, twoFAMethod, twoFAdestination: destination });
 
 	}
 

@@ -121,6 +121,25 @@ export class twoFAService {
 
 		else if (data.method === "sms") {
 			console.log('[2FA SMS] Code sent to', data.destination, ':', data.code);
+
+			// TWILIO POUR VRAI SMS ICI, MAIS C PAYANT DONC ON SIMULE, LAISSEZ LE CODE PLS POUR MONTRER QU'ON PEUT IMPLEMENTER LE VRAI SERVICE QD MEME
+			// Evidemment faut installer le package npm install twilio et changer les env
+			/*
+				import Twilio from "twilio";
+
+				const client = Twilio(
+					process.env.TWILIO_SID,
+					process.env.TWILIO_TOKEN
+				);
+
+				await client.messages.create({
+					to: data.destination ?? "",
+					from: process.env.TWILIO_PHONE, // numéro Twilio
+					body: `Your Transcendence 2FA code is: ${data.code}.`
+				});
+
+				console.log('[2FA SMS - Twilio] Real SMS sent to', data.destination);
+			*/
 		}
 
 		else if (data.method === "qr") {

@@ -15,6 +15,11 @@ const login_button = document.getElementById("login-button")!;
 
 // 2FA Elements
 const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
+const destinationModal = document.getElementById("destination-modal")!;
+const destinationInput = document.getElementById("destination-input") as HTMLInputElement;
+const destinationTitle = document.getElementById("destination-title")!;
+const destinationCancel = document.getElementById("destination-cancel")!;
+const destinationConfirm = document.getElementById("destination-confirm")!;
 let storedUserId: number | null = null;
 
 //Profile
@@ -48,6 +53,73 @@ let is2FAEnabled = false;
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
+
+function openDestinationModal(type: "email" | "sms") {
+	selected2FAType = type;
+	destinationModal.classList.remove("hidden");
+
+	if (type === "email") {
+		destinationTitle.textContent = "Entrez votre email pour la 2FA";
+		destinationInput.placeholder = "exemple@mail.com";
+		destinationInput.type = "email";
+	} else if (type === "sms") {
+		destinationTitle.textContent = "Entrez votre numéro de téléphone";
+		destinationInput.placeholder = "+33123456789";
+		destinationInput.type = "sms";
+	}
+
+	destinationInput.value = "";
+	destinationInput.focus();
+}
+
+destinationCancel.addEventListener("click", () => {
+	destinationModal.classList.add("hidden");
+});
+
+destinationConfirm.addEventListener("click", async () => {
+	const destination = destinationInput.value.trim();
+
+	if (!destination) {
+		alert("Veuillez entrer une valeur.");
+		return;
+	}
+
+	const res = await fetch("enable-2fa", {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			type: selected2FAType,
+			destination
+		}),
+	});
+
+	let data: any = null;
+	const text = await res.text();
+	if (text) {
+		data = JSON.parse(text);
+	}
+
+	if (!res.ok) {
+		alert("Erreur : " + data.error);
+		return;
+	}
+
+	alert("2FA activée avec succès !");
+	twofaStatusText.textContent = `2FA est activée (${selected2FAType}).`;
+	twofaToggleBtn.textContent = "Désactiver";
+	destinationModal.classList.add("hidden");
+});
+
+btnEmail.addEventListener("click", () => {
+	twofaTypeMenu.classList.add("hidden");
+	openDestinationModal("email");
+});
+
+btnSMS.addEventListener("click", () => {
+	twofaTypeMenu.classList.add("hidden");
+	openDestinationModal("sms");
+});
 
 function storeToken(accessToken: string) {
 	localStorage.setItem("accessToken", accessToken);
@@ -103,75 +175,30 @@ function applyLoggedOutState() {
 	storedUserId = null;
 }
 
-try {
-	const storedUserJson = localStorage.getItem('user');
-	if (storedUserJson) {
-		const u = JSON.parse(storedUserJson);
-		if (u) {
-			if (typeof u.id === 'number') storedUserId = u.id;
+async function initAuthState() {
+	try {
+		const res = await fetch("/user/me", { credentials: "include" });
 
-			const idToCheck = (typeof storedUserId === 'number' && !Number.isNaN(storedUserId))
-				? storedUserId
-				: (typeof u.id === 'number' ? u.id : null);
-
-			if (typeof idToCheck === 'number') {
-				(async () => {
-					try {
-						const token = localStorage.getItem('accessToken');
-						const headers: Record<string, string> = {};
-						if (token) headers['Authorization'] = 'Bearer ' + token;
-
-						const res = await fetch(`/user/profile/${idToCheck}`, {
-							method: 'GET',
-							headers,
-							credentials: 'include'
-						});
-
-						if (res.ok) {
-							const serverUser = await res.json().catch(() => null);
-							if (serverUser) {
-								storeUser(serverUser);
-								applyLoggedInState(serverUser);
-								return;
-							}
-						}
-
-						let serverBody: any = null;
-						try {
-							serverBody = await res.json().catch(() => null);
-						} catch (_) {
-							serverBody = null;
-						}
-						const bodyMsg = (serverBody && (serverBody.error || serverBody.message || serverBody.msg)) || '';
-
-						if (res.status === 404 || res.status == 401 || (res.status === 400 && /user not found/i.test(String(bodyMsg)))) {
-							localStorage.removeItem('accessToken');
-							localStorage.removeItem('user');
-							applyLoggedOutState();
-							return;
-						}
-
-						console.warn('Session validation failed but not definitive, keeping local session', res.status, bodyMsg);
-						if (u) applyLoggedInState(u);
-						return;
-					} catch (err) {
-						console.warn('Failed to validate session on startup', err);
-
-					}
-				})();
-			} else {
-				localStorage.removeItem('accessToken');
-				localStorage.removeItem('user');
-				applyLoggedOutState();
-			}
+		if (!res.ok) {
+			applyLoggedOutState();
+			return;
 		}
+
+		const data = await res.json();
+		storeToken(data.accessToken);
+		storeUser(data.user);
+		applyLoggedInState(data.user);
+
+	} catch {
+		applyLoggedOutState();
 	}
-} catch (e) {
-	console.warn('Error parsing stored user data', e);
 }
 
+initAuthState();
+
+
 function toggleMenu(main: HTMLElement | null, ...toHide: (HTMLElement | null)[]) {
-	if (!main) 
+	if (!main)
 		return;
 	toHide.forEach(menu => menu?.classList.add("hidden"));
 	main.classList.toggle("hidden");
@@ -188,9 +215,9 @@ register_button.addEventListener("click", () => {
 
 
 login_button.addEventListener("click", () => {
-	toggleMenu( 
-		loginContainer, 
-		registerContainer, 
+	toggleMenu(
+		loginContainer,
+		registerContainer,
 		language_menu
 	);
 });
@@ -266,10 +293,9 @@ twofaToggleBtn.addEventListener("click", async () => {
 		twofaTypeMenu.classList.add("hidden");
 		selected2FAType = null;
 
-		await fetch("/user/disable-2fa", {
+		await fetch("disable-2fa", {
 			method: "POST",
-			credentials: "include",
-			headers: { "Content-Type": "application/json" },
+			credentials: "include"
 		});
 	}
 });
@@ -295,38 +321,6 @@ twoFA_profile_button.addEventListener("click", () => {
 	}
 });
 
-btnEmail.addEventListener("click", async () => {
-	is2FAEnabled = true;
-	selected2FAType = "email";
-	alert("2FA par Email sélectionnée !");
-	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = "2FA est activée (Email).";
-	twofaToggleBtn.textContent = "Désactiver";
-
-	await fetch("/user/enable-2fa", {
-		method: "POST",
-		credentials: "include",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ type: selected2FAType })
-	});
-});
-
-btnSMS.addEventListener("click", async () => {
-	is2FAEnabled = true;
-	selected2FAType = "sms";
-	alert("2FA par SMS sélectionnée !");
-	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = "2FA est activée (SMS).";
-	twofaToggleBtn.textContent = "Désactiver";
-
-	await fetch("/user/enable-2fa", {
-		method: "POST",
-		credentials: "include",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ type: selected2FAType })
-	});
-});
-
 btnQR.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "qr";
@@ -335,7 +329,7 @@ btnQR.addEventListener("click", async () => {
 	twofaToggleBtn.textContent = "Annuler";
 
 	try {
-		const res = await fetch("/user/enable-2fa", {
+		const res = await fetch("enable-2fa", {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },
@@ -394,7 +388,17 @@ saveProfileBtn.addEventListener("click", async () => {
 	if (password) payload.password = password;
 
 	const token = localStorage.getItem("accessToken");
+	let userId = storedUserId;
 
+	if (!userId) {
+		try {
+			const user = JSON.parse(localStorage.getItem('user') || '{}');
+			userId = user.id;
+		} catch (e) {
+			alert("Error: Cannot find user ID");
+			return;
+		}
+	}
 	try {
 		const res = await fetch("/user/update-profile", {
 			method: "PATCH",
@@ -529,15 +533,16 @@ else {
 				});
 
 				const data = await res.json().catch(() => null);
+
 				if (res.ok) {
 					if (data?.accessToken) storeToken(data.accessToken);
 					if (data?.user) {
 						storeUser(data.user);
 						if (typeof data.user.id === 'number') storedUserId = data.user.id;
 					}
-					applyLoggedInState(data?.user || { id: 0, username: '', email: '' });
+					// L'alert marche pas car bloque pqr le navigateur, a voir -------------------------------------
+					alert("Registration successful, you can now log in");
 					register_form.reset();
-					alert("Registration successful, you are now logged in");
 				} else {
 					alert("Server error: " + (data?.error || res.statusText));
 				}
@@ -608,6 +613,9 @@ else {
 				});
 
 				const data = await res.json();
+				if (data.twoFAtoken) {
+					sessionStorage.setItem("twoFAtoken", data.twoFAtoken);
+				}
 				if (res.ok) {
 					if (data.message === "2FA required") {
 						storedUserId = data.userId;
@@ -660,11 +668,14 @@ twofaForm.addEventListener("submit", async (e) => {
 				body: JSON.stringify({ userId: storedUserId, code }),
 			});
 		} else if (selected2FAType === "qr") {
+			const twoFAToken = sessionStorage.getItem("twoFAtoken");
+			if (!twoFAToken)
+				throw new Error("Missing 2FA token for QR verification");
 			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ code }),
+				body: JSON.stringify({ code, twoFAToken }),
 			});
 		} else {
 			throw new Error("2FA method not selected");

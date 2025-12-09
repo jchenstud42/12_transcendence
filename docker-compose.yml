@@ -20,6 +20,3 @@ services:
       - ./Backend/database:/app/database
     command: sh -c "npx prisma migrate deploy --schema=./prisma/schema.prisma && npm start"
     restart: on-failure
-
-# Persist DB on host to avoid accidental volume removal during rebuilds
-# (we bind-mount ./Backend/database into the backend service)
