@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import prisma from "../prisma/client.js";
 import { twoFAService } from "../../module_security/2FA.js";
 import { verifyToken, signAccessToken, signRefreshToken } from "../../module_security/jwtUtils.js";
+import { sanitizeInput, validateEmail } from "../../security/inputSecurity.js";
 
 const twofa = new twoFAService();
 
@@ -21,6 +22,10 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 			const userId = payload.sub;
 			if (!code) return reply.status(400).send({ error: "QR code required" });
+
+			if (!/^\d{6}$/.test(code)) {
+				return reply.status(400).send({ error: "Invalid code format" });
+			}
 
 			const isValid = await twofa.verifyTOTP(userId, code);
 			if (!isValid) return reply.status(400).send({ error: "Invalid QR code" });
@@ -156,10 +161,21 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 			if (!destination)
 				return reply.status(400).send({ error: "Destination is required" });
 
+			const dest = sanitizeInput(destination);
+			if (type === "email")
+				if (!validateEmail(dest))
+					return reply.status(400).send({ error: "invalid email address" });
+
+			if (type === "sms") {
+				const phoneRegex = /^(\+[1-9]\d{7,14}|0\d{8,9})$/;
+				if (!phoneRegex.test(dest))
+					return reply.status(400).send({ error: "invalid phone number" });
+			}
+
 			await prisma.twoFA.upsert({
 				where: { userId },
-				update: { method: type, destination },
-				create: { userId, method: type, destination },
+				update: { method: type, destination: dest },
+				create: { userId, method: type, destination: dest },
 			});
 
 			await prisma.user.update({
@@ -167,8 +183,13 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 				data: {
 					isTwoFAEnabled: true,
 					twoFAMethod: type,
-					twoFAdestination: destination
+					twoFAdestination: dest
 				}
+			});
+			return reply.send({
+				message: "2FA enabled successfully",
+				method: type,
+				destination: dest
 			});
 		} catch (err) {
 			req.log.error(err);

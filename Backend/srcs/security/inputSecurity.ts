@@ -6,7 +6,7 @@
 /*   By: mjameau <mjameau@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:04:50 by mjameau           #+#    #+#             */
-/*   Updated: 2025/11/05 18:22:52 by mjameau          ###   ########.fr       */
+/*   Updated: 2025/12/10 11:22:17 by mjameau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ export function sanitizeInput(input: string): string {
 
 // ON VERIFIE L'EMAIL SI Y A BIEN TOUT DE DEMANDE (@, . ETC) bises - Mathis
 export function validateEmail(email: string): boolean {
-	return (/^\S+@\S+\.\S+$/.test(email));
+	return (/^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
+		.test(email));
 }
 
 /* ON VERIFIE LE MDP :

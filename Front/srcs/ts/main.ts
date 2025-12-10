@@ -77,7 +77,7 @@ destinationCancel.addEventListener("click", () => {
 });
 
 destinationConfirm.addEventListener("click", async () => {
-	const destination = destinationInput.value.trim();
+	const destination = sanitizeInput(destinationInput.value.trim());
 
 	if (!destination) {
 		alert("Veuillez entrer une valeur.");
@@ -327,6 +327,8 @@ btnQR.addEventListener("click", async () => {
 	twofaTypeMenu.classList.add("hidden");
 	twofaStatusText.textContent = "2FA en cours de configuration (QR Code)...";
 	twofaToggleBtn.textContent = "Annuler";
+	alert("Make sure to scan the QR code with your Google authenticator app before refreshing or navigating away from this page.")
+
 
 	try {
 		const res = await fetch("enable-2fa", {
@@ -343,7 +345,7 @@ btnQR.addEventListener("click", async () => {
 		qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan this QR code in your Authenticator app" />`;
 
 		twofaForm.classList.remove("hidden");
-		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré.";
+		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré, garder ce code sur votre application Google Authenticator pour vos futures connexions.";
 	} catch (err: any) {
 		alert(err.message);
 		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
@@ -656,6 +658,11 @@ twofaForm.addEventListener("submit", async (e) => {
 	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
 	const code = codeInput.value.trim();
 	if (!code) return alert("Enter the 2FA code");
+	if (!/^\d{6}$/.test(codeInput.value.trim())) {
+		alert("Le code doit contenir exactement 6 chiffres.");
+		return;
+	}
+
 
 	try {
 		let res: Response;
@@ -671,6 +678,7 @@ twofaForm.addEventListener("submit", async (e) => {
 			const twoFAToken = sessionStorage.getItem("twoFAtoken");
 			if (!twoFAToken)
 				throw new Error("Missing 2FA token for QR verification");
+
 			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
