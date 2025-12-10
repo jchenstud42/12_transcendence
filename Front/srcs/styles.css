@@ -1,3 +1,4 @@
+/* Importation de polices personnalisees */
 @font-face {
 	font-family: "Petrona-Regular";
 	src: url("assets/fonts/Petrona-Regular.woff2") format("woff2");
@@ -5,8 +6,25 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: "ClimateCrisis-1979";
+	src: url("assets/fonts/ClimateCrisis-1979.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+}
 
-/* Police globale pour tout le projet */
+
+/* Classes Tailwind-like pour appeler les polices personnalisees */
+.font-petrona {
+	font-family: "Petrona-Regular", sans-serif;
+}
+
+.font-climate {
+	font-family: "ClimateCrisis-1979", sans-serif;
+}
+
+
+/* Pour appliquer la police globalement */
 body {
 	font-family: "Petrona-Regular", sans-serif;
 	margin: 0;
