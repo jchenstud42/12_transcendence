@@ -756,13 +756,15 @@ twofaForm.addEventListener("submit", async (e) => {
 			if (!twoFAToken)
 				throw new Error("Missing 2FA token for QR verification");
 
+			const body = { code, twoFAToken };
 			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body)
 			});
-		} else {
+		}
+		else {
 			throw new Error("2FA method not selected");
 		}
 
