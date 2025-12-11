@@ -23,7 +23,6 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 		fastify.log.warn("INTRA_CLIENT_ID or INTRA_CLIENT_SECRET not set. OAuth will fail until configured.");
 	}
 
-	// Redirect user to 42 authorize page
 	fastify.get("/oauth/42", async (req, reply) => {
 		if (!clientId) return reply.status(500).send({ error: "OAuth not configured (INTRA_CLIENT_ID missing)" });
 
@@ -34,7 +33,7 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 			secure: true,
 			sameSite: "lax",
 			path: "/",
-			maxAge: 5 * 60, // 5 minutes
+			maxAge: 5 * 60,
 		});
 
 		const params = new URLSearchParams();
@@ -132,13 +131,12 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 					data: {
 						username: username,
 						email: email,
-						password: null,         // ✔ pas de mot de passe inutile
+						password: null,
 						oauth42Id: profile.id.toString(),
 						status: "ONLINE",
 					},
 				});
 			} else {
-				// link existing account if not linked
 				if (!user.oauth42Id) {
 					await prisma.user.update({
 						where: { id: user.id },
@@ -152,34 +150,22 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 				});
 			}
 
-			// ---- HANDLE 2FA ----
 			if (user.isTwoFAEnabled) {
-				// Génère un token temporaire pour la 2FA (pas encore connecté)
 				const twoFAtoken = signAccessToken(user.id, false);
-
-				// Initialise la 2FA côté serveur
-				await twofa.generate2FA(user.id, user.twoFAMethod as "email" | "sms" | "qr", user.twoFAdestination ?? undefined);
-
-				// Si QR, génère le code QR
-				const qrCodeUrl = await twofa.send2FACode(user.id);
-
-				// Prépare les query params
-				const params = new URLSearchParams();
-				params.set("userId", String(user.id));          // <-- stocké côté frontend comme storedUserId
-				params.set("twoFAtoken", twoFAtoken);          // <-- token temporaire pour vérif 2FA
-				const method = qrCodeUrl ? "qr" : (user.twoFAMethod || "sms");
-				params.set("method", method);
-
-				if (qrCodeUrl) {
-					params.set("qrCodeUrl", qrCodeUrl);
+				if (user.twoFAMethod === "email" || user.twoFAMethod === "sms") {
+					await twofa.generate2FA(user.id, user.twoFAMethod, user.twoFAdestination ?? undefined);
+					await twofa.send2FACode(user.id);
 				}
 
-				// Redirige vers le frontend avec toutes les infos
+				const params = new URLSearchParams();
+				params.set("userId", String(user.id));
+				params.set("twoFAtoken", twoFAtoken);
+				params.set("method", user.twoFAMethod || "qr");
+
 				return reply.redirect(`${frontendUrl}/?${params.toString()}`);
 			}
 
 
-			// ---- NORMAL LOGIN ----
 			const accessToken = signAccessToken(user.id, true);
 			const refreshToken = signRefreshToken(user.id);
 
@@ -189,7 +175,6 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 				sameSite: "lax",
 				path: "/",
 				maxAge: 60 * 60 * 24 * 7,
-				// domain: process.env.COOKIE_DOMAIN || "localhost",  // active-le en prod
 			});
 
 			return reply.redirect(frontendUrl + "/#accessToken=" + accessToken);

@@ -164,7 +164,20 @@ function storeUser(user: any) {
 	}
 }
 
+function reset2FAUIState() {
+	if (twofaForm) twofaForm.classList.add("hidden");
+	if (twofaTypeMenu) twofaTypeMenu.classList.add("hidden");
+
+	const qrContainer = document.getElementById("qr-container");
+	if (qrContainer) qrContainer.innerHTML = "";
+
+	sessionStorage.removeItem("2fa-setup-mode");
+}
+
 function applyLoggedInState(user: { id: number; username: string; email: string; }) {
+
+	reset2FAUIState();
+
 	try {
 		(register_button as HTMLElement).classList.add('hidden');
 		(login_button as HTMLElement).classList.add('hidden');
@@ -208,36 +221,28 @@ function applyLoggedOutState() {
 
 async function initAuthState() {
 	try {
-		/* ========== 1) TOKEN OAUTH DANS LE HASH ========== */
 		if (window.location.hash.startsWith("#accessToken=")) {
 			const accessToken = window.location.hash.split("=")[1];
 			storeToken(accessToken);
 
-			// on supprime uniquement le hash
 			window.history.replaceState(null, "", window.location.pathname + window.location.search);
 		}
 
-		/* ========== 2) TOKEN 2FA DEPUIS OAUTH OU LOGIN ========== */
 		const urlParams = new URLSearchParams(window.location.search);
 		const twoFAToken = urlParams.get("twoFAtoken");
 		const method = urlParams.get("method");
 
 		if (twoFAToken) {
-			// On stocke le token 2FA temporaire
 			sessionStorage.setItem("twoFAtoken", twoFAToken);
 
 			const payload = JSON.parse(atob(twoFAToken.split(".")[1]));
 			storedUserId = payload.userId;
 			selected2FAType = method as "email" | "sms" | "qr";
-
 			twofaForm.classList.remove("hidden");
-
-			// Nettoyage URL
 			window.history.replaceState({}, "", window.location.pathname);
 			return;
 		}
 
-		/* ========== 3) ETAT AUTH ========== */
 		const res = await fetch("/user/me", { credentials: "include" });
 
 		if (!res.ok) {
@@ -350,31 +355,52 @@ language_button.addEventListener("click", () => {
 
 
 twofaToggleBtn.addEventListener("click", async () => {
-	is2FAEnabled = !is2FAEnabled;
+	const isInSetupMode = !twofaTypeMenu.classList.contains("hidden");
 
-	if (is2FAEnabled) {
-		twofaStatusText.textContent = t("two_fa_setup_in_progress");
-		twofaToggleBtn.textContent = t("cancel");
-		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		twofaTypeMenu.classList.remove("hidden");
-	}
-	else {
+	if (isInSetupMode && !is2FAEnabled) {
 		twofaStatusText.textContent = t("two_fa_is_disabled");
 		twofaToggleBtn.textContent = t("enable");
 		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
 		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
 		twofaTypeMenu.classList.add("hidden");
-		selected2FAType = null;
+		twofaForm.classList.add("hidden");
 
-		await fetch("disable-2fa", {
-			method: "POST",
-			credentials: "include"
-		});
+		const qrContainer = document.getElementById("qr-container");
+		if (qrContainer) qrContainer.innerHTML = "";
+
+		sessionStorage.removeItem("2fa-setup-mode");
+		return;
+	}
+
+	if (!is2FAEnabled) {
+		twofaStatusText.textContent = t("two_fa_setup_in_progress");
+		twofaToggleBtn.textContent = t("cancel");
+		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+		twofaTypeMenu.classList.remove("hidden");
+	} else {
+		try {
+			const res = await fetch("/disable-2fa", {
+				method: "POST",
+				credentials: "include"
+			});
+
+			if (res.ok) {
+				is2FAEnabled = false;
+				twofaStatusText.textContent = t("two_fa_is_disabled");
+				twofaToggleBtn.textContent = t("enable");
+				twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
+				twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+				twofaTypeMenu.classList.add("hidden");
+				alert("2FA disabled successfully!");
+			}
+		} catch (err) {
+			console.error("Error disabling 2FA:", err);
+		}
 	}
 });
 
-twoFA_profile_button.addEventListener("click", () => {
+twoFA_profile_button.addEventListener("click", async () => {
 	if (edit_menu && !edit_menu.classList.contains("hidden")) {
 		edit_menu.classList.add("hidden");
 	}
@@ -387,10 +413,11 @@ twoFA_profile_button.addEventListener("click", () => {
 	if (twofaTypeMenu && !twofaTypeMenu.classList.contains("hidden")) {
 		twofaTypeMenu.classList.add("hidden");
 	}
+
 	if (twoFA_menu && twoFA_menu.classList.contains("hidden")) {
 		twoFA_menu.classList.remove("hidden");
-	}
-	else if (twoFA_menu) {
+		await update2FAStatus();
+	} else if (twoFA_menu) {
 		twoFA_menu.classList.add("hidden");
 	}
 });
@@ -398,10 +425,10 @@ twoFA_profile_button.addEventListener("click", () => {
 btnQR.addEventListener("click", async () => {
 	selected2FAType = "qr";
 	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = "2FA en cours de configuration (QR Code)...";
-	twofaToggleBtn.textContent = "Annuler";
-	alert("Make sure to scan the QR code with your Google authenticator app before refreshing or navigating away from this page.")
+	twofaStatusText.textContent = t("two_fa_setup_in_progress");
+	twofaToggleBtn.textContent = t("cancel");
 
+	alert("Make sure to scan the QR code with your Google Authenticator app before refreshing or navigating away from this page.");
 
 	try {
 		const res = await fetch("/enable-2fa", {
@@ -416,17 +443,20 @@ btnQR.addEventListener("click", async () => {
 		const data = await res.json();
 		if (!data.qrCode) throw new Error("Server did not return QR code");
 
+		sessionStorage.setItem("2fa-setup-mode", "true");
+
 		const qrContainer = document.getElementById("qr-container")!;
-		qrContainer.innerHTML = `<img src="${data.qrCode}" alt=t("scan_qr_code") />`;
+		qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan QR Code" />`;
 
 		twofaForm.classList.remove("hidden");
-		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré, garder ce code sur votre application Google Authenticator pour vos futures connexions.";
+		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré...";
+
 	} catch (err: any) {
 		alert(err.message);
 		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
 		is2FAEnabled = false;
 		selected2FAType = null;
-		twofaToggleBtn.textContent = "Activer";
+		twofaToggleBtn.textContent = t("enable");
 	}
 });
 
@@ -728,56 +758,113 @@ else {
 	});
 }
 
+async function update2FAStatus() {
+	try {
+		const res = await fetch("/user/me", { credentials: "include" });
+		if (!res.ok) return;
+
+		const data = await res.json();
+		const user = data.user;
+
+		if (user?.isTwoFAEnabled) {
+			is2FAEnabled = true;
+			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${user.twoFAMethod || "qr"})`;
+			twofaToggleBtn.textContent = t("disable");
+			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+		} else {
+			is2FAEnabled = false;
+			twofaStatusText.textContent = t("two_fa_is_disabled");
+			twofaToggleBtn.textContent = t("enable");
+			twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
+			twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+		}
+	} catch (err) {
+		console.error("Failed to fetch 2FA status:", err);
+	}
+}
+
 twofaForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
-	console.log("Token au submit:", sessionStorage.getItem("twoFAtoken"));
 
 	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
 	const code = codeInput.value.trim();
+
 	if (!code) return alert("Enter the 2FA code");
-	if (!/^\d{6}$/.test(codeInput.value.trim())) {
+	if (!/^\d{6}$/.test(code)) {
 		alert("Le code doit contenir exactement 6 chiffres.");
 		return;
 	}
 
+	const isSetupMode = sessionStorage.getItem("2fa-setup-mode") === "true";
+	const twoFAtoken = sessionStorage.getItem("twoFAtoken");
 
 	try {
 		let res: Response;
 
 		if (selected2FAType === "email" || selected2FAType === "sms") {
+			if (!twoFAtoken) {
+				throw new Error("Missing 2FA token");
+			}
 			res = await fetch("/verify-2fa", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ userId: storedUserId, code }),
+				body: JSON.stringify({ code, twoFAtoken }),
 			});
 		} else if (selected2FAType === "qr") {
-			const twoFAToken = sessionStorage.getItem("twoFAtoken");
-			if (!twoFAToken)
-				throw new Error("Missing 2FA token for QR verification");
-
-			const body = { code, twoFAToken };
+			const body: Record<string, string> = { code };
+			if (twoFAtoken && !isSetupMode) {
+				body.twoFAtoken = twoFAtoken;
+			}
 			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(body)
 			});
-		}
-		else {
+		} else {
 			throw new Error("2FA method not selected");
 		}
 
 		const data = await res.json();
 		if (!res.ok) throw new Error(data.error || "Erreur lors de la vérification 2FA");
 
-		storeToken(data.accessToken);
-		if (data.user) storeUser(data.user);
-		applyLoggedInState(data.user || { id: 0, username: '', email: '' });
-		alert("Login successful with 2FA!");
+		sessionStorage.removeItem("2fa-setup-mode");
+		sessionStorage.removeItem("twoFAtoken");
+
+		if (isSetupMode) {
+			alert("2FA enabled successfully!");
+			is2FAEnabled = true;
+			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
+			twofaToggleBtn.textContent = t("disable");
+			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+		} else {
+			storeToken(data.accessToken);
+			if (data.user) storeUser(data.user);
+			applyLoggedInState(data.user || { id: 0, username: '', email: '' });
+			alert("Login successful with 2FA!");
+		}
+
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
+		twofaTypeMenu.classList.add("hidden");
+
+		const qrContainer = document.getElementById("qr-container");
+		if (qrContainer) qrContainer.innerHTML = "";
+
+		if (!isSetupMode) {
+			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
+			twofaToggleBtn.textContent = t("disable");
+			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+		}
+
+		selected2FAType = null;
+
 	} catch (err: any) {
+		console.error("2FA verification error:", err);
 		alert(err.message);
 	}
 });

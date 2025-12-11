@@ -58,13 +58,6 @@ export class AuthService {
 		type TwoFAMethod = "email" | "sms" | "qr";
 		const twoFAMethod: TwoFAMethod | null = assertTwoFAMethod(user.twoFAMethod);
 		const destination = user.twoFAdestination || user.email;
-		// if (user.isTwoFAEnabled) {
-		// 	const twoFAData = await prisma.twoFA.findUnique({ where: { userId: user.id } });
-		// 	if (twoFAData?.method === "email" || twoFAData?.method === "sms" || twoFAData?.method === "qr") {
-		// 		twoFAMethod = twoFAData.method;
-		// 	}
-
-		// }
 		return ({ id: user.id, username: user.username, email: user.email, isTwoFAEnabled: user.isTwoFAEnabled, twoFAMethod, twoFAdestination: destination });
 
 	}
