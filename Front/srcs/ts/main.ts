@@ -1,6 +1,7 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
 import { shuffleArray } from "./utils/utils.js";
-import { initLanguage, setLanguage } from "./i18n.js";
+import { initLanguage, setLanguage, t } from "./i18n.js";
+import { TranslationKey } from "./traduction.js";
 const page = document.getElementById("page")!;
 
 // CA C LE DIV DANS LE HTML
@@ -49,7 +50,28 @@ const btnQR = document.getElementById("2fa-qr")!;
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
+const serverErrorTranslations: Record<string, string> = {
+	"User not found": "user_not_found",
+	"Invalid username": "invalid_username",
+	"Invalid password": "invalid_password",
+	"Email already in use": "email_taken",
+	"Username already in use": "username_or_email_taken",
+	"2FA required": "two_fa_required",
+	"Invalid 2FA code": "invalid_2fa_code",
+	"Missing user ID": "missing_user_id",
+	"Network error": "network_error",
+	"Failed to enable 2FA": "two_fa_activation_error",
+	"Not Found": "profile_not_found",
+	"Invalid credentials": "invalid_user_or_password",
+	"User already exists": "username_or_email_taken",
+};
 
+function getServerErrorMessage(error: string | undefined) {
+	if (!error)
+		return t("network_error");
+	const key = serverErrorTranslations[error];
+	return (key ? t(key as TranslationKey) : error);
+}
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
@@ -59,11 +81,11 @@ function openDestinationModal(type: "email" | "sms") {
 	destinationModal.classList.remove("hidden");
 
 	if (type === "email") {
-		destinationTitle.textContent = "Entrez votre email pour la 2FA";
-		destinationInput.placeholder = "exemple@mail.com";
+		destinationTitle.textContent = t("enter_email_2fa");
+		destinationInput.placeholder = "exemple@gmail.com";
 		destinationInput.type = "email";
 	} else if (type === "sms") {
-		destinationTitle.textContent = "Entrez votre numéro de téléphone";
+		destinationTitle.textContent = t("enter_phone_2fa");
 		destinationInput.placeholder = "+33123456789";
 		destinationInput.type = "sms";
 	}
@@ -80,7 +102,7 @@ destinationConfirm.addEventListener("click", async () => {
 	const destination = sanitizeInput(destinationInput.value.trim());
 
 	if (!destination) {
-		alert("Veuillez entrer une valeur.");
+		alert(t("no_value_provided"));
 		return;
 	}
 
@@ -101,13 +123,13 @@ destinationConfirm.addEventListener("click", async () => {
 	}
 
 	if (!res.ok) {
-		alert("Erreur : " + data.error);
+		alert("Erreur : " + getServerErrorMessage(data.error));
 		return;
 	}
 
-	alert("2FA activée avec succès !");
-	twofaStatusText.textContent = `2FA est activée (${selected2FAType}).`;
-	twofaToggleBtn.textContent = "Désactiver";
+	alert(t("two_fa_enabled_success"));
+	twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
+	twofaToggleBtn.textContent = t("disable");
 	destinationModal.classList.add("hidden");
 });
 
@@ -279,15 +301,15 @@ twofaToggleBtn.addEventListener("click", async () => {
 	is2FAEnabled = !is2FAEnabled;
 
 	if (is2FAEnabled) {
-		twofaStatusText.textContent = "2FA en cours de configuration...";
-		twofaToggleBtn.textContent = "Annuler";
+		twofaStatusText.textContent = t("two_fa_setup_in_progress");
+		twofaToggleBtn.textContent = t("cancel");
 		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
 		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
 		twofaTypeMenu.classList.remove("hidden");
 	}
 	else {
-		twofaStatusText.textContent = "2FA est désactivée.";
-		twofaToggleBtn.textContent = "Activer";
+		twofaStatusText.textContent = t("two_fa_is_disabled");
+		twofaToggleBtn.textContent = t("enable");
 		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
 		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
 		twofaTypeMenu.classList.add("hidden");
@@ -325,9 +347,9 @@ btnQR.addEventListener("click", async () => {
 	is2FAEnabled = true;
 	selected2FAType = "qr";
 	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = "2FA en cours de configuration (QR Code)...";
-	twofaToggleBtn.textContent = "Annuler";
-	alert("Make sure to scan the QR code with your Google authenticator app before refreshing or navigating away from this page.")
+	twofaStatusText.textContent = t("two_fa_setup_in_progress");
+	twofaToggleBtn.textContent = t("cancel");
+	alert(t("scan_qr_warning"));
 
 
 	try {
@@ -342,16 +364,16 @@ btnQR.addEventListener("click", async () => {
 		if (!res.ok) throw new Error(data.error || "Failed to enable 2FA");
 
 		const qrContainer = document.getElementById("qr-container")!;
-		qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan this QR code in your Authenticator app" />`;
+		qrContainer.innerHTML = `<img src="${data.qrCode}" alt=t("scan_qr_code") />`;
 
 		twofaForm.classList.remove("hidden");
-		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré, garder ce code sur votre application Google Authenticator pour vos futures connexions.";
+		twofaStatusText.textContent = t("scan_qr_instruction");
 	} catch (err: any) {
-		alert(err.message);
-		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
+		alert(getServerErrorMessage(err.message));
+		twofaStatusText.textContent = t("qr_activation_error");
 		is2FAEnabled = false;
 		selected2FAType = null;
-		twofaToggleBtn.textContent = "Activer";
+		twofaToggleBtn.textContent = t("enable");
 	}
 });
 
@@ -367,19 +389,20 @@ saveProfileBtn.addEventListener("click", async () => {
 	const errors: string[] = [];
 
 	if (username && !validateTextInput(username, 20))
-		errors.push("Invalid username");
+		errors.push("invalid_username");
 
 	if (email && !validateEmail(email))
-		errors.push("Invalid email");
+		errors.push("invalid_email");
 
 	if (password && !validatePassword(password))
-		errors.push("Invalid password format");
+		errors.push("invalid_password");
 
 	if (password !== confirmPass)
-		errors.push("Passwords do not match");
+		errors.push("passwords_do_not_match");
 
 	if (errors.length > 0) {
-		alert("Errors:\n" + errors.join("\n"));
+		const translatedErrors = errors.map(key => t(key as any));
+		alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
 		return;
 	}
 
@@ -397,7 +420,7 @@ saveProfileBtn.addEventListener("click", async () => {
 			const user = JSON.parse(localStorage.getItem('user') || '{}');
 			userId = user.id;
 		} catch (e) {
-			alert("Error: Cannot find user ID");
+			alert(t("missing_user_id"));
 			return;
 		}
 	}
@@ -414,7 +437,7 @@ saveProfileBtn.addEventListener("click", async () => {
 
 		const data = await res.json();
 		if (!res.ok) {
-			alert("Server error: " + data.error);
+			alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
 			return;
 		}
 
@@ -428,11 +451,11 @@ saveProfileBtn.addEventListener("click", async () => {
 		if (data.user.email) menuEmail!.textContent = data.user.email;
 		if (data.user.avatar) profileAvatar.src = data.user.avatar;
 
-		alert("Profile updated!");
+		alert(t("profile_updated"));
 
 	} catch (err) {
 		console.error(err);
-		alert("Network error");
+		alert(t("network_error"));
 	}
 });
 
@@ -480,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
 - On envoie l'objet au backend via fetch a la route /register en POST
 - On gere les erreurs ou le succes en mettant un message et on reset le formulaire
 
-  Bisous, Mathis
+	Bisous, Mathis
 */
 if (!register_form) {
 	console.warn("Register form not found");
@@ -505,21 +528,22 @@ else {
 		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
-		if (!validateEmail(email)) errors.push("Invalid email");
-		if (!validatePassword(password)) errors.push("Password must have 8 characters, one uppercase letter and one number");
-		if (!validateTextInput(username, 20)) errors.push("Invalid username");
-		if (password !== confirmPassword) errors.push("Passwords do not match");
+		if (!validateEmail(email)) errors.push("invalid_email");
+		if (!validatePassword(password)) errors.push("invalid_password");
+		if (!validateTextInput(username, 20)) errors.push("invalid_username");
+		if (password !== confirmPassword) errors.push("passwords_do_not_match");
 
 		if (errors.length > 0) {
-			alert("Errors:\n" + errors.join("\n"));
-			return;
-		}
+		const translatedErrors = errors.map(key => t(key as any));
+		alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
+		return;
+}
 
 		const submit = register_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 		if (submit) {
 			submit.disabled = true;
 			const originalTxt = submit.textContent;
-			submit.textContent = "Registering...";
+			submit.textContent = t("registering");
 			try {
 				const payload = {
 					username: sanitizeInput(username),
@@ -543,14 +567,14 @@ else {
 						if (typeof data.user.id === 'number') storedUserId = data.user.id;
 					}
 					// L'alert marche pas car bloque pqr le navigateur, a voir -------------------------------------
-					alert("Registration successful, you can now log in");
+					alert(t("register_ok"));
 					register_form.reset();
 				} else {
-					alert("Server error: " + (data?.error || res.statusText));
+					alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
 				}
 			} catch (err) {
 				console.error("Register fetch error:", err);
-				alert("Network error. Try again later.");
+				alert(t("network_error"));
 			} finally {
 				if (submit) {
 					submit.disabled = false;
@@ -584,12 +608,13 @@ else {
 
 		const err: string[] = [];
 		if (!(validateEmail(loginId) || validateTextInput(loginId, 50)))
-			err.push("Invalid username or email");
+			err.push("invalid_user_or_email");
 		if (!validatePassword(loginPass))
-			err.push("Invalid password");
+			err.push("invalid_password");
 
 		if (err.length > 0) {
-			alert("Errors:\n" + err.join("\n"));
+			const translatedErrors = err.map(key => t(key as any));
+			alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
 			return;
 		}
 
@@ -603,7 +628,7 @@ else {
 		if (submit) {
 			submit.disabled = true;
 			const originalTxt = submit.textContent;
-			submit.textContent = "Logging in...";
+			submit.textContent = t("logging_in");
 			try {
 				const res = await fetch("/login", {
 					method: "POST",
@@ -633,15 +658,16 @@ else {
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
 						console.log("Hourray");
-						alert("Login successful");
+						alert(t("login_success"));
 					}
 				}
-				else
-					alert("Server error: " + (data?.error || res.statusText));
+				else{
+					alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
+				}
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
-				alert("Network error. Try again later.");
+				alert(t("network_error"));
 			}
 			finally {
 				if (submit) {
@@ -657,9 +683,9 @@ twofaForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
 	const code = codeInput.value.trim();
-	if (!code) return alert("Enter the 2FA code");
+	if (!code) return alert(t("enter_2fa_code"));
 	if (!/^\d{6}$/.test(codeInput.value.trim())) {
-		alert("Le code doit contenir exactement 6 chiffres.");
+		alert(t("code_must_be_six_digits"));
 		return;
 	}
 
@@ -677,7 +703,7 @@ twofaForm.addEventListener("submit", async (e) => {
 		} else if (selected2FAType === "qr") {
 			const twoFAToken = sessionStorage.getItem("twoFAtoken");
 			if (!twoFAToken)
-				throw new Error("Missing 2FA token for QR verification");
+				throw new Error(t("qr_activation_error"));
 
 			res = await fetch("/verify-totp", {
 				method: "POST",
@@ -686,7 +712,7 @@ twofaForm.addEventListener("submit", async (e) => {
 				body: JSON.stringify({ code, twoFAToken }),
 			});
 		} else {
-			throw new Error("2FA method not selected");
+			throw new Error(t("method_not_selected"));
 		}
 
 		const data = await res.json();
@@ -695,11 +721,11 @@ twofaForm.addEventListener("submit", async (e) => {
 		storeToken(data.accessToken);
 		if (data.user) storeUser(data.user);
 		applyLoggedInState(data.user || { id: 0, username: '', email: '' });
-		alert("Login successful with 2FA!");
+		alert(t("login_success_2fa"));
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
 	} catch (err: any) {
-		alert(err.message);
+		alert(getServerErrorMessage(err.message));
 	}
 });
 
@@ -722,7 +748,7 @@ if (logoutButton) {
 			}
 
 			if (!idToSend) {
-				alert('Cannot logout: missing user id. Try refreshing the page and retry.');
+				alert(t("logout_missing_user_id"));
 				return;
 			}
 
@@ -738,7 +764,7 @@ if (logoutButton) {
 			if (res.ok) {
 				storedUserId = null;
 				localStorage.removeItem("accessToken");
-				alert("Logout successful");
+				alert(t("logout_success"));
 				localStorage.removeItem('user');
 				location.reload();
 			} else {
@@ -754,17 +780,17 @@ if (logoutButton) {
 					storedUserId = null;
 					localStorage.removeItem("accessToken");
 					localStorage.removeItem('user');
-					alert("Logout: user not found on server — local session cleared.");
+					alert(t("logout_user_not_found"));
 					location.reload();
 					return;
 				}
 
 				const err = serverBody || { error: res.statusText };
-				alert("Error logging out: " + (err?.error || err?.message || res.statusText));
+				alert(t("logout_error") + " " + (err?.error || err?.message || res.statusText));
 			}
 		} catch (err) {
 			console.error(err);
-			alert("Network error. Try again later.");
+			alert(t("network_error"));
 		}
 	});
 }
