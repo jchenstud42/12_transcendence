@@ -46,6 +46,9 @@ export class AuthService {
 		if (!user)
 			throw new Error("User not found");
 
+		if (user.password === null)
+			throw new Error("User has no password (OAuth account)");
+
 		const valid = await checkPassword(password, user.password);
 		if (!valid)
 			throw new Error("Invalid credentials");

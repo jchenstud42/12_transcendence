@@ -14,6 +14,9 @@ const login_form = document.getElementById("login_form") as HTMLFormElement | nu
 const register_button = document.getElementById("register-button")!;
 const login_button = document.getElementById("login-button")!;
 
+const oauth42Btn = document.getElementById("oauth-42-button");
+
+
 // 2FA Elements
 const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
 const destinationModal = document.getElementById("destination-modal")!;
@@ -75,6 +78,12 @@ function getServerErrorMessage(error: string | undefined) {
 
 //affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
 //et cacher le formulaire si on reclique sur le boutton a nouveau
+if (oauth42Btn) {
+	oauth42Btn.addEventListener("click", () => {
+		window.location.href = "/oauth/42";
+	});
+}
+
 
 function openDestinationModal(type: "email" | "sms") {
 	selected2FAType = type;
@@ -199,6 +208,36 @@ function applyLoggedOutState() {
 
 async function initAuthState() {
 	try {
+		/* ========== 1) TOKEN OAUTH DANS LE HASH ========== */
+		if (window.location.hash.startsWith("#accessToken=")) {
+			const accessToken = window.location.hash.split("=")[1];
+			storeToken(accessToken);
+
+			// on supprime uniquement le hash
+			window.history.replaceState(null, "", window.location.pathname + window.location.search);
+		}
+
+		/* ========== 2) TOKEN 2FA DEPUIS OAUTH OU LOGIN ========== */
+		const urlParams = new URLSearchParams(window.location.search);
+		const twoFAToken = urlParams.get("twoFAtoken");
+		const method = urlParams.get("method");
+
+		if (twoFAToken) {
+			// On stocke le token 2FA temporaire
+			sessionStorage.setItem("twoFAtoken", twoFAToken);
+
+			const payload = JSON.parse(atob(twoFAToken.split(".")[1]));
+			storedUserId = payload.userId;
+			selected2FAType = method as "email" | "sms" | "qr";
+
+			twofaForm.classList.remove("hidden");
+
+			// Nettoyage URL
+			window.history.replaceState({}, "", window.location.pathname);
+			return;
+		}
+
+		/* ========== 3) ETAT AUTH ========== */
 		const res = await fetch("/user/me", { credentials: "include" });
 
 		if (!res.ok) {
@@ -209,12 +248,25 @@ async function initAuthState() {
 		const data = await res.json();
 		storeToken(data.accessToken);
 		storeUser(data.user);
+
+		if (data.user?.is2FAEnabled && !sessionStorage.getItem("twoFAtoken")) {
+			storedUserId = data.user.id;
+			console.log("User id in InitAuthState:", storedUserId);
+			selected2FAType = data.user.twoFAMethod;
+			twofaForm.classList.remove("hidden");
+			return;
+		}
+
+		storedUserId = data.user.id;
+		console.log("User id in InitAuthState before applyLoggedIn:", storedUserId);
 		applyLoggedInState(data.user);
 
-	} catch {
+	} catch (err) {
+		console.error("initAuthState error:", err);
 		applyLoggedOutState();
 	}
 }
+
 
 initAuthState();
 
@@ -344,36 +396,37 @@ twoFA_profile_button.addEventListener("click", () => {
 });
 
 btnQR.addEventListener("click", async () => {
-	is2FAEnabled = true;
 	selected2FAType = "qr";
 	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = t("two_fa_setup_in_progress");
-	twofaToggleBtn.textContent = t("cancel");
-	alert(t("scan_qr_warning"));
+	twofaStatusText.textContent = "2FA en cours de configuration (QR Code)...";
+	twofaToggleBtn.textContent = "Annuler";
+	alert("Make sure to scan the QR code with your Google authenticator app before refreshing or navigating away from this page.")
 
 
 	try {
-		const res = await fetch("enable-2fa", {
+		const res = await fetch("/enable-2fa", {
 			method: "POST",
 			credentials: "include",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ type: "qr" })
 		});
 
+		if (!res.ok) throw new Error("Failed to enable 2FA");
+
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error || "Failed to enable 2FA");
+		if (!data.qrCode) throw new Error("Server did not return QR code");
 
 		const qrContainer = document.getElementById("qr-container")!;
 		qrContainer.innerHTML = `<img src="${data.qrCode}" alt=t("scan_qr_code") />`;
 
 		twofaForm.classList.remove("hidden");
-		twofaStatusText.textContent = t("scan_qr_instruction");
+		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré, garder ce code sur votre application Google Authenticator pour vos futures connexions.";
 	} catch (err: any) {
-		alert(getServerErrorMessage(err.message));
-		twofaStatusText.textContent = t("qr_activation_error");
+		alert(err.message);
+		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
 		is2FAEnabled = false;
 		selected2FAType = null;
-		twofaToggleBtn.textContent = t("enable");
+		twofaToggleBtn.textContent = "Activer";
 	}
 });
 
@@ -389,20 +442,19 @@ saveProfileBtn.addEventListener("click", async () => {
 	const errors: string[] = [];
 
 	if (username && !validateTextInput(username, 20))
-		errors.push("invalid_username");
+		errors.push("Invalid username");
 
 	if (email && !validateEmail(email))
-		errors.push("invalid_email");
+		errors.push("Invalid email");
 
 	if (password && !validatePassword(password))
-		errors.push("invalid_password");
+		errors.push("Invalid password format");
 
 	if (password !== confirmPass)
-		errors.push("passwords_do_not_match");
+		errors.push("Passwords do not match");
 
 	if (errors.length > 0) {
-		const translatedErrors = errors.map(key => t(key as any));
-		alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
+		alert("Errors:\n" + errors.join("\n"));
 		return;
 	}
 
@@ -420,7 +472,7 @@ saveProfileBtn.addEventListener("click", async () => {
 			const user = JSON.parse(localStorage.getItem('user') || '{}');
 			userId = user.id;
 		} catch (e) {
-			alert(t("missing_user_id"));
+			alert("Error: Cannot find user ID");
 			return;
 		}
 	}
@@ -437,7 +489,7 @@ saveProfileBtn.addEventListener("click", async () => {
 
 		const data = await res.json();
 		if (!res.ok) {
-			alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
+			alert("Server error: " + data.error);
 			return;
 		}
 
@@ -451,11 +503,11 @@ saveProfileBtn.addEventListener("click", async () => {
 		if (data.user.email) menuEmail!.textContent = data.user.email;
 		if (data.user.avatar) profileAvatar.src = data.user.avatar;
 
-		alert(t("profile_updated"));
+		alert("Profile updated!");
 
 	} catch (err) {
 		console.error(err);
-		alert(t("network_error"));
+		alert("Network error");
 	}
 });
 
@@ -503,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
 - On envoie l'objet au backend via fetch a la route /register en POST
 - On gere les erreurs ou le succes en mettant un message et on reset le formulaire
 
-	Bisous, Mathis
+  Bisous, Mathis
 */
 if (!register_form) {
 	console.warn("Register form not found");
@@ -528,22 +580,21 @@ else {
 		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
-		if (!validateEmail(email)) errors.push("invalid_email");
-		if (!validatePassword(password)) errors.push("invalid_password");
-		if (!validateTextInput(username, 20)) errors.push("invalid_username");
-		if (password !== confirmPassword) errors.push("passwords_do_not_match");
+		if (!validateEmail(email)) errors.push("Invalid email");
+		if (!validatePassword(password)) errors.push("Password must have 8 characters, one uppercase letter and one number");
+		if (!validateTextInput(username, 20)) errors.push("Invalid username");
+		if (password !== confirmPassword) errors.push("Passwords do not match");
 
 		if (errors.length > 0) {
-		const translatedErrors = errors.map(key => t(key as any));
-		alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
-		return;
-}
+			alert("Errors:\n" + errors.join("\n"));
+			return;
+		}
 
 		const submit = register_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 		if (submit) {
 			submit.disabled = true;
 			const originalTxt = submit.textContent;
-			submit.textContent = t("registering");
+			submit.textContent = "Registering...";
 			try {
 				const payload = {
 					username: sanitizeInput(username),
@@ -567,14 +618,14 @@ else {
 						if (typeof data.user.id === 'number') storedUserId = data.user.id;
 					}
 					// L'alert marche pas car bloque pqr le navigateur, a voir -------------------------------------
-					alert(t("register_ok"));
+					alert("Registration successful, you can now log in");
 					register_form.reset();
 				} else {
-					alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
+					alert("Server error: " + (data?.error || res.statusText));
 				}
 			} catch (err) {
 				console.error("Register fetch error:", err);
-				alert(t("network_error"));
+				alert("Network error. Try again later.");
 			} finally {
 				if (submit) {
 					submit.disabled = false;
@@ -624,6 +675,7 @@ else {
 			identifier: safeLoginId,
 			password: loginPass
 		};
+
 		const submit = login_form.querySelector('button[type="submit"]') as HTMLButtonElement | null;
 		if (submit) {
 			submit.disabled = true;
@@ -633,9 +685,7 @@ else {
 				const res = await fetch("/login", {
 					method: "POST",
 					credentials: "include",
-					headers: {
-						"Content-Type": "application/json"
-					},
+					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(sendBack),
 				});
 
@@ -658,16 +708,15 @@ else {
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
 						console.log("Hourray");
-						alert(t("login_success"));
+						alert("Login successful");
 					}
 				}
-				else{
-					alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error || res.statusText));
-				}
+				else
+					alert("Server error: " + (data?.error || res.statusText));
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
-				alert(t("network_error"));
+				alert("Network error. Try again later.");
 			}
 			finally {
 				if (submit) {
@@ -681,11 +730,13 @@ else {
 
 twofaForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
+	console.log("Token au submit:", sessionStorage.getItem("twoFAtoken"));
+
 	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
 	const code = codeInput.value.trim();
-	if (!code) return alert(t("enter_2fa_code"));
+	if (!code) return alert("Enter the 2FA code");
 	if (!/^\d{6}$/.test(codeInput.value.trim())) {
-		alert(t("code_must_be_six_digits"));
+		alert("Le code doit contenir exactement 6 chiffres.");
 		return;
 	}
 
@@ -703,31 +754,34 @@ twofaForm.addEventListener("submit", async (e) => {
 		} else if (selected2FAType === "qr") {
 			const twoFAToken = sessionStorage.getItem("twoFAtoken");
 			if (!twoFAToken)
-				throw new Error(t("qr_activation_error"));
+				throw new Error("Missing 2FA token for QR verification");
 
 			res = await fetch("/verify-totp", {
 				method: "POST",
 				credentials: "include",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ code, twoFAToken }),
+				body: JSON.stringify(body)
 			});
 		} else {
-			throw new Error(t("method_not_selected"));
+			throw new Error("2FA method not selected");
 		}
 
 		const data = await res.json();
-		if (!res.ok) throw new Error(data.error || "Invalid 2FA code");
+		if (!res.ok) throw new Error(data.error || "Erreur lors de la vérification 2FA");
 
 		storeToken(data.accessToken);
 		if (data.user) storeUser(data.user);
 		applyLoggedInState(data.user || { id: 0, username: '', email: '' });
-		alert(t("login_success_2fa"));
+		alert("Login successful with 2FA!");
 		twofaForm.reset();
 		twofaForm.classList.add("hidden");
 	} catch (err: any) {
-		alert(getServerErrorMessage(err.message));
+		alert(err.message);
 	}
 });
+
+
+
 
 
 const logoutButton = document.getElementById("logout-button") as HTMLButtonElement;
@@ -766,6 +820,9 @@ if (logoutButton) {
 				localStorage.removeItem("accessToken");
 				alert(t("logout_success"));
 				localStorage.removeItem('user');
+				sessionStorage.removeItem("twoFAtoken");
+				selected2FAType = null;
+				twofaForm.classList.add("hidden");
 				location.reload();
 			} else {
 				let serverBody: any = null;
@@ -780,7 +837,7 @@ if (logoutButton) {
 					storedUserId = null;
 					localStorage.removeItem("accessToken");
 					localStorage.removeItem('user');
-					alert(t("logout_user_not_found"));
+					alert("Logout: user not found on server — local session cleared.");
 					location.reload();
 					return;
 				}
@@ -1009,13 +1066,13 @@ function startGame() {
 play_button.addEventListener("click", startGame);
 
 // document.addEventListener("keydown", (e) => {
-// 	if (e.key !== "Enter") return;
+// 	if (e.key !== "Enter") return;twofaForm
 // 	const active = document.activeElement as HTMLElement | null;
 // 	if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
 // 	startGame();
 // });
 
-//Set true or False wether a key is press among the "keys" list
+//Set true or False wether a key is press among the "keys" listtwofaForm
 document.addEventListener('keydown', (e) => {
 	if (e.key in keys) {
 		keys[e.key as keyof typeof keys] = true;

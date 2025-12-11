@@ -7,6 +7,7 @@ import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3';
 import twofaRoutes from '../user_manage/routes/2FAJWT.routes.js';
 import twofaTestRoutes from './routes/2fa_test.js';
 import authRoutes from '../user_manage/routes/auth.routes.js';
+import remoteAuthRoutes from '../OAuth/remote_auth.js';
 import fastifyCookie from "@fastify/cookie";
 import userRoutes from '../user_manage/routes/user.routes.js';
 import friendRoutes from '../user_manage/routes/friend.routes.js';
@@ -63,7 +64,7 @@ export async function buildServer() {
 	// Routes ----------------------------------------------------------------------------------
 	// LAISSER CETTE ROUTE AVANT LES AUTRES PITIE
 	await fastify.register(fastifyCors, {
-		origin: "http://localhost:3001",
+		origin: "http://localhost:8443",
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 	});
@@ -71,6 +72,7 @@ export async function buildServer() {
 	fastify.get('/', async () => { return { message: 'Transcendence!' } });
 	// fastify.register(testsRoutes)	// test, a retirer
 	fastify.register(authRoutes);
+	fastify.register(remoteAuthRoutes);
 	fastify.register(userRoutes, { prefix: '/user' });
 	fastify.register(friendRoutes, { prefix: '/friend' });
 	fastify.register(matchRoutes, { prefix: '/match' });
