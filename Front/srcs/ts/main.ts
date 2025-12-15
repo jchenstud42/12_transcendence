@@ -50,6 +50,10 @@ const btnEmail = document.getElementById("2fa-email")!;
 const btnSMS = document.getElementById("2fa-sms")!;
 const btnQR = document.getElementById("2fa-qr")!;
 
+const addFriendBtn = document.getElementById("btn-add-friend")!;
+const yourFriendsBtn = document.getElementById("btn-your-friends")!;
+const pendingFriendsBtn = document.getElementById("btn-pending-friends")!;
+
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
@@ -941,6 +945,78 @@ if (logoutButton) {
 	});
 }
 
+async function fetchFriendsList(userId: number) {
+	try {
+		const res = await fetch(`/friend/${userId}`, { credentials: "include" });
+		if (!res.ok) throw new Error("Failed to fetch friends");
+		const data = await res.json();
+		return data;
+	} catch (err) {
+		console.error(err);
+		return [];
+	}
+}
+
+addFriendBtn.addEventListener("click", async () => {
+	const friendUsername = prompt("Enter the username of the friend to add:");
+	if (!friendUsername) return;
+
+	try {
+		const resUser = await fetch(`/user/by-username/${friendUsername}`, { credentials: "include" });
+		if (!resUser.ok) 
+			throw new Error("User not found");
+		const userData = await resUser.json();
+
+		const payload = { userId: storedUserId!, friendId: userData.id };
+		const res = await fetch("/friend", {
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+
+		if (!res.ok) 
+			throw new Error("Failed to add friend");
+		alert("Friend added successfully!");
+	} catch (err: any) {
+		alert(err.message);
+	}
+});
+
+yourFriendsBtn.addEventListener("click", async () => {
+	const friends = await fetchFriendsList(storedUserId!);
+	alert("Your friends: " + friends.map((f: any) => f.username).join(", "));
+});
+
+pendingFriendsBtn.addEventListener("click", async () => {
+	try {
+		const res = await fetch(`/friend-request/received/${storedUserId}`, { credentials: "include" });
+		if (!res.ok) 
+			throw new Error("Failed to fetch pending friends");
+		const requests = await res.json();
+		alert("Pending requests: " + requests.map((r: any) => r.sendBy.username).join(", "));
+	} catch (err: any) {
+		alert(err.message);
+	}
+});
+
+const friendsMenuList = document.createElement("div");
+friendsMenuList.id = "friends-list";
+friends_menu!.appendChild(friendsMenuList);
+
+function renderFriends(friends: any[]) {
+	friendsMenuList.innerHTML = "";
+	friends.forEach(f => {
+		const div = document.createElement("div");
+		div.textContent = `${f.username} (${f.status})`;
+		friendsMenuList.appendChild(div);
+	});
+}
+
+yourFriendsBtn.addEventListener("click", async () => {
+	const friends = await fetchFriendsList(storedUserId!);
+	renderFriends(friends);
+});
 
 
 // POOOONNNNNNNG

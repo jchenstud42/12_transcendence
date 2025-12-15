@@ -54,4 +54,23 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		const status = await userService.getUserStatus(Number((req.params as UserParams).id));
 		return reply.send({ status });
 	});
+
+	fastify.get("/by-username/:username",{ preHandler: [authentizer()] },async (req, reply) => {
+		const { username } = req.params as { username: string };
+
+		const user = await prisma.user.findUnique({
+			where: { username },
+			select: {
+				id: true,
+				username: true,
+				status: true
+			}
+		});
+
+		if (!user)
+			return (reply.status(404).send({ error: "User not found" }));
+
+		return (reply.send(user));
+	}
+);
 }
