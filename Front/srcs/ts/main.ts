@@ -1042,12 +1042,14 @@ const playerIncr_button = document.getElementById("increasePlayer-button")!;
 const playerDecr_button = document.getElementById("decreasePlayer-button")!;
 const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
 const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
-const OK_button = document.getElementById("OK-button")!;
+const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
 const play_button = document.getElementById("play-button")!;
 const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
-
+const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
+const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
+const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
 const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
 const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
 const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
@@ -1372,17 +1374,25 @@ playerDecr_button.addEventListener("click", () => {
 })
 
 OK_button.addEventListener("click", () => {
-	hidePlayerNbrMenu();
-	playersList.classList.remove("hidden")
+	console.log("OK-button clicked — playerNbr:", playerNbr, "players_area found:", !!players_area);
+	try {
+		hidePlayerNbrMenu();
+		if (players_area) {
+			players_area.classList.remove("hidden");
+		} else {
+			console.warn("players-area element not found in DOM");
+		}
 
-	if (playerNbr > 0) {
-		enterPlayerName();
+		if (playerNbr > 0) {
+			enterPlayerName();
+		} else {
+			addAiNameLabel();
+			const game = new Game(playerNames);
+		}
+	} catch (err) {
+		console.error("Error in OK-button handler:", err);
 	}
-	else {
-		addAiNameLabel();
-		const game = new Game(playerNames);
-	}
-})
+});
 
 function hidePlayerNbrMenu() {
 	enterPlayerNbr_text.classList.add("hidden")
@@ -1448,7 +1458,7 @@ function addAiNameLabel() {
 		playerNames.push([aiName, true]);
 	}
 }
-
+ 
 function showTournamentMatch() {
 	//Create/show Final Boxex (holder of the results of the first match)
 	for (let i = 0; i < 2; i++) {
