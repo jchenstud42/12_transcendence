@@ -1043,7 +1043,7 @@ const playerDecr_button = document.getElementById("decreasePlayer-button")!;
 const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
 const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
 const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
-const play_button = document.getElementById("play-button")!;
+const play_button = document.getElementById("play-button") as HTMLButtonElement;
 const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
@@ -1230,14 +1230,37 @@ function startGame() {
 	}, 1000);
 }
 
-play_button.addEventListener("click", startGame);
+play_button.addEventListener("click", () => {
+	startMatch();
+});
 
-// document.addEventListener("keydown", (e) => {
-// 	if (e.key !== "Enter") return;twofaForm
-// 	const active = document.activeElement as HTMLElement | null;
-// 	if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA" || active.isContentEditable)) return;
-// 	startGame();
-// });
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+	if (event.key === "Enter" && !play_button.classList.contains("hidden")) {
+		startMatch();
+	}
+});
+
+
+function startMatch() {
+	play_button?.classList.add("hidden");
+
+	ready_text.classList.remove("hidden");
+
+	setTimeout(() => {
+		ready_text.classList.add("hidden");
+		go_text.classList.remove("hidden");
+
+		setTimeout(() => {
+			go_text.classList.add("hidden");
+			ball.classList.remove("hidden");
+			paddle_left.classList.remove("hidden");
+			paddle_right.classList.remove("hidden");
+			
+			gameBall.active = true;
+			gameBall.serve();
+		}, 1000);
+	}, 1000);
+}
 
 //Set true or False wether a key is press among the "keys" listtwofaForm
 document.addEventListener('keydown', (e) => {
@@ -1272,12 +1295,34 @@ function updatePaddlePositions() {
 
 requestAnimationFrame(updatePaddlePositions);
 
+function resetGameMenu() {
+	if (score_left) score_left.textContent = "0";
+	if (score_right) score_right.textContent = "0";
+
+	if (players_area) players_area.classList.add("hidden");
+	playersList.innerHTML = "";
+	playerNames = [];
+	nameEntered = 0;
+	isTournament = false;
+	playerNbr = 2;
+	maxPlayer = 2;
+	aiNbr = 0;
+
+	pong_button.classList.remove("hidden");
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+}
+
 class Game {
 	players: Player[] = [];
 	winner: Player | null = null;
+	pointsToWin = 1;
+	isQuickMatch = false;
 
 	constructor(playersName: [string, boolean][]) {
 		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
+
+		this.isQuickMatch = !isTournament;
 
 		gameBall.onScore = (playerSide: 'left' | 'right') => {
 			this.addPoint(playerSide);
@@ -1290,12 +1335,46 @@ class Game {
 	}
 
 	public addPoint(playerSide: 'left' | 'right') {
-		// À adapter selon ta logique (2 joueurs vs tournament)
 		const pointIndex = playerSide === 'left' ? 0 : 1;
 		if (this.players[pointIndex]) {
 			this.players[pointIndex].point++;
+			
+			// Update score display
+			if (playerSide === 'left' && score_left) {
+				score_left.textContent = this.players[pointIndex].point.toString();
+			} else if (playerSide === 'right' && score_right) {
+				score_right.textContent = this.players[pointIndex].point.toString();
+			}
+
 			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
+
+			// Check if player reached 10 points (quick match only)
+			if (this.isQuickMatch && this.players[pointIndex].point >= this.pointsToWin) {
+				this.endGame(this.players[pointIndex]);
+			} else {
+				// Reset ball for next point
+				gameBall.reset();
+				ball.classList.add("hidden");
+				play_button.classList.remove("hidden");
+			}
 		}
+	}
+
+	private endGame(winner: Player) {
+		this.winner = winner;
+		console.log(`${winner.name} wins the match!`);
+		gameBall.active = false;
+		ball.classList.add("hidden");
+		paddle_left.classList.add("hidden");
+		paddle_right.classList.add("hidden");
+		play_button.classList.add("hidden");
+
+		alert(`${winner.name} wins with ${winner.point} points!`);
+
+		// Reset everything and go back to menu
+		setTimeout(() => {
+			resetGameMenu();
+		}, 1000);
 	}
 
 
@@ -1310,7 +1389,6 @@ class Game {
 
 	public createQuickMatch() {
 		play_button.classList.remove("hidden");
-
 	}
 }
 
@@ -1374,23 +1452,18 @@ playerDecr_button.addEventListener("click", () => {
 })
 
 OK_button.addEventListener("click", () => {
-	console.log("OK-button clicked — playerNbr:", playerNbr, "players_area found:", !!players_area);
-	try {
-		hidePlayerNbrMenu();
-		if (players_area) {
-			players_area.classList.remove("hidden");
-		} else {
-			console.warn("players-area element not found in DOM");
-		}
+	hidePlayerNbrMenu();
+	if (players_area) {
+		players_area.classList.remove("hidden");
+	} else {
+		console.warn("players-area element not found in DOM");
+	}
 
-		if (playerNbr > 0) {
-			enterPlayerName();
-		} else {
-			addAiNameLabel();
-			const game = new Game(playerNames);
-		}
-	} catch (err) {
-		console.error("Error in OK-button handler:", err);
+	if (playerNbr > 0) {
+		enterPlayerName();
+	} else {
+		addAiNameLabel();
+		const game = new Game(playerNames);
 	}
 });
 
@@ -1429,6 +1502,10 @@ playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 
 		if (nameEntered === playerNbr) {
 			playerName_container.classList.add("hidden")
+
+			// Reset scores display
+			if (score_left) score_left.textContent = "0";
+			if (score_right) score_right.textContent = "0";
 
 			addAiNameLabel();
 			const game = new Game(playerNames);
