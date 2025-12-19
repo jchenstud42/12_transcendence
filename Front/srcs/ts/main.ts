@@ -2,6 +2,7 @@ import { validateTextInput, validatePassword, sanitizeInput, validateEmail } fro
 import { shuffleArray } from "./utils/utils.js";
 import { initLanguage, setLanguage, t } from "./i18n.js";
 import { TranslationKey } from "./traduction.js";
+import { init2FA, showTwoFAForm, setSelected2FAType, update2FAStatus } from "./2FA_Auth.js";
 const page = document.getElementById("page")!;
 
 // CA C LE DIV DANS LE HTML
@@ -57,6 +58,32 @@ const pendingFriendsBtn = document.getElementById("btn-pending-friends")!;
 let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
+
+init2FA({
+	twofaForm,
+	destinationModal,
+	destinationInput,
+	destinationTitle,
+	destinationCancel,
+	destinationConfirm,
+	twofaTypeMenu,
+	twofaStatusText,
+	twofaToggleBtn,
+	btnEmail,
+	btnSMS,
+	btnQR,
+	twoFA_menu,
+	twoFA_profile_button,
+	oauth42Btn
+}, {
+	sanitizeInput,
+	t,
+	getServerErrorMessage,
+	storeToken,
+	storeUser,
+	applyLoggedInState
+}, is2FAEnabled);
+
 const serverErrorTranslations: Record<string, string> = {
 	"User not found": "user_not_found",
 	"Invalid username": "invalid_username",
@@ -79,82 +106,6 @@ function getServerErrorMessage(error: string | undefined) {
 	const key = serverErrorTranslations[error];
 	return (key ? t(key as TranslationKey) : error);
 }
-
-//affichage des formulaires lorsque l'on clique sur un des boutons avec synchronisation pour cacher l'autre formulaire si il etait deja affiche
-//et cacher le formulaire si on reclique sur le boutton a nouveau
-if (oauth42Btn) {
-	oauth42Btn.addEventListener("click", () => {
-		window.location.href = "/oauth/42";
-	});
-}
-
-
-function openDestinationModal(type: "email" | "sms") {
-	selected2FAType = type;
-	destinationModal.classList.remove("hidden");
-
-	if (type === "email") {
-		destinationTitle.textContent = t("enter_email_2fa");
-		destinationInput.placeholder = "exemple@gmail.com";
-		destinationInput.type = "email";
-	} else if (type === "sms") {
-		destinationTitle.textContent = t("enter_phone_2fa");
-		destinationInput.placeholder = "+33123456789";
-		destinationInput.type = "sms";
-	}
-
-	destinationInput.value = "";
-	destinationInput.focus();
-}
-
-destinationCancel.addEventListener("click", () => {
-	destinationModal.classList.add("hidden");
-});
-
-destinationConfirm.addEventListener("click", async () => {
-	const destination = sanitizeInput(destinationInput.value.trim());
-
-	if (!destination) {
-		alert(t("no_value_provided"));
-		return;
-	}
-
-	const res = await fetch("enable-2fa", {
-		method: "POST",
-		credentials: "include",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			type: selected2FAType,
-			destination
-		}),
-	});
-
-	let data: any = null;
-	const text = await res.text();
-	if (text) {
-		data = JSON.parse(text);
-	}
-
-	if (!res.ok) {
-		alert("Erreur : " + getServerErrorMessage(data.error));
-		return;
-	}
-
-	alert(t("two_fa_enabled_success"));
-	twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
-	twofaToggleBtn.textContent = t("disable");
-	destinationModal.classList.add("hidden");
-});
-
-btnEmail.addEventListener("click", () => {
-	twofaTypeMenu.classList.add("hidden");
-	openDestinationModal("email");
-});
-
-btnSMS.addEventListener("click", () => {
-	twofaTypeMenu.classList.add("hidden");
-	openDestinationModal("sms");
-});
 
 function storeToken(accessToken: string) {
 	localStorage.setItem("accessToken", accessToken);
@@ -241,11 +192,14 @@ async function initAuthState() {
 
 			const payload = JSON.parse(atob(twoFAToken.split(".")[1]));
 			storedUserId = payload.userId;
-			selected2FAType = method as "email" | "sms" | "qr";
-			twofaForm.classList.remove("hidden");
+
+			setSelected2FAType(method as any);
+			showTwoFAForm(method as any);
+
 			window.history.replaceState({}, "", window.location.pathname);
 			return;
 		}
+
 
 		const res = await fetch("/user/me", { credentials: "include" });
 
@@ -261,10 +215,11 @@ async function initAuthState() {
 		if (data.user?.is2FAEnabled && !sessionStorage.getItem("twoFAtoken")) {
 			storedUserId = data.user.id;
 			console.log("User id in InitAuthState:", storedUserId);
-			selected2FAType = data.user.twoFAMethod;
-			twofaForm.classList.remove("hidden");
+			setSelected2FAType(data.user.twoFAMethod as any);
+			showTwoFAForm(data.user.twoFAMethod as any);
 			return;
 		}
+
 
 		storedUserId = data.user.id;
 		console.log("User id in InitAuthState before applyLoggedIn:", storedUserId);
@@ -355,113 +310,6 @@ language_button.addEventListener("click", () => {
 		loginContainer,
 		profile_menu
 	);
-});
-
-
-twofaToggleBtn.addEventListener("click", async () => {
-	const isInSetupMode = !twofaTypeMenu.classList.contains("hidden");
-
-	if (isInSetupMode && !is2FAEnabled) {
-		twofaStatusText.textContent = t("two_fa_is_disabled");
-		twofaToggleBtn.textContent = t("enable");
-		twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-		twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
-		twofaTypeMenu.classList.add("hidden");
-		twofaForm.classList.add("hidden");
-
-		const qrContainer = document.getElementById("qr-container");
-		if (qrContainer) qrContainer.innerHTML = "";
-
-		sessionStorage.removeItem("2fa-setup-mode");
-		return;
-	}
-
-	if (!is2FAEnabled) {
-		twofaStatusText.textContent = t("two_fa_setup_in_progress");
-		twofaToggleBtn.textContent = t("cancel");
-		twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-		twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		twofaTypeMenu.classList.remove("hidden");
-	} else {
-		try {
-			const res = await fetch("/disable-2fa", {
-				method: "POST",
-				credentials: "include"
-			});
-
-			if (res.ok) {
-				is2FAEnabled = false;
-				twofaStatusText.textContent = t("two_fa_is_disabled");
-				twofaToggleBtn.textContent = t("enable");
-				twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-				twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
-				twofaTypeMenu.classList.add("hidden");
-				alert("2FA disabled successfully!");
-			}
-		} catch (err) {
-			console.error("Error disabling 2FA:", err);
-		}
-	}
-});
-
-twoFA_profile_button.addEventListener("click", async () => {
-	if (edit_menu && !edit_menu.classList.contains("hidden")) {
-		edit_menu.classList.add("hidden");
-	}
-	if (friends_menu && !friends_menu.classList.contains("hidden")) {
-		friends_menu.classList.add("hidden");
-	}
-	if (history_menu && !history_menu.classList.contains("hidden")) {
-		history_menu.classList.add("hidden");
-	}
-	if (twofaTypeMenu && !twofaTypeMenu.classList.contains("hidden")) {
-		twofaTypeMenu.classList.add("hidden");
-	}
-
-	if (twoFA_menu && twoFA_menu.classList.contains("hidden")) {
-		twoFA_menu.classList.remove("hidden");
-		await update2FAStatus();
-	} else if (twoFA_menu) {
-		twoFA_menu.classList.add("hidden");
-	}
-});
-
-btnQR.addEventListener("click", async () => {
-	selected2FAType = "qr";
-	twofaTypeMenu.classList.add("hidden");
-	twofaStatusText.textContent = t("two_fa_setup_in_progress");
-	twofaToggleBtn.textContent = t("cancel");
-
-	alert("Make sure to scan the QR code with your Google Authenticator app before refreshing or navigating away from this page.");
-
-	try {
-		const res = await fetch("/enable-2fa", {
-			method: "POST",
-			credentials: "include",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ type: "qr" })
-		});
-
-		if (!res.ok) throw new Error("Failed to enable 2FA");
-
-		const data = await res.json();
-		if (!data.qrCode) throw new Error("Server did not return QR code");
-
-		sessionStorage.setItem("2fa-setup-mode", "true");
-
-		const qrContainer = document.getElementById("qr-container")!;
-		qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan QR Code" />`;
-
-		twofaForm.classList.remove("hidden");
-		twofaStatusText.textContent = "Scannez le QR code et entrez le code généré...";
-
-	} catch (err: any) {
-		alert(err.message);
-		twofaStatusText.textContent = "Erreur lors de l'activation du QR Code.";
-		is2FAEnabled = false;
-		selected2FAType = null;
-		twofaToggleBtn.textContent = t("enable");
-	}
 });
 
 const saveProfileBtn = document.getElementById("btn-save-profile")!;
@@ -651,7 +499,6 @@ else {
 						storeUser(data.user);
 						if (typeof data.user.id === 'number') storedUserId = data.user.id;
 					}
-					// L'alert marche pas car bloque pqr le navigateur, a voir -------------------------------------
 					alert("Registration successful, you can now log in");
 					register_form.reset();
 				} else {
@@ -730,9 +577,10 @@ else {
 				if (res.ok) {
 					if (data.message === "2FA required") {
 						storedUserId = data.userId;
-						selected2FAType = data.method;
-						twofaForm.classList.remove("hidden");
+						setSelected2FAType(data.method as any);
+						showTwoFAForm(data.method as any);
 					}
+
 					else {
 						storeToken(data.accessToken);
 						if (data.user) {
@@ -761,120 +609,6 @@ else {
 		}
 	});
 }
-
-async function update2FAStatus() {
-	try {
-		const res = await fetch("/user/me", { credentials: "include" });
-		if (!res.ok) return;
-
-		const data = await res.json();
-		const user = data.user;
-
-		if (user?.isTwoFAEnabled) {
-			is2FAEnabled = true;
-			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${user.twoFAMethod || "qr"})`;
-			twofaToggleBtn.textContent = t("disable");
-			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		} else {
-			is2FAEnabled = false;
-			twofaStatusText.textContent = t("two_fa_is_disabled");
-			twofaToggleBtn.textContent = t("enable");
-			twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-			twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
-		}
-	} catch (err) {
-		console.error("Failed to fetch 2FA status:", err);
-	}
-}
-
-twofaForm.addEventListener("submit", async (e) => {
-	e.preventDefault();
-
-	const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
-	const code = codeInput.value.trim();
-
-	if (!code) return alert("Enter the 2FA code");
-	if (!/^\d{6}$/.test(code)) {
-		alert("Le code doit contenir exactement 6 chiffres.");
-		return;
-	}
-
-	const isSetupMode = sessionStorage.getItem("2fa-setup-mode") === "true";
-	const twoFAtoken = sessionStorage.getItem("twoFAtoken");
-
-	try {
-		let res: Response;
-
-		if (selected2FAType === "email" || selected2FAType === "sms") {
-			if (!twoFAtoken) {
-				throw new Error("Missing 2FA token");
-			}
-			res = await fetch("/verify-2fa", {
-				method: "POST",
-				credentials: "include",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ code, twoFAtoken }),
-			});
-		} else if (selected2FAType === "qr") {
-			const body: Record<string, string> = { code };
-			if (twoFAtoken && !isSetupMode) {
-				body.twoFAtoken = twoFAtoken;
-			}
-			res = await fetch("/verify-totp", {
-				method: "POST",
-				credentials: "include",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(body)
-			});
-		} else {
-			throw new Error("2FA method not selected");
-		}
-
-		const data = await res.json();
-		if (!res.ok) throw new Error(data.error || "Erreur lors de la vérification 2FA");
-
-		sessionStorage.removeItem("2fa-setup-mode");
-		sessionStorage.removeItem("twoFAtoken");
-
-		if (isSetupMode) {
-			alert("2FA enabled successfully!");
-			is2FAEnabled = true;
-			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
-			twofaToggleBtn.textContent = t("disable");
-			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		} else {
-			storeToken(data.accessToken);
-			if (data.user) storeUser(data.user);
-			applyLoggedInState(data.user || { id: 0, username: '', email: '' });
-			alert("Login successful with 2FA!");
-		}
-
-		twofaForm.reset();
-		twofaForm.classList.add("hidden");
-		twofaTypeMenu.classList.add("hidden");
-
-		const qrContainer = document.getElementById("qr-container");
-		if (qrContainer) qrContainer.innerHTML = "";
-
-		if (!isSetupMode) {
-			twofaStatusText.textContent = `${t("two_fa_is_enabled")} (${selected2FAType})`;
-			twofaToggleBtn.textContent = t("disable");
-			twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-			twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
-		}
-
-		selected2FAType = null;
-
-	} catch (err: any) {
-		console.error("2FA verification error:", err);
-		alert(err.message);
-	}
-});
-
-
-
 
 
 const logoutButton = document.getElementById("logout-button") as HTMLButtonElement;
@@ -963,7 +697,7 @@ addFriendBtn.addEventListener("click", async () => {
 
 	try {
 		const resUser = await fetch(`/user/by-username/${friendUsername}`, { credentials: "include" });
-		if (!resUser.ok) 
+		if (!resUser.ok)
 			throw new Error("User not found");
 		const userData = await resUser.json();
 
@@ -975,7 +709,7 @@ addFriendBtn.addEventListener("click", async () => {
 			body: JSON.stringify(payload),
 		});
 
-		if (!res.ok) 
+		if (!res.ok)
 			throw new Error("Failed to add friend");
 		alert("Friend added successfully!");
 	} catch (err: any) {
@@ -991,7 +725,7 @@ yourFriendsBtn.addEventListener("click", async () => {
 pendingFriendsBtn.addEventListener("click", async () => {
 	try {
 		const res = await fetch(`/friend-request/received/${storedUserId}`, { credentials: "include" });
-		if (!res.ok) 
+		if (!res.ok)
 			throw new Error("Failed to fetch pending friends");
 		const requests = await res.json();
 		alert("Pending requests: " + requests.map((r: any) => r.sendBy.username).join(", "));
@@ -1458,7 +1192,7 @@ function addAiNameLabel() {
 		playerNames.push([aiName, true]);
 	}
 }
- 
+
 function showTournamentMatch() {
 	//Create/show Final Boxex (holder of the results of the first match)
 	for (let i = 0; i < 2; i++) {
