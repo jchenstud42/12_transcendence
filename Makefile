@@ -10,7 +10,7 @@
 
 
 BACKEND_DIR 	= Backend
-FRONT_DIR		= Front
+FRONT_DIR		= Frontend
 
 RESET			= \e[0m
 BLACK    		= \e[1;30m
@@ -31,7 +31,7 @@ all: build up
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
 	@docker compose build && cd Backend && npx tsc
-	@cd Front/srcs/ && npx tsc
+	@cd Frontend && npx tsc
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
 dev:

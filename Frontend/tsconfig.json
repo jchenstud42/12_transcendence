@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"noImplicitAny": true,
+		"forceConsistentCasingInFileNames": true,
+		// File Layout
+		"rootDir": "ts",
+		"outDir": "js",
+		"target": "ES2017",
+		"lib": [
+			"DOM",
+			"ES2017"
+		],
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"allowJs": false,
+		"skipLibCheck": true
+	},
+	"include": [
+		"ts/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}

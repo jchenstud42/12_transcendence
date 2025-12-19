@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: ./Front
+      context: ./Frontend
     ports:
       - "8443:8443"
     restart: on-failure
