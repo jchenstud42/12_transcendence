@@ -36,11 +36,11 @@ Dans un systeme OAuth, l’application delegue l’authentification a un fournis
 
 ### Principe de fonctionnement
 
-1. L’utilisateur choisit de se connecter via un service tiers (ici, Sign in with 42).
-2. Il est redirige vers la page de connexion du tiers.
-3. Apres authentification, ce tiers service renvoie un **code d’authorisation** a notre app.
-4. Ce code est echange côte serveur contre un **access token**.
-5. Ce token permet a notre app de recuperer les informations de l’utilisateur (identite, email, etc...).
+-	L’utilisateur choisit de se connecter via un service tiers (ici, Sign in with 42).
+-	Il est redirige vers la page de connexion du tiers.
+-	Apres authentification, ce tiers service renvoie un **code d’authorisation** a notre app.
+-	Ce code est echange côte serveur contre un **access token**.
+-	Ce token permet a notre app de recuperer les informations de l’utilisateur (identite, email, etc...).
 
 a aucun moment le mot de passe de l’utilisateur n’est transmis ou stocke par/dans notre application.
 
