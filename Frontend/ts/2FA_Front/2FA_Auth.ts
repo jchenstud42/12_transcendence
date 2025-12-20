@@ -1,6 +1,10 @@
 import { TranslationKey } from "../traduction/traduction.js";
+import { toggleMenu } from "../UI/UI_helpers.js";
 
 
+/*
+Les elements html passes a l'initialisation de la 2fa, dans les params de la fonction dans le front (main.ts)
+*/
 type TwoFAElements = {
 	twofaForm: HTMLFormElement;
 	destinationModal: HTMLElement;
@@ -19,6 +23,9 @@ type TwoFAElements = {
 	oauth42Btn?: HTMLElement | null;
 };
 
+/*
+Les fonctions passes a l'initialisation de la 2fa, dans les params de la fonction dans le front (main.ts)
+ */
 type TwoFACallbacks = {
 	sanitizeInput: (s: string) => string;
 	t: (key: TranslationKey) => string;
@@ -34,10 +41,17 @@ let is2FAEnabled = false;
 let elems: TwoFAElements | null = null;
 let funcs: TwoFACallbacks | null = null;
 
+
+/*
+ On check si c'est bien initialise
+ */
 function ensureInit() {
 	if (!elems || !funcs) throw new Error("2FA module not initialized. Call init2FA(...) first.");
 }
 
+/*
+Ouvre le modal pour entrer la destination pour la 2fa (email ou sms)
+*/
 function openDestinationModal(type: "email" | "sms") {
 	ensureInit();
 	selected2FAType = type;
@@ -60,6 +74,9 @@ function openDestinationModal(type: "email" | "sms") {
 	destinationInput.focus();
 }
 
+/*
+ Activer la 2fa avec la destination entree dans le modal
+*/
 async function handleEnableDestination() {
 	ensureInit();
 	const { destinationInput, destinationModal, twofaStatusText, twofaToggleBtn, twofaTypeMenu } = elems!;
@@ -100,20 +117,32 @@ async function handleEnableDestination() {
 }
 
 
+/*
+ Affiche le formulaire pour rentrer le code 2fa
+*/
 export function showTwoFAForm(method?: "email" | "sms" | "qr" | string | null) {
 	ensureInit();
 	if (method) selected2FAType = method as any;
 	elems!.twofaForm.classList.remove("hidden");
 }
 
+/*
+ Recupere le type de 2fa que l'user a choisi
+*/
 export function setSelected2FAType(type: "email" | "sms" | "qr" | null) {
 	selected2FAType = type;
 }
 
+/*
+ Met a jour le flag pour savoir la 2fa est active
+*/
 export function setIs2FAEnabled(flag: boolean) {
 	is2FAEnabled = flag;
 }
 
+/*
+ On met a jour l'affichage du status de la 2fa (couleur du bouton, texte...)
+*/
 export async function update2FAStatus() {
 	ensureInit();
 	try {
@@ -141,6 +170,10 @@ export async function update2FAStatus() {
 	}
 }
 
+/*
+ On initialise le module 2fa avec les elements html qu'on a recupere dans le front via l'appel de la fonction dans main.ts
+ et les fonctions egalement
+*/
 export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, initial2FAState: boolean) {
 	elems = elements;
 	funcs = callbacks;
@@ -270,7 +303,14 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			const isHidden = elems!.twoFA_menu.classList.contains("hidden");
 
 			if (isHidden) {
-				elems!.twoFA_menu.classList.remove("hidden");
+				toggleMenu(
+					elems!.twoFA_menu,
+					document.getElementById("edit-profile-menu"),
+					document.getElementById("friends-menu"),
+					document.getElementById("history-menu"),
+					document.getElementById("language-menu"),
+					elems!.twofaTypeMenu,
+				);
 				await update2FAStatus();
 			} else {
 				elems!.twoFA_menu.classList.add("hidden");

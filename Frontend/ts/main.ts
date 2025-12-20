@@ -136,10 +136,14 @@ else {
 		const confirmPassword = inConfirmPassword.value;
 
 		const errors: string[] = [];
-		if (!validateEmail(email)) errors.push("Invalid email");
-		if (!validatePassword(password)) errors.push("Password must have 8 characters, one uppercase letter and one number");
-		if (!validateTextInput(username, 20)) errors.push("Invalid username");
-		if (password !== confirmPassword) errors.push("Passwords do not match");
+		if (!validateEmail(email))
+			errors.push("Invalid email");
+		if (!validatePassword(password))
+			errors.push("Password must have 8 characters, one uppercase letter and one number");
+		if (!validateTextInput(username, 20))
+			errors.push("Invalid username");
+		if (password !== confirmPassword)
+			errors.push("Passwords do not match");
 
 		if (errors.length > 0) {
 			alert("Errors:\n" + errors.join("\n"));
@@ -263,7 +267,6 @@ else {
 						}
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
-						console.log("Hourray");
 						alert("Login successful");
 					}
 				}

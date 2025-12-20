@@ -2,7 +2,13 @@ import { toggleMenu } from "./UI_helpers.js";
 import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
+import { t } from "../traduction/i18n.js";
 
+
+
+/*
+ Les elements html qu'on recupere dans le front/via les params de la function init (main.ts) pour init les events (fonction en dessous)
+*/
 type UIEventElements = {
 	register_button?: HTMLElement | null;
 	login_button?: HTMLElement | null;
@@ -23,6 +29,12 @@ type UIEventElements = {
 	language_menu?: HTMLElement | null;
 };
 
+
+/*
+ On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus,
+  on affiche le menu et cache les autres)
+  On initialise aussi le menu de langue
+ */
 export function initUIEvents(elems: UIEventElements) {
 
 	elems.register_button?.addEventListener("click", () =>
@@ -88,6 +100,13 @@ export function initUIEvents(elems: UIEventElements) {
 	}
 }
 
+
+/*
+ Meme chose on initialise les events pour le profil et le menu de langue
+  On oublie pas de gerer les inputs du profil pour les verifier et les sanitize
+  On gere aussi la sauvegarde des modifications du profil
+  On initialise aussi le menu de langue ici aussi car
+*/
 export function initProfileAndLanguage(profileElems: {
 	saveProfileBtn: HTMLElement;
 	usernameInput: HTMLInputElement;
@@ -102,8 +121,7 @@ export function initProfileAndLanguage(profileElems: {
 	language_button: HTMLElement;
 	language_menu: HTMLElement;
 }, currentUserId: number | null) {
-	const { saveProfileBtn, usernameInput, emailInput, avatarInput, passwordInput, confirmPasswordInput, menuUsername, menuEmail, profileAvatar } = profileElems;
-	const { language_button, language_menu } = languageElems;
+	const { saveProfileBtn } = profileElems;
 
 
 
@@ -184,27 +202,6 @@ export function initProfileAndLanguage(profileElems: {
 		} catch (err) {
 			console.error(err);
 			alert("Network error");
-		}
-	});
-
-	initLanguage();
-
-	language_button.addEventListener("click", () => {
-		language_menu.classList.toggle("show");
-	});
-
-	const enBtn = language_menu.querySelector(".en");
-	const frBtn = language_menu.querySelector(".fr");
-	const esBtn = language_menu.querySelector(".es");
-
-	if (enBtn) enBtn.addEventListener("click", () => setLanguage("en"));
-	if (frBtn) frBtn.addEventListener("click", () => setLanguage("fr"));
-	if (esBtn) esBtn.addEventListener("click", () => setLanguage("es"));
-
-	document.addEventListener("click", (e) => {
-		if (!(e.target instanceof Node)) return;
-		if (!language_button.contains(e.target) && !language_menu.contains(e.target)) {
-			language_menu.classList.remove("show");
 		}
 	});
 }

@@ -1,3 +1,7 @@
+
+/*
+Function pour changer l'affichage des menus (afficher un et cacher les autres)
+*/
 export function toggleMenu(
 	main?: HTMLElement | null,
 	...toHide: (HTMLElement | null | undefined)[]
