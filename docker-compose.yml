@@ -9,13 +9,10 @@ services:
   backend:
     build:
       context: ./Backend
-      target: runtime
     env_file:
       - Backend/.env
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=production
     volumes:
       - ./Backend/database:/app/database
     command: sh -c "npx prisma migrate deploy --schema=./prisma/schema.prisma && npm start"

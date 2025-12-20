@@ -1,5 +1,7 @@
-# ---------- BUILD STAGE ----------
-FROM node:20-alpine AS builder
+# ================================ #
+#            BUILD STAGE           #
+# ================================ #
+FROM node:20-alpine AS build
 
 WORKDIR /app/srcs
 
@@ -15,7 +17,10 @@ RUN npm install
 RUN npm run build
 RUN ls -la /app/srcs/js
 
-# ---------- NGINX STAGE ----------
+
+# ========================================= #
+#               NGINX STAGE                 #
+# ========================================= #
 FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
@@ -31,10 +36,10 @@ RUN openssl req -x509 -nodes -days 365 \
 
 COPY index.html ./
 
-COPY --from=builder /app/srcs/js ./js
+COPY --from=build /app/srcs/js ./js
 
-COPY --from=builder /app/srcs/assets ./assets
-COPY --from=builder /app/srcs/styles.css ./
+COPY --from=build /app/srcs/assets ./assets
+COPY --from=build /app/srcs/styles.css ./
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

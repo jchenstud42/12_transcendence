@@ -1,14 +1,3 @@
-# make build = construit les images et compile les fichiers backend
-# make dev = construit, compile et demarre les containers en mode dev
-# make up = demarre les containeurs en mode prod
-# make ps = liste tout les containeurs actif
-# make logs = regarde les logs
-# make down = arrete les containeurs
-# make clean = supprime tout SAUF volumes
-# make fclean = supprime tout
-# make rebuild = supprime tout et relance tout.
-
-
 BACKEND_DIR 	= Backend
 FRONT_DIR		= Frontend
 
@@ -34,9 +23,6 @@ build:
 	@cd Frontend && npx tsc
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"
 
-dev:
-	@echo "$(RED)"D"$(YELLOW)"e"$(GREEN)"v" $(CYAN)"M"$(BLUE)"o"$(MAGENTA)"d"$(RED)"."$(YELLOW)"."$(CYAN)"." "🧑‍💻" $(RESET) "
-	@NODE_ENV=development docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 up:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ⌚​​​" $(RESET)"
 	@docker compose up -d
