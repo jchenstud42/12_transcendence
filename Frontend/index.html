@@ -1,60 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="m-0 p-0">
 
-<style>
-	/* Importation de polices personnalisees */
-	@font-face {
-		font-family: "Petrona-Regular";
-		src: url("assets/fonts/Petrona-Regular.woff2") format("woff2");
-		font-weight: 400;
-		font-style: normal;
-	}
-
-	@font-face {
-		font-family: "ClimateCrisis-1979";
-		src: url("assets/fonts/ClimateCrisis-1979.woff2") format("woff2");
-		font-weight: 400;
-		font-style: normal;
-	}
-
-	@font-face {
-		font-family: "Karnivore-Tecca";
-		src: url("assets/fonts/karnivore-tecca.woff2") format("woff2");
-		font-weight: 400;
-		font-style: normal;
-	}
-
-
-	/* Classes Tailwind-like pour appeler les polices personnalisees */
-	.font-petrona {
-		font-family: "Petrona-Regular", sans-serif;
-	}
-
-	.font-climate {
-		font-family: "ClimateCrisis-1979", sans-serif;
-	}
-
-	.font-karnivore {
-		font-family: "Karnivore-Tecca", sans-serif;
-	}
-
-	.text-glow {
-		text-shadow:
-			0 0 5px #c2c22d,
-			0 0 20px #868613,
-			0 0 50px #696913;
-	}
-
-
-
-	/* Pour appliquer la police globalement */
-	body {
-		font-family: "Petrona-Regular", sans-serif;
-		margin: 0;
-		padding: 0;
-	}
-</style>
-
 
 <head>
 	<meta charset="UTF-8">
@@ -117,8 +63,70 @@
 			border-radius: 8px;
 			width: calc(var(--game-width) * 0.2);
 		}
+
+		/* Importation de polices personnalisees */
+		@font-face {
+			font-family: "Petrona-Regular";
+			src: url("assets/fonts/Petrona-Regular.woff2") format("woff2");
+			font-weight: 400;
+			font-style: normal;
+		}
+
+		@font-face {
+			font-family: "Karnivore-Tecca";
+			src: url("assets/fonts/karnivore-tecca.woff2") format("woff2");
+			font-weight: 400;
+			font-style: normal;
+		}
+
+		/* Classes Tailwind-like */
+		.font-petrona {
+			font-family: "Petrona-Regular", sans-serif;
+		}
+
+		.font-karnivore {
+			font-family: "Karnivore-Tecca", sans-serif;
+		}
+
+		.text-glow {
+			text-shadow:
+				0 0 5px #bebe1d,
+				0 0 20px #8f8f18,
+				0 0 50px #94941c;
+		}
+
+		/* Pour appliquer la police globalement */
+		body {
+			font-family: "Petrona-Regular", sans-serif;
+			margin: 0;
+			padding: 0;
+		}
 	</style>
 </head>
+
+<script>
+	tailwind.config = {
+		theme: {
+			extend: {
+				keyframes: {
+					flicker: {
+						'0%, 70%, 100%': { opacity: '1' },
+
+						'72%': { opacity: '0.4' },
+						'74%': { opacity: '1' },
+						'76%': { opacity: '0.2' },
+						'78%': { opacity: '1' },
+					},
+				},
+				animation: {
+					flicker: 'flicker 5s infinite',
+				},
+			},
+		},
+	}
+</script>
+
+
 
 <!-- MODULE DESTINATION 2FA -->
 <div id="destination-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -134,14 +142,16 @@
 	</div>
 </div>
 
+
 <body id="page" class="relative min-h-screen overflow-x-hidden m-0 p-0">
 	<!--background-->
-	<div class="absolute inset-0 bg-[url('./assets/template2.png')] bg-cover bg-center z-0"></div>
+	<div class="absolute inset-0 bg-[url('./assets/light.png')] bg-cover bg-center z-10 animate-flicker"></div>
+	<div class="absolute inset-0 bg-[url('./assets/background.png')] bg-cover bg-center z-0"></div>
 	<!--register, login  and language button-->
 	<div class="absolute top-4 right-4 z-10">
 		<div class="flex justify-end space-x-4 mb-2">
 			<button id="register-button"
-				class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline font-climate"
+				class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
 				type="button" data-i18n="register">
 				Register
 			</button>
@@ -354,7 +364,8 @@
 		<div id="ecran-pong" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-hidden"
 			style="width: var(--game-width); height: var(--game-height);">
 
-			<button id="pong-start-button" class="text-2xl text-[#e4dd33] tracking-[0.45em] font-karnivore text-glow"
+			<button id="pong-start-button"
+				class="text-2xl text-[#e4dd33] tracking-[0.45em] font-karnivore text-glow animate-pulse"
 				style="position: fixed; top: 67%; left: 50%; transform: translate(-50%, -50%);" type="submit">
 				START
 			</button>
@@ -363,7 +374,7 @@
 		<!-- ------------------------------- METTRE HIDDEN DANS LA CLASS PONG MENU ------------------------------------------ -->
 
 		<div id="pong-menu"
-			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black overflow-hidden"
+			class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black hidden overflow-hidden"
 			style="width: var(--game-width); height: var(--game-height);">
 
 			<!-- Play Buttons + Choose the type of match (Quick or Tournament Button)-->
