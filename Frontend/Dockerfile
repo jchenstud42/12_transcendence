@@ -10,7 +10,6 @@ COPY tsconfig.json ./
 
 COPY ./ts ./ts
 COPY ./assets ./assets
-COPY ./styles.css ./
 
 RUN npm install
 
@@ -37,9 +36,7 @@ RUN openssl req -x509 -nodes -days 365 \
 COPY index.html ./
 
 COPY --from=build /app/srcs/js ./js
-
 COPY --from=build /app/srcs/assets ./assets
-COPY --from=build /app/srcs/styles.css ./
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

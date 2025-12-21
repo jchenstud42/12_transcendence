@@ -18,6 +18,8 @@ const login_button = document.getElementById("login-button")!;
 
 const oauth42Btn = document.getElementById("oauth-42-button");
 
+const start_button = document.getElementById("pong-start-button")
+
 
 // 2FA Elements
 const twofaForm = document.getElementById("twofa-form") as HTMLFormElement;
@@ -74,7 +76,7 @@ init2FA(
 
 initUIEvents(
 	{
-		register_button, login_button, profile_button, edit_button, friends_button, history_button,
+		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button,
 		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu
 	});
 

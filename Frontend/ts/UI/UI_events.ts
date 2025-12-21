@@ -14,6 +14,7 @@ import { t } from "../traduction/i18n.js";
 */
 type UIEventElements = {
 	register_button?: HTMLElement | null;
+	start_button?: HTMLElement | null;
 	login_button?: HTMLElement | null;
 	profile_button?: HTMLElement | null;
 	edit_button?: HTMLElement | null;
@@ -62,6 +63,20 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.twofaTypeMenu,
 			elems.language_menu
 		)
+	);
+
+
+	elems.start_button?.addEventListener("click", () =>
+		// toggleMenu(
+		// 	elems.edit_menu,
+		// 	elems.twoFA_menu,
+		// 	elems.friends_menu,
+		// 	elems.history_menu,
+		// 	elems.twofaTypeMenu,
+		// 	elems.language_menu,
+		//  elems.pong_menu
+		// )
+		alert("Bouton du cul")
 	);
 
 	elems.friends_button?.addEventListener("click", () =>
