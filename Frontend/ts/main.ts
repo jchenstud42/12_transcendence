@@ -2,7 +2,7 @@ import { validateTextInput, validatePassword, sanitizeInput, validateEmail } fro
 import { shuffleArray, storeToken, storeUser, getServerErrorMessage } from "./utils/utils.js";
 import { t } from "./traduction/i18n.js";
 import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js";
-import { initProfileAndLanguage } from "./UI/UI_events.js";
+import { initProfile } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
 
@@ -78,7 +78,7 @@ initUIEvents(
 		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu
 	});
 
-initProfileAndLanguage(
+initProfile(
 	{
 		saveProfileBtn: document.getElementById("btn-save-profile")!,
 		usernameInput: document.getElementById("edit-username") as HTMLInputElement,
@@ -89,10 +89,6 @@ initProfileAndLanguage(
 		menuUsername: document.getElementById("menu-username")!,
 		menuEmail: document.getElementById("menu-email")!,
 		profileAvatar: document.getElementById("profile-avatar") as HTMLImageElement
-	},
-	{
-		language_button: document.getElementById("language-button")!,
-		language_menu: document.getElementById("language-menu")!
 	},
 	storedUserId
 );

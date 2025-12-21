@@ -7,7 +7,10 @@ import { t } from "../traduction/i18n.js";
 
 
 /*
- Les elements html qu'on recupere dans le front/via les params de la function init (main.ts) pour init les events (fonction en dessous)
+  - Les elements html qu'on recupere dans le front/via les params de la function init (main.ts) pour init les events (fonction en dessous)
+  - C'est utilise pour gerer les clicks et cacher/afficher les menus
+
+  bisous baveux
 */
 type UIEventElements = {
 	register_button?: HTMLElement | null;
@@ -31,9 +34,10 @@ type UIEventElements = {
 
 
 /*
- On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus,
-  on affiche le menu et cache les autres)
-  On initialise aussi le menu de langue
+  - On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus on affiche le menu et cache les autres)
+  - On initialise aussi le menu de langue et on set les events pour changer de langue
+
+  langue hehe
  */
 export function initUIEvents(elems: UIEventElements) {
 
@@ -102,12 +106,16 @@ export function initUIEvents(elems: UIEventElements) {
 
 
 /*
- Meme chose on initialise les events pour le profil et le menu de langue
-  On oublie pas de gerer les inputs du profil pour les verifier et les sanitize
-  On gere aussi la sauvegarde des modifications du profil
-  On initialise aussi le menu de langue ici aussi car
+  - Meme chose on initialise les events pour le profil et le menu de langue
+  - Ensuite on gere les inputs du profil pour sauvegarder les modifs
+  - On sanitize et on valide les inputs avant d'envoyer la requete au back
+  - On recupere le userId soit via le param ou via le localstorage si null
+  - On envoie la requete PATCH au back pour update le profil
+  - On met a jour le localstorage et l'UI si reussi
+
+  love you <3
 */
-export function initProfileAndLanguage(profileElems: {
+export function initProfile(profileElems: {
 	saveProfileBtn: HTMLElement;
 	usernameInput: HTMLInputElement;
 	emailInput: HTMLInputElement;
@@ -117,9 +125,6 @@ export function initProfileAndLanguage(profileElems: {
 	menuUsername: HTMLElement;
 	menuEmail: HTMLElement;
 	profileAvatar: HTMLImageElement;
-}, languageElems: {
-	language_button: HTMLElement;
-	language_menu: HTMLElement;
 }, currentUserId: number | null) {
 	const { saveProfileBtn } = profileElems;
 
@@ -153,10 +158,14 @@ export function initProfileAndLanguage(profileElems: {
 		}
 
 		const payload: Record<string, any> = {};
-		if (username) payload.username = sanitizeInput(username);
-		if (email) payload.email = sanitizeInput(email);
-		if (avatar) payload.avatar = sanitizeInput(avatar);
-		if (password) payload.password = password;
+		if (username)
+			payload.username = sanitizeInput(username);
+		if (email)
+			payload.email = sanitizeInput(email);
+		if (avatar)
+			payload.avatar = sanitizeInput(avatar);
+		if (password)
+			payload.password = password;
 
 		const token = localStorage.getItem("accessToken");
 		let userId = currentUserId;
@@ -193,9 +202,12 @@ export function initProfileAndLanguage(profileElems: {
 			const menuEmail = document.getElementById("menu-email");
 			const profileAvatar = document.getElementById("profile-avatar") as HTMLImageElement;
 
-			if (data.user.username) menuUsername!.textContent = data.user.username;
-			if (data.user.email) menuEmail!.textContent = data.user.email;
-			if (data.user.avatar) profileAvatar.src = data.user.avatar;
+			if (data.user.username)
+				menuUsername!.textContent = data.user.username;
+			if (data.user.email)
+				menuEmail!.textContent = data.user.email;
+			if (data.user.avatar)
+				profileAvatar.src = data.user.avatar;
 
 			alert("Profile updated!");
 

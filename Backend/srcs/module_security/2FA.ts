@@ -6,6 +6,8 @@ import prisma from "../user_manage/prisma/client.js";
 
 export type twoFAMethod = "email" | "sms" | "qr";
 
+
+
 export class twoFAService {
 
 	async generateTOTPSecret(userId: number) {
@@ -122,7 +124,9 @@ export class twoFAService {
 		else if (data.method === "sms") {
 			console.log('[2FA SMS] Code sent to', data.destination, ':', data.code);
 
+			// ==========================================================================================================================================
 			// TWILIO POUR VRAI SMS ICI, MAIS C PAYANT DONC ON SIMULE, LAISSEZ LE CODE PLS POUR MONTRER QU'ON PEUT IMPLEMENTER LE VRAI SERVICE QD MEME
+			// ==========================================================================================================================================
 			// Evidemment faut installer le package npm install twilio et changer les env
 			/*
 				import Twilio from "twilio";
