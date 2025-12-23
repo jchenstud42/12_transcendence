@@ -5,6 +5,7 @@ import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js
 import { initProfileAndLanguage } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
+import { Ai } from "./Pong_AI/ai.js";
 
 // CA C LE DIV DANS LE HTML
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
@@ -430,7 +431,7 @@ yourFriendsBtn.addEventListener("click", async () => {
 });
 
 
-// POOOONNNNNNNG
+// Pong Game
 const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
 const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
 const ball = document.getElementById("ball") as HTMLDivElement;
@@ -468,21 +469,6 @@ const playersList = document.getElementById("players-list")! as HTMLDivElement;
 const finalList = document.getElementById("final-list")! as HTMLDivElement;
 const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
 const crownImage = document.getElementById("crown-image")! as HTMLImageElement;
-
-class Player {
-	name: string = "";
-	playerNbr: number = 0;
-	paddle: HTMLDivElement | null = null;
-	point: number = 0;
-	gameWon: number = 0;
-	isAi: boolean = false
-
-	constructor(name: string, isAi: boolean, playerNbr: number) {
-		this.name = name;
-		this.isAi = isAi;
-		this.playerNbr = playerNbr;
-	}
-};
 
 class Ball {
 	el: HTMLDivElement;
@@ -602,6 +588,7 @@ class Ball {
 };
 
 const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+const aiPlayer = new Ai(gameBall, paddle_right);
 
 //game loop to update ball position;
 let lastTime = performance.now();
@@ -637,6 +624,8 @@ function startGame() {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
 			gameBall.serve();
+			//Ai Starts Playing here
+			aiPlayer.oneSecondLoop();
 		}, 1000);
 	}, 1000);
 }
@@ -651,6 +640,7 @@ play_button.addEventListener("click", startGame);
 // });
 
 //Set true or False wether a key is press among the "keys" listtwofaForm
+
 document.addEventListener('keydown', (e) => {
 	if (e.key in keys) {
 		keys[e.key as keyof typeof keys] = true;
@@ -682,6 +672,24 @@ function updatePaddlePositions() {
 }
 
 requestAnimationFrame(updatePaddlePositions);
+
+//End of Pong
+/////////////////////////
+
+class Player {
+	name: string = "";
+	playerNbr: number = 0;
+	paddle: HTMLDivElement | null = null;
+	point: number = 0;
+	gameWon: number = 0;
+	isAi: boolean = false
+
+	constructor(name: string, isAi: boolean, playerNbr: number) {
+		this.name = name;
+		this.isAi = isAi;
+		this.playerNbr = playerNbr;
+	}
+};
 
 class Game {
 	players: Player[] = [];
