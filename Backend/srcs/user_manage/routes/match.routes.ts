@@ -7,11 +7,11 @@ interface MatchParams {
 }
 
 interface MatchBody {
-	player1Id: number;
-	player2Id: number;
+	player1Id: number | null;
+	player2Id: number | null;
 	score1: number;
 	score2: number;
-	winnerId: number;
+	winnerId: number | null;
 }
 
 export default async function matchRoutes(fastify: FastifyInstance) {

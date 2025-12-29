@@ -633,6 +633,87 @@ async function rejectFriendRequest(requestId: number, userId: number) {
 	return await res.json();
 }
 
+async function fetchMatchHistory(userId: number) {
+	try {
+		const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '8443') ? 'http://localhost:8443' : '';
+		const res = await fetch(`${apiBase}/match/${userId}`, {
+			credentials: "include",
+			headers: getAuthHeaders()
+		});
+		const text = await res.text();
+
+		if (!res.ok)
+			throw new Error("Failed to fetch match history");
+
+		const data = JSON.parse(text);
+		return data;
+	} catch (err) {
+		console.error("fetchMatchHistory error:", err);
+		return [];
+	}
+}
+
+const historyMenuList = document.createElement("div");
+historyMenuList.id = "history-list";
+
+function renderMatchHistory(matches: any[]) {
+	const historyContainer = document.getElementById("history-list");
+	if (!historyContainer) return;
+	
+	historyContainer.innerHTML = "";
+	
+	if (matches.length === 0) {
+		const div = document.createElement("div");
+		div.textContent = "No matches yet";
+		historyContainer.appendChild(div);
+		return;
+	}
+
+	matches.forEach(match => {
+		const div = document.createElement("div");
+		div.className = "match-item bg-gray-100 p-3 rounded mb-2";
+		
+		const date = new Date(match.date).toLocaleDateString();
+		const winner = match.winnerId ? (match.winnerId === match.player1?.id ? match.player1?.username : match.player2?.username) : "Draw";
+		const player1Name = match.player1?.username || "`NULL";
+		const player2Name = match.player2?.username || "NULL";
+		
+		div.innerHTML = `
+			<div class="flex justify-between items-center">
+				<div class="flex-1">
+					<span class="font-semibold">${player1Name}</span>
+					<span class="mx-2">${match.score1}</span>
+					<span>-</span>
+					<span class="mx-2">${match.score2}</span>
+					<span class="font-semibold">${player2Name}</span>
+				</div>
+			</div>
+			<div class="text-sm text-gray-600 mt-1">
+				<span>Winner: <span class="font-semibold">${winner}</span></span>
+				<span class="mx-2">|</span>
+				<span>${date}</span>
+			</div>
+		`;
+		historyContainer.appendChild(div);
+	});
+}
+
+history_button.addEventListener("click", async () => {
+	try {
+		const s = localStorage.getItem('user');
+		if (!s) {
+			alert("You must be logged in");
+			return;
+		}
+		const userId = JSON.parse(s).id;
+		const matches = await fetchMatchHistory(userId);
+		renderMatchHistory(matches);
+	} catch (err: any) {
+		console.error("Error:", err);
+		alert(err.message);
+	}
+});
+
 
 // POOOONNNNNNNG
 const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
@@ -680,11 +761,13 @@ class Player {
 	point: number = 0;
 	gameWon: number = 0;
 	isAi: boolean = false
+	userId?: number;
 
-	constructor(name: string, isAi: boolean, playerNbr: number) {
+	constructor(name: string, isAi: boolean, playerNbr: number, userId?: number) {
 		this.name = name;
 		this.isAi = isAi;
 		this.playerNbr = playerNbr;
+		this.userId = userId;
 	}
 };
 
