@@ -5,7 +5,6 @@ import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js
 import { initProfileAndLanguage } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
-import { Ai } from "./Pong_AI/ai.js";
 // CA C LE DIV DANS LE HTML
 const registerContainer = document.getElementById("register-form");
 const loginContainer = document.getElementById("login-form");
@@ -380,10 +379,12 @@ yourFriendsBtn.addEventListener("click", async () => {
     const friends = await fetchFriendsList(storedUserId);
     renderFriends(friends);
 });
-// Pong Game
+// PONG GAME
 const paddle_left = document.getElementById("left-paddle");
 const paddle_right = document.getElementById("right-paddle");
 const ball = document.getElementById("ball");
+const AIview = document.getElementById("AIview");
+const AInextView = document.getElementById("AInextView");
 const PONG_WIDTH = 800;
 const PONG_HEIGHT = 600;
 const PADDLE_WIDTH = 10;
@@ -414,115 +415,17 @@ const playersList = document.getElementById("players-list");
 const finalList = document.getElementById("final-list");
 const winnerName = document.getElementById("winner-name");
 const crownImage = document.getElementById("crown-image");
-class Ball {
-    constructor(el, container, size = BALL_SIZE) {
-        this.x = 0;
-        this.y = 0;
-        this.vx = 0;
-        this.vy = 0;
-        this.speed = 300;
-        this.active = false;
-        this.onScore = null; // callback
-        this.el = el;
-        this.container = container;
-        this.size = size;
-        this.initBallPos();
-    }
-    initBallPos() {
-        const w = this.container.clientWidth;
-        const h = this.container.clientHeight;
-        this.x = w / 2 - this.size / 2;
-        this.y = h / 2 - this.size / 2;
-        this.vx = 0;
-        this.vy = 0;
-        this.active = false;
-        this.render();
-    }
-    serve(direction = (Math.random() < 0.5 ? 1 : -1)) {
-        this.initBallPos();
-        const maxAngle = 45 * (Math.PI / 180);
-        const angle = (Math.random() * maxAngle * 2) - maxAngle;
-        this.speed = 300;
-        this.vx = direction * this.speed * Math.cos(angle);
-        this.vy = this.speed * Math.sin(angle);
-        this.active = true;
-    }
-    reset() {
-        this.initBallPos();
-    }
-    render() {
-        this.el.style.removeProperty('right');
-        this.el.style.left = `${this.x}px`;
-        this.el.style.top = `${this.y}px`;
-    }
-    rectsIntersect(ax, ay, aw, ah, bx, by, bw, bh) {
-        return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-    }
-    update(dt) {
-        if (!this.active)
-            return;
-        const w = this.container.clientWidth;
-        const h = this.container.clientHeight;
-        //update ball position
-        this.x += this.vx * dt;
-        this.y += this.vy * dt;
-        //wall colision
-        if (this.y <= 0) {
-            this.y = 0;
-            this.vy = -this.vy;
-        }
-        if (this.y + this.size >= h) {
-            this.y = h - this.size;
-            this.vy = -this.vy;
-        }
-        const plX = paddle_left.offsetLeft;
-        const plY = paddle_left.offsetTop;
-        if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
-            const paddleCenter = plY + PADDLE_HEIGHT / 2;
-            const ballCenter = this.y + this.size / 2;
-            const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-            const bounceAngle = relative * (75 * Math.PI / 180);
-            this.speed = Math.min(this.speed + 20, 900);
-            this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
-            this.vy = this.speed * Math.sin(bounceAngle);
-            this.x = plX + PADDLE_WIDTH + 0.5;
-        }
-        const prX = paddle_right.offsetLeft;
-        const prY = paddle_right.offsetTop;
-        if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
-            const paddleCenter = prY + PADDLE_HEIGHT / 2;
-            const ballCenter = this.y + this.size / 2;
-            const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-            const bounceAngle = relative * (75 * Math.PI / 180);
-            this.speed = Math.min(this.speed + 20, 900);
-            this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
-            this.vy = this.speed * Math.sin(bounceAngle);
-            this.x = prX - PADDLE_WIDTH - 0.5;
-        }
-        if (this.x + this.size < 0) {
-            console.debug('Ball out left -> right player scores');
-            if (this.onScore)
-                this.onScore('right'); // notifier le Game
-            this.reset();
-        }
-        if (this.x > w) {
-            console.debug('Ball out right -> left player scores');
-            if (this.onScore)
-                this.onScore('left'); // notifier le Game
-            this.reset();
-        }
-        this.render();
-    }
-}
-;
-const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
-const aiPlayer = new Ai(gameBall, paddle_right);
+import { Ball } from './Pong/ball.js';
+import { Ai } from './Pong/ai.js';
+const gameBall = new Ball(ball, pong_menu, paddle_left, paddle_right, BALL_SIZE);
+const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right);
 //game loop to update ball position;
 let lastTime = performance.now();
 function gameLoop(now = performance.now()) {
     const dt = (now - lastTime) / 1000;
     lastTime = now;
     gameBall.update(dt);
+    aiPlayer.updategameElapsedTime(dt);
     requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
@@ -545,6 +448,7 @@ function startGame() {
         setTimeout(() => {
             go_text.classList.add("hidden");
             ball.classList.remove("hidden");
+            aiPlayer.showballAIViews(true);
             gameBall.serve();
             //Ai Starts Playing here
             aiPlayer.oneSecondLoop();
