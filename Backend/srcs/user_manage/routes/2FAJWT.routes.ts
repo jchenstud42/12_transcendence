@@ -144,8 +144,6 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 
 	fastify.post("/disable-2fa", async (req, reply) => {
 		try {
-			console.log("disable-2FA route called");
-
 			const refreshToken = req.cookies.refreshToken;
 			req.log.info(`Refresh token: ${req.cookies.refreshToken}`);
 

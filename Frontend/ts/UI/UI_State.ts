@@ -190,7 +190,6 @@ export async function initAuthState() {
 
 		if (data.user?.is2FAEnabled && !sessionStorage.getItem("twoFAtoken")) {
 			storedUserId = data.user.id;
-			console.log("User id in InitAuthState:", storedUserId);
 			setSelected2FAType(data.user.twoFAMethod as any);
 			showTwoFAForm(data.user.twoFAMethod as any);
 			return;
@@ -198,7 +197,6 @@ export async function initAuthState() {
 
 
 		storedUserId = data.user.id;
-		console.log("User id in InitAuthState before applyLoggedIn:", storedUserId);
 		applyLoggedInState(data.user);
 
 	} catch (err) {

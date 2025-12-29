@@ -300,8 +300,6 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			}
 		});
 
-	console.log("twofaToggleBtn element:", twofaToggleBtn);
-
 	if (twofaToggleBtn)
 		twofaToggleBtn.addEventListener("click", async () => {
 			const isInSetupMode = !elems!.twofaTypeMenu.classList.contains("hidden");

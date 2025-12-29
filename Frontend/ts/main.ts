@@ -30,6 +30,7 @@ const destinationCancel = document.getElementById("destination-cancel")!;
 const destinationConfirm = document.getElementById("destination-confirm")!;
 let storedUserId: number | null = null;
 
+
 //Profile
 const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
 const edit_menu = document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
@@ -173,7 +174,8 @@ else {
 					if (data?.accessToken) storeToken(data.accessToken);
 					if (data?.user) {
 						storeUser(data.user);
-						if (typeof data.user.id === 'number') storedUserId = data.user.id;
+						if (typeof data.user.id === 'number')
+							storedUserId = data.user.id;
 					}
 					alert("Registration successful, you can now log in");
 					register_form.reset();
@@ -261,7 +263,8 @@ else {
 						storeToken(data.accessToken);
 						if (data.user) {
 							storeUser(data.user);
-							if (typeof data.user.id === 'number') storedUserId = data.user.id;
+							if (typeof data.user.id === 'number')
+								storedUserId = data.user.id;
 						}
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
@@ -296,7 +299,8 @@ if (logoutButton) {
 					const s = localStorage.getItem('user');
 					if (s) {
 						const parsed = JSON.parse(s);
-						if (parsed && typeof parsed.id === 'number') idToSend = parsed.id;
+						if (parsed && typeof parsed.id === 'number')
+							idToSend = parsed.id;
 					}
 				} catch (err) {
 					console.warn('Failed to parse stored user for logout', err);
@@ -354,78 +358,280 @@ if (logoutButton) {
 	});
 }
 
+// On recup la liste d'amis en envoyant un GET a la route /friend/userId, en gros pour recup les amis de cet userId precisement
+// luv yu
 async function fetchFriendsList(userId: number) {
 	try {
-		const res = await fetch(`/friend/${userId}`, { credentials: "include" });
-		if (!res.ok) throw new Error("Failed to fetch friends");
-		const data = await res.json();
-		return data;
+		const res = await fetch(`/friend/${userId}`, {
+			credentials: "include",
+			headers: getAuthHeaders()
+		});
+		const text = await res.text();
+
+		if (!res.ok)
+			throw new Error("Failed to fetch friends");
+
+		return JSON.parse(text);
 	} catch (err) {
-		console.error(err);
+		console.error("fetchFriendsList error:", err);
 		return [];
 	}
 }
 
+// Fonction pour recuperer un user par son username, on envoie une requete GEt a la route pour recup l'user
+// bisougue
+async function fetchUserByUsername(username: string) {
+	const res = await fetch(`/user/by-username/${username}`, {
+		credentials: "include",
+		headers: getAuthHeaders()
+	});
+	const textResponse = await res.text();
+	if (!res.ok)
+		throw new Error("User not found");
+
+	return JSON.parse(textResponse);
+}
+
+// La fonction pour supprimer un ami qui est appelee dans le listener du bouton de suppression d'ami
+// On envoie une requete DELETE a la route /friend avec le userId et le friendId dans le bobodydy
+// Zoubis
+async function removeFriend(userId: number, friendId: number) {
+	const res = await fetch("/friend", {
+		method: "DELETE",
+		credentials: "include",
+		headers: getAuthHeaders(),
+		body: JSON.stringify({ userId, friendId }),
+	});
+	if (!res.ok)
+		throw new Error("Failed to remove friend");
+	return await res.json();
+}
+
+// Fonction utilitaire pour recuperer les header d'authentification avec le token, pour les routes protegees par le preHandler
+// Bises
+function getAuthHeaders(): HeadersInit {
+	const token = localStorage.getItem("accessToken");
+	return {
+		"Content-Type": "application/json",
+		...(token && { "Authorization": `Bearer ${token}` })
+	};
+}
+
+
+// Le listener pour envoyer une requete d'ami, on recup l'userId du LocalStorage et on demande a l'user le username de l'ami qu'il souhaite ajouter
+// On fetch sur la route backend avec le bond body (senderId = userId du localStorage, receiverId = userId de l'ami qu'on veut ajouter)
+// et les bons headers (token car route protegee par le preHandler authentizer)
+// si tout bon on affiche une alerte comme quou la requete est envoyee
+// Bisous
 addFriendBtn.addEventListener("click", async () => {
 	const friendUsername = prompt("Enter the username of the friend to add:");
-	if (!friendUsername) return;
-
+	if (!friendUsername)
+		return;
 	try {
-		const resUser = await fetch(`/user/by-username/${friendUsername}`, { credentials: "include" });
-		if (!resUser.ok)
-			throw new Error("User not found");
-		const userData = await resUser.json();
+		const s = localStorage.getItem('user');
 
-		const payload = { userId: storedUserId!, friendId: userData.id };
-		const res = await fetch("/friend", {
+		if (!s)
+			throw new Error("You must be logged in");
+		const currentUser = JSON.parse(s);
+		const userData = await fetchUserByUsername(friendUsername);
+
+		const payload = { senderId: currentUser.id, receiverId: userData.id };
+		const res = await fetch("/friend/request", {
 			method: "POST",
 			credentials: "include",
-			headers: { "Content-Type": "application/json" },
+			headers: getAuthHeaders(),
 			body: JSON.stringify(payload),
 		});
 
-		if (!res.ok)
-			throw new Error("Failed to add friend");
-		alert("Friend added successfully!");
-	} catch (err: any) {
+		const responseText = await res.text();
+
+		if (!res.ok) {
+			const error = JSON.parse(responseText);
+			throw new Error(error.error || "Failed to send friend request");
+		}
+		alert("Friend request sent!");
+	}
+	catch (err: any) {
+		console.error("Error:", err);
 		alert(err.message);
 	}
 });
 
-yourFriendsBtn.addEventListener("click", async () => {
-	const friends = await fetchFriendsList(storedUserId!);
-	alert("Your friends: " + friends.map((f: any) => f.username).join(", "));
-});
-
-pendingFriendsBtn.addEventListener("click", async () => {
-	try {
-		const res = await fetch(`/friend-request/received/${storedUserId}`, { credentials: "include" });
-		if (!res.ok)
-			throw new Error("Failed to fetch pending friends");
-		const requests = await res.json();
-		alert("Pending requests: " + requests.map((r: any) => r.sendBy.username).join(", "));
-	} catch (err: any) {
-		alert(err.message);
-	}
-});
 
 const friendsMenuList = document.createElement("div");
 friendsMenuList.id = "friends-list";
 friends_menu!.appendChild(friendsMenuList);
 
+
+// On afficher la liste d'amis dans le menu friends, on cree un element pour chaque ami avec son username et un bouton pour le supprimer
+// On ajoute un listener sur le bouton pour supprimer l'ami en question si click dessus
+// Puis on refetch la liste d'amis et on re-render la liste actualise
+// Bisous
 function renderFriends(friends: any[]) {
 	friendsMenuList.innerHTML = "";
+	if (friends.length === 0) {
+		const div = document.createElement("div");
+		div.textContent = "No friends yet";
+		friendsMenuList.appendChild(div);
+		return;
+	}
 	friends.forEach(f => {
 		const div = document.createElement("div");
-		div.textContent = `${f.username} (${f.status})`;
+		div.className = "friend-item";
+		div.innerHTML = `
+            <span>${f.username} (${f.status})</span>
+            <button class="remove-friend-btn" data-friend-id="${f.id}">✕</button>
+        `;
 		friendsMenuList.appendChild(div);
+	});
+	document.querySelectorAll(".remove-friend-btn").forEach(btn => {
+		btn.addEventListener("click", async (e) => {
+			const friendId = Number((e.target as HTMLElement).dataset.friendId);
+			try {
+				const s = localStorage.getItem('user');
+				if (!s)
+					throw new Error("You must be logged in");
+				const userId = JSON.parse(s).id;
+
+				await removeFriend(userId, friendId);
+				const friends = await fetchFriendsList(userId);
+				renderFriends(friends);
+			}
+			catch (err: any) {
+				alert(err.message);
+			}
+		});
 	});
 }
 
+// Le listener pour afficher la liste d'amis, on recup l'userId dans le localStorage et on fetch sur la route backend
+// avec les bons headers (token car route protegee par le preHandler authentizer)
+// si tout bon on appelle renderFriends pour afficher la liste d'amis
+// Bisous
 yourFriendsBtn.addEventListener("click", async () => {
-	const friends = await fetchFriendsList(storedUserId!);
-	renderFriends(friends);
+	try {
+		const s = localStorage.getItem('user');
+		if (!s) {
+			alert("You must be logged in");
+			return;
+		}
+		const userId = JSON.parse(s).id;
+		const friends = await fetchFriendsList(userId);
+		renderFriends(friends);
+	} catch (err: any) {
+		console.error("Error:", err);
+		alert(err.message);
+	}
 });
+
+// Le listener pour afficher les requetes en attente, on recuper l'userId dans le localStorage et on fetch sur la route backend
+// toujours avec les bons headers (token car route protegee par le preHandler authentizer)
+// si tout bon on appelle renderPendingRequests pour afficher les requests
+// Bisous
+pendingFriendsBtn.addEventListener("click", async () => {
+	try {
+		const s = localStorage.getItem('user');
+		if (!s)
+			throw new Error("You must be logged in");
+		const userId = JSON.parse(s).id;
+
+		const res = await fetch(`/friend/request/received/${userId}`, {
+			credentials: "include",
+			headers: getAuthHeaders()
+		});
+		if (!res.ok)
+			throw new Error("Failed to fetch pending requests");
+
+		const requests = await res.json();
+		renderPendingRequests(requests, userId);
+	} catch (err: any) {
+		console.error(err);
+		alert(err.message);
+	}
+});
+
+// On affiche les request d'amis en attente et on permet d'accepter ou de rejeter la request
+// en fonction du choix on va dans le bon listener et la bonne fonction accept/reject
+// Bisous bisous
+function renderPendingRequests(requests: any[], currentUserId: number) {
+	friendsMenuList.innerHTML = "";
+
+	if (requests.length === 0) {
+		const div = document.createElement("div");
+		div.textContent = "No pending requests";
+		friendsMenuList.appendChild(div);
+		return;
+	}
+
+	requests.forEach(r => {
+		const div = document.createElement("div");
+		div.className = "pending-item";
+		div.innerHTML = `
+            <span>${r.sendBy.username}</span>
+            <button class="accept-btn" data-request-id="${r.id}">✓ Accept</button>
+            <button class="reject-btn" data-request-id="${r.id}">✕ Reject</button>
+        `;
+		friendsMenuList.appendChild(div);
+	});
+
+	document.querySelectorAll(".accept-btn").forEach(btn => {
+		btn.addEventListener("click", async (e) => {
+			const requestId = Number((e.target as HTMLElement).dataset.requestId);
+			try {
+				await acceptFriendRequest(requestId, currentUserId);
+				alert("Friend request accepted!");
+				pendingFriendsBtn.click();
+			} catch (err: any) {
+				alert(err.message);
+			}
+		});
+	});
+
+	document.querySelectorAll(".reject-btn").forEach(btn => {
+		btn.addEventListener("click", async (e) => {
+			const requestId = Number((e.target as HTMLElement).dataset.requestId);
+			try {
+				await rejectFriendRequest(requestId, currentUserId);
+				alert("Friend request rejected");
+				pendingFriendsBtn.click();
+			} catch (err: any) {
+				alert(err.message);
+			}
+		});
+	});
+}
+
+// Accepter la request d'un ami, on fetch sur la bonne route backed avec le bon body et les bons headers (token)
+// Bisous
+async function acceptFriendRequest(requestId: number, userId: number) {
+	const res = await fetch(`/friend/request/accept/${requestId}`, {
+		method: "POST",
+		credentials: "include",
+		headers: getAuthHeaders(),
+		body: JSON.stringify({ userId }),
+	});
+	if (!res.ok) {
+		const error = await res.json();
+		throw new Error(error.error || "Failed to accept request");
+	}
+	return await res.json();
+}
+
+// Meme fonctionnement que acceptFriendRequest mais pour rejeter
+// Bisous
+async function rejectFriendRequest(requestId: number, userId: number) {
+	const res = await fetch(`/friend/request/reject/${requestId}`, {
+		method: "POST",
+		credentials: "include",
+		headers: getAuthHeaders(),
+		body: JSON.stringify({ userId }),
+	});
+	if (!res.ok) {
+		const error = await res.json();
+		throw new Error(error.error || "Failed to reject request");
+	}
+	return await res.json();
+}
 
 
 // POOOONNNNNNNG
