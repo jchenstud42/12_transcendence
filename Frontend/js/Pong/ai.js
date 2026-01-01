@@ -9,11 +9,26 @@ const pong_menu = document.getElementById("pong-menu");
 const AIview = document.getElementById("AIview");
 const AIbounceView = document.getElementById("AIbounceView");
 const AInextView = document.getElementById("AInextView");
+const AIview_container = document.getElementById("AIview-container");
 const ballAiView = new Ball(AIview, pong_menu, undefined, undefined, BALL_SIZE);
 const ballAiBounceView = new Ball(AIbounceView, pong_menu, undefined, undefined, BALL_SIZE);
 const ballAiNextView = new Ball(AInextView, pong_menu, undefined, undefined, BALL_SIZE);
+/*
+    Problem to Solve:
+    - Prediction after a wall bounce is shit : OK
+    - Still some problem with the prediction view with wall bounce
+    - Add On/Off AI view button
+    - Add Mooving timer: The AI calculates how long before impact wiht paddle to reset instantly after hit
+    - Check if everything works with Left AI paddle
+    - Check if everything works with two AIs playing against each other
+    - Create Onion layers to show every position of prediction with different opacity / color
+
+*/
 export class Ai {
-    constructor(ball, paddleRight, paddleLeft, AIpaddle) {
+    constructor(ball, paddleRight, paddleLeft, AIpaddle, AILevel) {
+        this.AIside = 'NONE';
+        this.AIstate = 'MOVE';
+        this.AILevel = 1;
         this.lastTime = performance.now();
         this.gameElapsedTime = 1;
         if (!ball) {
@@ -23,6 +38,9 @@ export class Ai {
         ballAiView.x = ball.x;
         ballAiView.y = ball.y;
         ballAiView.render();
+        ballAiBounceView.x = -100;
+        ballAiBounceView.y = -100;
+        ballAiBounceView.render();
         ballAiNextView.x = ball.x;
         ballAiNextView.y = ball.y;
         ballAiNextView.render();
@@ -32,6 +50,11 @@ export class Ai {
         this.paddleRight = paddleRight;
         this.paddleLeft = paddleLeft;
         this.AIpaddle = AIpaddle;
+        if (this.AIpaddle === this.paddleLeft)
+            this.AIside = 'LEFT';
+        else if (this.AIpaddle === this.paddleRight)
+            this.AIside = 'RIGHT';
+        this.AILevel = AILevel;
         this.paddleCenter = { x: 0, y: 0 };
         this.updatePaddleCenter();
     }
@@ -39,15 +62,16 @@ export class Ai {
         // Update ball position every second
         if (this.canCheckBallPos() || firstRun) {
             this.updateBallPos();
-            // Predict ball position for the next second
-            ballAiView.render();
+            if (this.isBallMovingTowardsAI())
+                this.AIstate = 'MOVE';
+            else
+                this.AIstate = 'RESET';
             this.predictBallNextPos();
-            ballAiNextView.render();
             firstRun = false;
         }
         // Every frame: check delta and press appropriate key
         const delta = this.getPadBallDelta();
-        if (Math.abs(delta) > 10) { // tolerance to avoid jitter
+        if (this.AIstate === 'MOVE' && Math.abs(delta) > 10) { // tolerance to avoid jitter
             if (delta > 0) {
                 this.pressPaddleUp(true);
                 this.pressPaddleDown(false);
@@ -57,14 +81,12 @@ export class Ai {
                 this.pressPaddleDown(true);
             }
         }
+        else if (this.AIstate === 'RESET')
+            this.resetPaddle();
         else {
             this.pressPaddleUp(false);
             this.pressPaddleDown(false);
         }
-        /* 		else {
-            this.resetPaddle();
-            return requestAnimationFrame(() => this.oneSecondLoop(false, true));
-        } */
         requestAnimationFrame(() => this.oneSecondLoop(false));
     }
     //BALL POSITION FUNCTIONS
@@ -83,11 +105,22 @@ export class Ai {
         console.log("Ball Pos Updated to", this.ballPos);
         ballAiView.x = this.ballPos.x;
         ballAiView.y = this.ballPos.y;
+        ballAiView.render();
     }
     updatePaddleCenter() {
         const centerX = this.AIpaddle.offsetLeft + this.AIpaddle.offsetWidth / 2;
         const centerY = this.AIpaddle.offsetTop + this.AIpaddle.offsetHeight / 2;
         this.paddleCenter = { x: centerX, y: centerY };
+    }
+    isBallMovingTowardsAI() {
+        const prevDelta = this.getPrevBallDelta();
+        if (this.AIside === 'LEFT' && prevDelta.x < 0) {
+            return true;
+        }
+        else if (this.AIside === 'RIGHT' && prevDelta.x > 0) {
+            return true;
+        }
+        return false;
     }
     //BALL PREDICTION FUNCTIONS
     getPadBallDelta() {
@@ -102,101 +135,81 @@ export class Ai {
         const prevDelta = this.getPrevBallDelta();
         this.ballNextPos.x = this.ballPos.x + prevDelta.x;
         this.ballNextPos.y = this.ballPos.y + prevDelta.y;
+        let i = 0;
+        //Level of the AI ditactes how many seconds ahead it can predict until impact
+        while (!this.isBallGoingOut() && i < 10) {
+            this.ballNextPos.x += prevDelta.x;
+            this.ballNextPos.y += prevDelta.y;
+            i++;
+        }
         const Yratio = prevDelta.y / prevDelta.x;
         const Xratio = prevDelta.x / prevDelta.y;
-        //Predict Paddle Left/Right Hit
-        if (this.IsBallGoingOutRight()) {
-            this.ballNextPos.x = this.paddleRight.offsetLeft - BALL_SIZE;
-            const padBallDelta = this.ballNextPos.x - this.ballPos.x;
-            const Ypos = padBallDelta * Yratio;
-            this.ballNextPos.y = this.ballPos.y + Ypos;
-        }
-        else if (this.IsBallGoingOutLeft()) {
-            this.ballNextPos.x = this.paddleLeft.offsetLeft + BALL_SIZE;
-            const padBallDelta = this.ballNextPos.x - this.ballPos.x;
-            const Ypos = padBallDelta * Yratio;
-            this.ballNextPos.y = this.ballPos.y + Ypos;
-        }
-        //The ball will hit top or bottom bounds, predict bounce
-        //Predict Ball Bounce on top/bottom Walls
-        if (this.IsBallGoingOutDown()) {
-            console.log("Predicting Bounce Down");
-            // 1. Distance from current Y to the wall (0)
-            const distToWallY = PONG_HEIGHT - this.ballPos.y;
-            // 2. Calculate horizontal shift to impact point
-            const xImpactOffset = distToWallY * Xratio;
-            // 3. Set impact visual (Current X + Offset)
-            ballAiBounceView.x = this.ballPos.x + xImpactOffset;
-            ballAiBounceView.y = PONG_HEIGHT - (BALL_SIZE / 2);
-            ballAiBounceView.render();
-            this.ballNextPos.y = PONG_HEIGHT - (this.ballNextPos.y - PONG_HEIGHT);
-            this.ballPrevPos.y = this.ballNextPos.y;
-            this.ballPrevPos.x = this.ballNextPos.x;
-        }
-        else if (this.IsBallGoingOutUp()) {
-            console.log("Predicting Bounce Up");
-            // 1. Distance from current Y to the wall (0)
-            const distToWallY = 0 - this.ballPos.y;
-            // 2. Calculate horizontal shift to impact point
-            const xImpactOffset = distToWallY * Xratio;
-            // 3. Set impact visual (Current X + Offset)
-            ballAiBounceView.x = this.ballPos.x + xImpactOffset;
-            ballAiBounceView.y = BALL_SIZE / 2;
-            ballAiBounceView.render();
-            // 4. Reflect the NextPos Y across the wall
-            this.ballNextPos.y = -this.ballNextPos.y;
-            //5. Update previous position
-            this.ballPrevPos.y = this.ballNextPos.y;
-            this.ballPrevPos.x = this.ballNextPos.x;
-        }
-        else {
-            ballAiBounceView.x = -100; //move out of view
+        //Predict Bonces Paddle (Left/Righ) or Wall (Up/Down)
+        if (this.isBallGoingOutRight()) {
+            ballAiBounceView.x = -100; //move wall bounce phantom out of view
             ballAiBounceView.y = -100;
-            ballAiBounceView.render();
+            console.log("Predicting Right Paddle Bounce");
+            this.predictRightPaddleBounce(Yratio);
         }
+        else if (this.isBallGoingOutLeft()) {
+            ballAiBounceView.x = -100; //move wall bounce phantom out of view
+            ballAiBounceView.y = -100;
+            console.log("Predicting Left Paddle Bounce");
+            this.predictLeftPaddleBounce(Yratio);
+        }
+        else if (this.isBallGoingOutUp())
+            this.predictUpWallBounce(Xratio);
+        else if (this.isBallGoingOutDown())
+            this.predictDownWallBounce(Xratio);
+        ballAiBounceView.render();
         ballAiNextView.x = this.ballNextPos.x;
         ballAiNextView.y = this.ballNextPos.y;
+        ballAiNextView.render();
     }
     //PADDLE MOVMENT FUNCTIONS
     pressPaddleUp(option) {
+        const paddleUpKey = this.AIside === 'LEFT' ? 'w' : 'ArrowUp';
+        const paddleUpCode = this.AIside === 'LEFT' ? 87 : 38;
         if (option == true) {
             document.dispatchEvent(new KeyboardEvent("keydown", {
-                key: "ArrowUp",
-                code: "ArrowUp",
-                keyCode: 38,
-                which: 38,
+                key: paddleUpKey,
+                code: paddleUpKey,
+                keyCode: paddleUpCode,
+                which: paddleUpCode,
                 bubbles: true,
                 cancelable: true
             }));
         }
         else {
             document.dispatchEvent(new KeyboardEvent("keyup", {
-                key: "ArrowUp",
-                code: "ArrowUp",
-                keyCode: 38,
-                which: 38,
+                key: paddleUpKey,
+                code: paddleUpKey,
+                keyCode: paddleUpCode,
+                which: paddleUpCode,
                 bubbles: true,
                 cancelable: true
             }));
         }
     }
     pressPaddleDown(option) {
+        const paddleDownKey = this.AIside === 'LEFT' ? 's' : 'ArrowDown';
+        const paddleDownCode = this.AIside === 'LEFT' ? 83 : 40;
         if (option == true) {
             document.dispatchEvent(new KeyboardEvent("keydown", {
-                key: "ArrowDown",
-                code: "ArrowDown",
-                keyCode: 40,
-                which: 40,
+                key: paddleDownKey,
+                code: paddleDownKey,
+                keyCode: paddleDownCode,
+                which: paddleDownCode,
                 bubbles: true,
                 cancelable: true
             }));
         }
         else {
             document.dispatchEvent(new KeyboardEvent("keyup", {
-                key: "ArrowDown",
-                code: "ArrowDown",
-                keyCode: 40,
-                which: 40,
+                key: paddleDownKey,
+                code: paddleDownKey,
+                keyCode: paddleDownCode,
+                which: paddleDownCode,
                 bubbles: true,
                 cancelable: true
             }));
@@ -231,17 +244,72 @@ export class Ai {
     updategameElapsedTime(lapse) {
         this.gameElapsedTime = lapse;
     }
-    IsBallGoingOutRight() {
-        return this.ballNextPos.x > this.paddleRight.offsetLeft;
+    isBallGoingOut() {
+        if (this.isBallGoingOutUp() || this.isBallGoingOutDown())
+            return true;
+        if (this.AIside === 'RIGHT' && this.isBallGoingOutRight())
+            return true;
+        if (this.AIside === 'LEFT' && this.isBallGoingOutLeft())
+            return true;
+        return false;
     }
-    IsBallGoingOutLeft() {
-        return this.ballNextPos.x < this.paddleLeft.offsetLeft;
-    }
-    IsBallGoingOutUp() {
+    isBallGoingOutUp() {
         //0 : 0 is the top left corner
         return this.ballNextPos.y < 0;
     }
-    IsBallGoingOutDown() {
+    predictUpWallBounce(Xratio) {
+        console.log("Predicting Bounce Up");
+        // 1. Distance from current Y to the wall (0)
+        const distToWallY = 0 - this.ballPos.y;
+        // 2. Calculate horizontal shift to impact point
+        const xImpactOffset = distToWallY * Xratio;
+        // 3. Set impact visual (Current X + Offset)
+        ballAiBounceView.x = this.ballPos.x + xImpactOffset;
+        ballAiBounceView.y = BALL_SIZE / 2;
+        ballAiBounceView.render();
+        // 4. Reflect the NextPos Y across the wall
+        this.ballNextPos.y = -this.ballNextPos.y;
+        //5. Update previous position // PROBABLY NEED TO CHANGE BALL POS AND NOT PREV POS TO FIX BOUNCES
+        this.ballPrevPos.x = ballAiBounceView.x;
+        this.ballPrevPos.y = ballAiBounceView.y;
+    }
+    isBallGoingOutDown() {
         return this.ballNextPos.y > PONG_HEIGHT;
+    }
+    predictDownWallBounce(Xratio) {
+        console.log("Predicting Bounce Down");
+        // 1. Distance from current Y to the wall (0)
+        const distToWallY = PONG_HEIGHT - this.ballPos.y;
+        // 2. Calculate horizontal shift to impact point
+        const xImpactOffset = distToWallY * Xratio;
+        // 3. Set impact visual (Current X + Offset)
+        ballAiBounceView.x = this.ballPos.x + xImpactOffset;
+        ballAiBounceView.y = PONG_HEIGHT - (BALL_SIZE / 2);
+        ballAiBounceView.render();
+        this.ballNextPos.y = PONG_HEIGHT - (this.ballNextPos.y - PONG_HEIGHT);
+        this.ballPrevPos.x = ballAiBounceView.x;
+        this.ballPrevPos.y = ballAiBounceView.y;
+    }
+    isBallGoingOutRight() {
+        return this.ballNextPos.x > this.paddleRight.offsetLeft;
+    }
+    predictRightPaddleBounce(Yratio) {
+        this.ballNextPos.x = this.paddleRight.offsetLeft - BALL_SIZE;
+        const padBallDelta = this.ballNextPos.x - this.ballPos.x;
+        const Ypos = padBallDelta * Yratio;
+        this.ballNextPos.y = this.ballPos.y + Ypos;
+        this.ballPrevPos.x = this.ballNextPos.x;
+        this.ballPrevPos.y = this.ballNextPos.y;
+    }
+    isBallGoingOutLeft() {
+        return this.ballNextPos.x < this.paddleLeft.offsetLeft + this.paddleLeft.offsetWidth;
+    }
+    predictLeftPaddleBounce(Yratio) {
+        this.ballNextPos.x = this.paddleLeft.offsetLeft + this.paddleLeft.offsetWidth;
+        const padBallDelta = this.ballNextPos.x - this.ballPos.x;
+        const Ypos = padBallDelta * Yratio;
+        this.ballNextPos.y = this.ballPos.y + Ypos;
+        this.ballPrevPos.x = this.ballNextPos.x;
+        this.ballPrevPos.y = this.ballNextPos.y;
     }
 }

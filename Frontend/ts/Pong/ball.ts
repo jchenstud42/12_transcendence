@@ -1,3 +1,5 @@
+const BALL_SPEED = 300;
+
 export class Ball {
     el: HTMLDivElement;
     container: HTMLElement;
@@ -6,7 +8,7 @@ export class Ball {
     y = 0;
     vx = 0;
     vy = 0;
-    speed = 300;
+    speed = BALL_SPEED;
     active = false;
     onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
     leftPaddle?: HTMLDivElement;
@@ -37,7 +39,7 @@ export class Ball {
         const maxAngle = 45 * (Math.PI / 180);
 		//Serve the ball in a random angle between -45 and 45 degrees
         const angle = (Math.random() * maxAngle * 2) - maxAngle;
-        this.speed = 300;
+        this.speed = BALL_SPEED;
         this.vx = direction * this.speed * Math.cos(angle);
         this.vy = this.speed * Math.sin(angle);
         this.active = true;

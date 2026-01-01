@@ -1,10 +1,11 @@
+const BALL_SPEED = 300;
 export class Ball {
     constructor(el, container, leftPaddle, rightPaddle, size = 10) {
         this.x = 0;
         this.y = 0;
         this.vx = 0;
         this.vy = 0;
-        this.speed = 300;
+        this.speed = BALL_SPEED;
         this.active = false;
         this.onScore = null; // callback
         this.el = el;
@@ -29,7 +30,7 @@ export class Ball {
         const maxAngle = 45 * (Math.PI / 180);
         //Serve the ball in a random angle between -45 and 45 degrees
         const angle = (Math.random() * maxAngle * 2) - maxAngle;
-        this.speed = 300;
+        this.speed = BALL_SPEED;
         this.vx = direction * this.speed * Math.cos(angle);
         this.vy = this.speed * Math.sin(angle);
         this.active = true;

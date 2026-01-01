@@ -433,8 +433,6 @@ yourFriendsBtn.addEventListener("click", async () => {
 const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
 const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
 const ball = document.getElementById("ball") as HTMLDivElement;
-const AIview = document.getElementById("AIview") as HTMLDivElement;
-const AInextView = document.getElementById("AInextView") as HTMLDivElement;
 
 const PONG_WIDTH = 800;
 const PONG_HEIGHT = 600;
@@ -460,6 +458,8 @@ const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
 const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
+const aiViewCheckBox = document.getElementById("ai-view-label");
+const aiViewCheckboxInput = document.getElementById("ai-view-checkbox") as HTMLInputElement;
 const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
 const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
 const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
@@ -470,11 +470,26 @@ const finalList = document.getElementById("final-list")! as HTMLDivElement;
 const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
 const crownImage = document.getElementById("crown-image")! as HTMLImageElement;
 
+
 import { Ball } from './Pong/ball.js';
 import { Ai } from './Pong/ai.js';
 
 const gameBall = new Ball(ball, pong_menu, paddle_left, paddle_right, BALL_SIZE);
-const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right);
+const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right, 3);
+const aiPlayer2 = new Ai(gameBall, paddle_right, paddle_left, paddle_left, 3);
+
+// AI View checkbox event listener
+if (aiViewCheckboxInput) {
+	aiViewCheckboxInput.addEventListener("change", (e) => {
+		const isChecked = (e.target as HTMLInputElement).checked;
+		console.log("AI View checkbox changed:", isChecked);
+		// Add your logic here for when checkbox is checked/unchecked
+		if (isChecked)
+			aiPlayer.showballAIViews(true);
+		else
+			aiPlayer.showballAIViews(false);
+	});
+}
 
 //game loop to update ball position;
 let lastTime = performance.now();
@@ -484,6 +499,8 @@ function gameLoop(now = performance.now()) {
 
 	gameBall.update(dt);
 	aiPlayer.updategameElapsedTime(dt);
+	aiPlayer2.updategameElapsedTime(dt);
+
 
 	requestAnimationFrame(gameLoop);
 }
@@ -510,10 +527,12 @@ function startGame() {
 		setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
-			aiPlayer.showballAIViews(true);
 			gameBall.serve();
 			//Ai Starts Playing here
+			if (aiViewCheckBox)
+				aiViewCheckBox.classList.remove("hidden");
 			aiPlayer.oneSecondLoop();
+			aiPlayer2.oneSecondLoop();
 		}, 1000);
 	}, 1000);
 }
