@@ -485,9 +485,9 @@ if (aiViewCheckboxInput) {
 		console.log("AI View checkbox changed:", isChecked);
 		// Add your logic here for when checkbox is checked/unchecked
 		if (isChecked)
-			aiPlayer.showballAIViews(true);
+			aiPlayer.showAiPredictions();
 		else
-			aiPlayer.showballAIViews(false);
+			aiPlayer.hideAiPredictions();
 	});
 }
 
