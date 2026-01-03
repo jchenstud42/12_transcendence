@@ -1316,7 +1316,7 @@ function resetGameMenu() {
 class Game {
 	players: Player[] = [];
 	winner: Player | null = null;
-	pointsToWin = 1;
+	pointsToWin = 5;
 	isQuickMatch = false;
 
 	constructor(playersName: [string, boolean][]) {
@@ -1328,10 +1328,17 @@ class Game {
 			this.addPoint(playerSide);
 		};
 
-		if (playersName.length > 2)
+		if (playersName.length > 2) {
+			// Hide tournament tree during matches
+			finalList.classList.add("hidden");
+			winnerName.classList.add("hidden");
+			crownImage.classList.add("hidden");
+			
+			// Call async tournament without await in constructor
 			this.createTournament();
-		else
+		} else {
 			play_button.classList.remove("hidden");
+		}
 	}
 
 	public addPoint(playerSide: 'left' | 'right') {
@@ -1378,14 +1385,146 @@ class Game {
 	}
 
 
-	public createTournament() {
-		const shuffled: Player[] = shuffleArray(this.players);
+	// public createTournament() {
+	// 	const shuffled: Player[] = shuffleArray(this.players);
+	// 	playersList.innerHTML = "";
+	// 	shuffled.forEach(({ name, playerNbr, isAi }) => {
+	// 		addPlayerNameLabel(name, playerNbr, isAi);
+	// 	});
+	// 	showTournamentMatch();
+	// }
+	public async createTournament() {
+		let bracket: Player[] = shuffleArray(this.players.slice());
+
 		playersList.innerHTML = "";
-		shuffled.forEach(({ name, playerNbr, isAi }) => {
-			addPlayerNameLabel(name, playerNbr, isAi);
-		});
-		showTournamentMatch();
+		finalList.innerHTML = "";
+		winnerName.innerHTML = "";
+		crownImage.classList.add("hidden");
+
+		const showPair = (a: Player, b: Player) => {
+			playersList.innerHTML = "";
+			addPlayerNameLabel(a.name, a.playerNbr, a.isAi);
+			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
+			if (players_area) players_area.classList.remove("hidden");
+		};
+
+		const runMatch = (left: Player, right: Player): Promise<Player> => {
+			return new Promise((resolve) => {
+				let leftScore = 0;
+				let rightScore = 0;
+
+				const updateScores = () => {
+					if (score_left) score_left.textContent = String(leftScore);
+					if (score_right) score_right.textContent = String(rightScore);
+				};
+				updateScores();
+
+				paddle_left.classList.remove("hidden");
+				paddle_right.classList.remove("hidden");
+				ball.classList.add("hidden");
+
+				// Show play button for user to start
+				play_button.classList.remove("hidden");
+
+				// Define handler BEFORE user starts
+				const handler = (side: 'left' | 'right') => {
+					if (side === 'left') leftScore++;
+					else rightScore++;
+
+					updateScores();
+
+					if (leftScore >= this.pointsToWin || rightScore >= this.pointsToWin) {
+						gameBall.onScore = null;
+						gameBall.active = false;
+						ball.classList.add("hidden");
+						paddle_left.classList.add("hidden");
+						paddle_right.classList.add("hidden");
+						play_button.classList.add("hidden");
+
+						const winner = leftScore > rightScore ? left : right;
+						setTimeout(() => resolve(winner), 300);
+						return;
+					}
+
+					gameBall.reset();
+					ball.classList.add("hidden");
+					play_button.classList.remove("hidden");
+				};
+
+				gameBall.onScore = handler;
+
+				// One-time listener for play button click to start countdown
+				const startMatchListener = () => {
+					play_button.removeEventListener("click", startMatchListener);
+					play_button.classList.add("hidden");
+
+					ready_text.classList.remove("hidden");
+					setTimeout(() => {
+						ready_text.classList.add("hidden");
+						go_text.classList.remove("hidden");
+						setTimeout(() => {
+							go_text.classList.add("hidden");
+							ball.classList.remove("hidden");
+							gameBall.reset();
+							gameBall.serve();
+						}, 800);
+					}, 800);
+				};
+
+				play_button.addEventListener("click", startMatchListener);
+			});
+		};
+
+		let round = 1;
+		while (bracket.length > 1) {
+			const nextRound: Player[] = [];
+			for (let i = 0; i < bracket.length; i += 2) {
+				const p1 = bracket[i];
+				const p2 = bracket[i + 1];
+
+				showPair(p1, p2);
+
+				const winner = await runMatch(p1, p2);
+
+				nextRound.push(winner);
+
+				const label = document.createElement("div");
+				label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+				label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Round ${round} winner</span><br>${winner.name}`;
+				finalList.appendChild(label);
+				finalList.classList.remove("hidden");
+
+				await new Promise(r => setTimeout(r, 400));
+			}
+
+			bracket = nextRound;
+			round++;
+			playersList.innerHTML = "";
+		}
+
+		const champion = bracket[0];
+		if (champion) {
+			winnerName.innerHTML = "";
+			const label = document.createElement("div");
+			label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+			label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Champion</span><br>${champion.name}`;
+			winnerName.appendChild(label);
+			winnerName.classList.remove("hidden");
+			crownImage.classList.remove("hidden");
+			alert(`${champion.name} remporte le tournoi !`);
+		}
+
+		if (players_area) players_area.classList.add("hidden");
+		if (score_left) score_left.textContent = "0";
+		if (score_right) score_right.textContent = "0";
+		gameBall.onScore = null;
+
+		// After tournament ends, return to menu
+		setTimeout(() => {
+			resetGameMenu();
+		}, 1000);
 	}
+
 
 	public createQuickMatch() {
 		play_button.classList.remove("hidden");
