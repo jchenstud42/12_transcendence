@@ -1394,6 +1394,9 @@ class Game {
 	// 	showTournamentMatch();
 	// }
 	public async createTournament() {
+		console.log("createTournament started");
+
+		const pointsToWin = this.pointsToWin; // Capture pointsToWin
 		let bracket: Player[] = shuffleArray(this.players.slice());
 
 		playersList.innerHTML = "";
@@ -1402,6 +1405,7 @@ class Game {
 		crownImage.classList.add("hidden");
 
 		const showPair = (a: Player, b: Player) => {
+			console.log("Showing pair:", a.name, "vs", b.name);
 			playersList.innerHTML = "";
 			addPlayerNameLabel(a.name, a.playerNbr, a.isAi);
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
@@ -1410,6 +1414,8 @@ class Game {
 
 		const runMatch = (left: Player, right: Player): Promise<Player> => {
 			return new Promise((resolve) => {
+				console.log("runMatch called for", left.name, "vs", right.name);
+
 				let leftScore = 0;
 				let rightScore = 0;
 
@@ -1424,16 +1430,21 @@ class Game {
 				ball.classList.add("hidden");
 
 				// Show play button for user to start
-				play_button.classList.remove("hidden");
+				if (play_button) {
+					play_button.classList.remove("hidden");
+					console.log("play_button displayed");
+				} else {
+					console.error("play_button is null!");
+				}
 
 				// Define handler BEFORE user starts
 				const handler = (side: 'left' | 'right') => {
 					if (side === 'left') leftScore++;
 					else rightScore++;
-
+					
 					updateScores();
 
-					if (leftScore >= this.pointsToWin || rightScore >= this.pointsToWin) {
+					if (leftScore >= pointsToWin || rightScore >= pointsToWin) {
 						gameBall.onScore = null;
 						gameBall.active = false;
 						ball.classList.add("hidden");
@@ -1442,22 +1453,23 @@ class Game {
 						play_button.classList.add("hidden");
 
 						const winner = leftScore > rightScore ? left : right;
+						console.log("Match winner:", winner.name);
 						setTimeout(() => resolve(winner), 300);
 						return;
 					}
-
 					gameBall.reset();
 					ball.classList.add("hidden");
 					play_button.classList.remove("hidden");
 				};
-
+				
 				gameBall.onScore = handler;
-
+				
 				// One-time listener for play button click to start countdown
 				const startMatchListener = () => {
+					console.log("startMatchListener triggered");
 					play_button.removeEventListener("click", startMatchListener);
 					play_button.classList.add("hidden");
-
+					
 					ready_text.classList.remove("hidden");
 					setTimeout(() => {
 						ready_text.classList.add("hidden");
@@ -1470,38 +1482,52 @@ class Game {
 						}, 800);
 					}, 800);
 				};
-
-				play_button.addEventListener("click", startMatchListener);
+				
+				if (play_button) {
+					play_button.addEventListener("click", () => {
+						startMatch();
+					});
+				} else {
+					console.error("play_button not found at script load");
+				}
+				
+				document.addEventListener("keydown", (event: KeyboardEvent) => {
+					if (event.key === "Enter" && play_button && !play_button.classList.contains("hidden")) {
+						startMatch();
+					}
+				});
 			});
 		};
 
 		let round = 1;
 		while (bracket.length > 1) {
+			console.log(`Round ${round} started with ${bracket.length} players`);
 			const nextRound: Player[] = [];
+			
 			for (let i = 0; i < bracket.length; i += 2) {
 				const p1 = bracket[i];
 				const p2 = bracket[i + 1];
-
+				
 				showPair(p1, p2);
-
+				
 				const winner = await runMatch(p1, p2);
-
+				
 				nextRound.push(winner);
-
+				
 				const label = document.createElement("div");
 				label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
 				label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Round ${round} winner</span><br>${winner.name}`;
 				finalList.appendChild(label);
 				finalList.classList.remove("hidden");
-
+				
 				await new Promise(r => setTimeout(r, 400));
 			}
-
+			
 			bracket = nextRound;
 			round++;
 			playersList.innerHTML = "";
 		}
-
+		
 		const champion = bracket[0];
 		if (champion) {
 			winnerName.innerHTML = "";
@@ -1513,17 +1539,18 @@ class Game {
 			crownImage.classList.remove("hidden");
 			alert(`${champion.name} remporte le tournoi !`);
 		}
-
+		
 		if (players_area) players_area.classList.add("hidden");
 		if (score_left) score_left.textContent = "0";
 		if (score_right) score_right.textContent = "0";
 		gameBall.onScore = null;
-
+		
 		// After tournament ends, return to menu
 		setTimeout(() => {
 			resetGameMenu();
 		}, 1000);
 	}
+	
 
 
 	public createQuickMatch() {
