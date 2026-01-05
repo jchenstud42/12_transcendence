@@ -44,10 +44,18 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		return reply.send(user);
 	});
 
-	fastify.put("/profile/:id", async (req, reply) => {
-		const body = req.body as { username?: string; avatar?: string };
-		const updated = await userService.updateProfile(Number((req.params as UserParams).id), body);
-		return reply.send({ user: updated });
+	fastify.patch("/profile/:id", { preHandler: [authentizer()] }, async (req, reply) => {
+		try {
+			const userId = Number((req.params as UserParams).id);
+
+			const body = req.body as { username?: string; avatar?: string; email?: string; password?: string };
+			const updated = await userService.updateProfile(userId, body);
+			return reply.send({ user: updated });
+		}
+		catch (err) {
+			console.error(err);
+			return reply.status(500).send({ error: "Server error" });
+		}
 	});
 
 	fastify.get("/status/:id", { preHandler: [authentizer()] }, async (req, reply) => {
