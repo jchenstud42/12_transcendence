@@ -98,9 +98,7 @@ initProfile(
 	storedUserId
 );
 
-
 initAuthState();
-
 
 /*- On regarde si on arrive a recuperer le formulaire
 - On ecoute si le formulaire est submit, si oui on preventDefault pour pas qu'il ne reload la page.
@@ -112,7 +110,7 @@ initAuthState();
 - On envoie l'objet au backend via fetch a la route /register en POST
 - On gere les erreurs ou le succes en mettant un message et on reset le formulaire
 
-  Bisous, Mathis
+	Bisous, Mathis
 */
 if (!register_form) {
 	console.warn("Register form not found");
@@ -480,9 +478,9 @@ function renderFriends(friends: any[]) {
 		const div = document.createElement("div");
 		div.className = "friend-item";
 		div.innerHTML = `
-            <span>${f.username} (${f.status})</span>
-            <button class="remove-friend-btn" data-friend-id="${f.id}">✕</button>
-        `;
+						<span>${f.username} (${f.status})</span>
+						<button class="remove-friend-btn" data-friend-id="${f.id}">✕</button>
+				`;
 		friendsMenuList.appendChild(div);
 	});
 	document.querySelectorAll(".remove-friend-btn").forEach(btn => {
@@ -714,6 +712,8 @@ history_button.addEventListener("click", async () => {
 		alert(err.message);
 	}
 });
+
+
 
 
 // POOOONNNNNNNG

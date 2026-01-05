@@ -1,4 +1,6 @@
 import { setSelected2FAType, showTwoFAForm } from "../2FA_Front/2FA_Auth.js";
+import { storeUser } from "../utils/utils.js";
+import { AVATARS } from "./UI_events.js";
 
 
 /**
@@ -56,7 +58,7 @@ function ensureInit() {
 /*
  - On reset l'UI 2FA (Cache le form et le menu de type, vide le QR code, supprime le mode stup)
 
-  kisses
+	kisses
 */
 export function reset2FAUIState() {
 	ensureInit();
@@ -79,7 +81,7 @@ export function reset2FAUIState() {
  * - On affiche le bouton logout
  * - Si besoin on cacher aussi les containers (forms) register/login
 
-  luv
+	luv
  */
 export function applyLoggedInState(user: { id: number; username: string; email: string; }) {
 	ensureInit();
@@ -203,4 +205,58 @@ export async function initAuthState() {
 		console.error("initAuthState error:", err);
 		applyLoggedOutState();
 	}
+}
+
+async function updateAvatar(url: string) {
+	const token = localStorage.getItem("accessToken");
+	const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+	if (!user.id) {
+		alert("User not logged in");
+		return;
+	}
+
+	const res = await fetch(`/user/profile/${user.id}`, {
+		method: "PATCH",
+		credentials: "include",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": token ? `Bearer ${token}` : ""
+		},
+		body: JSON.stringify({ avatar: url })
+	});
+
+	const data = await res.json();
+	if (!res.ok) {
+		alert(data.error || "Failed to update avatar");
+		return;
+	}
+
+	storeUser(data.user);
+
+	const img = document.getElementById("profile-avatar") as HTMLImageElement;
+	if (img) img.src = url;
+}
+
+const changeAvatarBtn = document.getElementById("change-avatar-btn");
+const quickPicker = document.getElementById("quick-avatar-picker");
+
+if (changeAvatarBtn && quickPicker) {
+	changeAvatarBtn.addEventListener("click", () => {
+		quickPicker.classList.toggle("hidden");
+		quickPicker.innerHTML = "";
+
+		AVATARS.forEach((url) => {
+			const img = document.createElement("img");
+			img.src = url;
+			img.className ="w-14 h-14 rounded-full cursor-pointer hover:ring-2 ring-purple-500";
+
+			img.addEventListener("click", async () => {
+				await updateAvatar(url);
+				quickPicker.classList.add("hidden");
+			});
+
+			quickPicker.appendChild(img);
+		});
+	});
 }

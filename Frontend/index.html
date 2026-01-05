@@ -175,7 +175,8 @@
 
 					<button id="edit-profile-button" class="w-full text-left hover:bg-gray-100 px-2 py-1 rounded">Edit</button>
 					<!-- EDIT PROFILE MENU -->
-					<div id="edit-profile-menu" class="hidden fixed top-40 right-[280px] w-80 bg-white shadow-lg rounded p-4 z-50">
+					<div id="edit-profile-menu"
+						class="hidden fixed top-40 right-[280px] w-80 h-[600px] bg-white shadow-lg rounded p-4 z-50">
 						<h2 class="text-xl font-bold mb-4" data-i18n="edit_profile">Edit Profile</h2>
 
 						<!-- USERNAME -->
@@ -187,8 +188,15 @@
 						<input id="edit-email" class="border rounded w-full p-2 mb-3" type="email" data-i18n="new_email" placeholder="New email">
 
 						<!-- AVATAR -->
-						<label class="font-semibold" data-i18n="avatar">Avatar</label>
-						<input id="edit-avatar" class="border rounded w-full p-2 mb-3" type="text" data-i18n="new_avatar" placeholder="URL de l'avatar">
+						 <label class="font-semibold" data-i18n="avatar">Avatar</label>
+						<button id="change-avatar-btn" class="w-full text-sm bg-gray-200 hover:bg-gray-300">
+							Changer d'avatar
+						</button>
+						
+						<div id="quick-avatar-picker"
+						  class="hidden grid grid-cols-4 gap-4 mt-2 p-5">
+						</div>
+
 						<!-- PASSWORD -->
 						<label class="font-semibold" data-i18n="new_Password">New Password</label>
 						<input id="edit-password" class="border rounded w-full p-2 mb-3" type="text" data-i18n="new_password" placeholder="New password">
