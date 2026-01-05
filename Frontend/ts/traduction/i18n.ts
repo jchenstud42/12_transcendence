@@ -1,7 +1,7 @@
 import { translations, Language, TranslationKey } from "./traduction.js";
 
 export function setLanguage(lang: Language) {
-	currentLang = lang; // <- ajouter cette ligne
+	currentLang = lang;
 	localStorage.setItem("lang", lang);
 
 	document.querySelectorAll("[data-i18n]").forEach(el => {

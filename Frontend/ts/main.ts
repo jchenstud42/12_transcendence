@@ -41,6 +41,8 @@ const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
 const history_button = document.getElementById("history-button")!;
 
+const back_button = document.getElementById("back-button")!;
+
 // const add_friend_button = document.getElementById("btn-add-friend")!;
 // const your_friends_button = document.getElementById("btn-your-friends")!;
 const language_button = document.getElementById("language-button")!;
@@ -78,7 +80,7 @@ init2FA(
 initUIEvents(
 	{
 		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button,
-		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu
+		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu: document.getElementById("pong-menu"), back_button
 	});
 
 initProfile(
@@ -136,16 +138,15 @@ else {
 
 		const errors: string[] = [];
 		if (!validateEmail(email))
-			errors.push("Invalid email");
+			errors.push(t("invalid_email"));
 		if (!validatePassword(password))
-			errors.push("Password must have 8 characters, one uppercase letter and one number");
+			errors.push(t("invalid_password_format"));
 		if (!validateTextInput(username, 20))
-			errors.push("Invalid username");
+			errors.push(t("invalid_username"));
 		if (password !== confirmPassword)
-			errors.push("Passwords do not match");
-
+			errors.push(t("passwords_do_not_match"));
 		if (errors.length > 0) {
-			alert("Errors:\n" + errors.join("\n"));
+			alert(t("errors_prefix") + "\n" + errors.join("\n"));
 			return;
 		}
 
@@ -153,7 +154,7 @@ else {
 		if (submit) {
 			submit.disabled = true;
 			const originalTxt = submit.textContent;
-			submit.textContent = "Registering...";
+			submit.textContent = t("registering");
 			try {
 				const payload = {
 					username: sanitizeInput(username),
@@ -177,14 +178,14 @@ else {
 						if (typeof data.user.id === 'number')
 							storedUserId = data.user.id;
 					}
-					alert("Registration successful, you can now log in");
+					alert(t("register_ok"));
 					register_form.reset();
 				} else {
-					alert("Server error: " + (data?.error || res.statusText));
+					alert(t("server_error_prefix") + " " + (data?.error || res.statusText));
 				}
 			} catch (err) {
 				console.error("Register fetch error:", err);
-				alert("Network error. Try again later.");
+				alert(t("network_error"));
 			} finally {
 				if (submit) {
 					submit.disabled = false;
@@ -218,9 +219,9 @@ else {
 
 		const err: string[] = [];
 		if (!(validateEmail(loginId) || validateTextInput(loginId, 50)))
-			err.push("invalid_user_or_email");
+			err.push(t("invalid_user_or_email"));
 		if (!validatePassword(loginPass))
-			err.push("invalid_password");
+			err.push(t("invalid_password"));
 
 		if (err.length > 0) {
 			const translatedErrors = err.map(key => t(key as any));
@@ -268,7 +269,7 @@ else {
 						}
 						applyLoggedInState(data.user || { id: 0, username: '', email: '' });
 						login_form.reset();
-						alert("Login successful");
+						alert(t("login_success"));
 					}
 				}
 				else
@@ -276,7 +277,7 @@ else {
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
-				alert("Network error. Try again later.");
+				alert(t("network_error"));
 			}
 			finally {
 				if (submit) {
@@ -343,7 +344,7 @@ if (logoutButton) {
 					storedUserId = null;
 					localStorage.removeItem("accessToken");
 					localStorage.removeItem('user');
-					alert("Logout: user not found on server — local session cleared.");
+					alert(t("logout_user_not_found"));
 					location.reload();
 					return;
 				}
@@ -369,7 +370,7 @@ async function fetchFriendsList(userId: number) {
 		const text = await res.text();
 
 		if (!res.ok)
-			throw new Error("Failed to fetch friends");
+			throw new Error(t("failed_fetch_friends"));
 
 		return JSON.parse(text);
 	} catch (err) {
@@ -387,7 +388,7 @@ async function fetchUserByUsername(username: string) {
 	});
 	const textResponse = await res.text();
 	if (!res.ok)
-		throw new Error("User not found");
+		throw new Error(t("profile_not_found"));
 
 	return JSON.parse(textResponse);
 }
@@ -403,7 +404,7 @@ async function removeFriend(userId: number, friendId: number) {
 		body: JSON.stringify({ userId, friendId }),
 	});
 	if (!res.ok)
-		throw new Error("Failed to remove friend");
+		throw new Error(t("failed_remove_friend"));
 	return await res.json();
 }
 
@@ -424,14 +425,14 @@ function getAuthHeaders(): HeadersInit {
 // si tout bon on affiche une alerte comme quou la requete est envoyee
 // Bisous
 addFriendBtn.addEventListener("click", async () => {
-	const friendUsername = prompt("Enter the username of the friend to add:");
+	const friendUsername = prompt(t("ask_username"));
 	if (!friendUsername)
 		return;
 	try {
 		const s = localStorage.getItem('user');
 
 		if (!s)
-			throw new Error("You must be logged in");
+			throw new Error(t("must_login"));
 		const currentUser = JSON.parse(s);
 		const userData = await fetchUserByUsername(friendUsername);
 
@@ -447,13 +448,13 @@ addFriendBtn.addEventListener("click", async () => {
 
 		if (!res.ok) {
 			const error = JSON.parse(responseText);
-			throw new Error(error.error || "Failed to send friend request");
+			throw new Error(getServerErrorMessage(error.error) || t(("failed_friend_request")));
 		}
-		alert("Friend request sent!");
+		alert(t("friend_request_sent"));
 	}
 	catch (err: any) {
 		console.error("Error:", err);
-		alert(err.message);
+		alert(getServerErrorMessage(err.message));
 	}
 });
 
@@ -471,7 +472,7 @@ function renderFriends(friends: any[]) {
 	friendsMenuList.innerHTML = "";
 	if (friends.length === 0) {
 		const div = document.createElement("div");
-		div.textContent = "No friends yet";
+		div.textContent = t("no_friends_yet");
 		friendsMenuList.appendChild(div);
 		return;
 	}
@@ -490,7 +491,7 @@ function renderFriends(friends: any[]) {
 			try {
 				const s = localStorage.getItem('user');
 				if (!s)
-					throw new Error("You must be logged in");
+					throw new Error(t("must_login"));
 				const userId = JSON.parse(s).id;
 
 				await removeFriend(userId, friendId);
@@ -512,7 +513,7 @@ yourFriendsBtn.addEventListener("click", async () => {
 	try {
 		const s = localStorage.getItem('user');
 		if (!s) {
-			alert("You must be logged in");
+			alert(t("must_login"));
 			return;
 		}
 		const userId = JSON.parse(s).id;
@@ -532,7 +533,7 @@ pendingFriendsBtn.addEventListener("click", async () => {
 	try {
 		const s = localStorage.getItem('user');
 		if (!s)
-			throw new Error("You must be logged in");
+			throw new Error(t("must_login"));
 		const userId = JSON.parse(s).id;
 
 		const res = await fetch(`/friend/request/received/${userId}`, {
@@ -558,7 +559,7 @@ function renderPendingRequests(requests: any[], currentUserId: number) {
 
 	if (requests.length === 0) {
 		const div = document.createElement("div");
-		div.textContent = "No pending requests";
+		div.textContent = t("no_pending_requests");
 		friendsMenuList.appendChild(div);
 		return;
 	}
@@ -568,8 +569,8 @@ function renderPendingRequests(requests: any[], currentUserId: number) {
 		div.className = "pending-item";
 		div.innerHTML = `
             <span>${r.sendBy.username}</span>
-            <button class="accept-btn" data-request-id="${r.id}">✓ Accept</button>
-            <button class="reject-btn" data-request-id="${r.id}">✕ Reject</button>
+            <button class="accept-btn" data-request-id="${r.id}"> ✅ </button>
+            <button class="reject-btn" data-request-id="${r.id}"> ❌ </button>
         `;
 		friendsMenuList.appendChild(div);
 	});
@@ -579,10 +580,10 @@ function renderPendingRequests(requests: any[], currentUserId: number) {
 			const requestId = Number((e.target as HTMLElement).dataset.requestId);
 			try {
 				await acceptFriendRequest(requestId, currentUserId);
-				alert("Friend request accepted!");
+				alert(t("friends_request_accepted"));
 				pendingFriendsBtn.click();
 			} catch (err: any) {
-				alert(err.message);
+				alert(getServerErrorMessage(err.message));
 			}
 		});
 	});
@@ -592,10 +593,10 @@ function renderPendingRequests(requests: any[], currentUserId: number) {
 			const requestId = Number((e.target as HTMLElement).dataset.requestId);
 			try {
 				await rejectFriendRequest(requestId, currentUserId);
-				alert("Friend request rejected");
+				alert(t("friends_request_rejected"));
 				pendingFriendsBtn.click();
 			} catch (err: any) {
-				alert(err.message);
+				alert(getServerErrorMessage(err.message));
 			}
 		});
 	});
@@ -612,7 +613,7 @@ async function acceptFriendRequest(requestId: number, userId: number) {
 	});
 	if (!res.ok) {
 		const error = await res.json();
-		throw new Error(error.error || "Failed to accept request");
+		throw new Error(getServerErrorMessage(error.error) || t("failed_accept_request"));
 	}
 	return await res.json();
 }
@@ -628,7 +629,7 @@ async function rejectFriendRequest(requestId: number, userId: number) {
 	});
 	if (!res.ok) {
 		const error = await res.json();
-		throw new Error(error.error || "Failed to reject request");
+		throw new Error(getServerErrorMessage(error.error) || t("failed_reject_request"));
 	}
 	return await res.json();
 }
@@ -643,7 +644,7 @@ async function fetchMatchHistory(userId: number) {
 		const text = await res.text();
 
 		if (!res.ok)
-			throw new Error("Failed to fetch match history");
+			throw new Error(t("failed_fetch_history"));
 
 		const data = JSON.parse(text);
 		return data;
@@ -659,12 +660,12 @@ historyMenuList.id = "history-list";
 function renderMatchHistory(matches: any[]) {
 	const historyContainer = document.getElementById("history-list");
 	if (!historyContainer) return;
-	
+
 	historyContainer.innerHTML = "";
-	
+
 	if (matches.length === 0) {
 		const div = document.createElement("div");
-		div.textContent = "No matches yet";
+		div.textContent = t("no_match_history");
 		historyContainer.appendChild(div);
 		return;
 	}
@@ -672,12 +673,12 @@ function renderMatchHistory(matches: any[]) {
 	matches.forEach(match => {
 		const div = document.createElement("div");
 		div.className = "match-item bg-gray-100 p-3 rounded mb-2";
-		
+
 		const date = new Date(match.date).toLocaleDateString();
-		const winner = match.winnerId ? (match.winnerId === match.player1?.id ? match.player1?.username : match.player2?.username) : "Draw";
+		const winner = match.winnerId ? (match.winnerId === match.player1?.id ? match.player1?.username : match.player2?.username) : t("draw");
 		const player1Name = match.player1?.username || "`NULL";
 		const player2Name = match.player2?.username || "NULL";
-		
+
 		div.innerHTML = `
 			<div class="flex justify-between items-center">
 				<div class="flex-1">
@@ -702,7 +703,7 @@ history_button.addEventListener("click", async () => {
 	try {
 		const s = localStorage.getItem('user');
 		if (!s) {
-			alert("You must be logged in");
+			alert(t("must_login"));
 			return;
 		}
 		const userId = JSON.parse(s).id;

@@ -1,7 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { UserService } from "../services/user.service.js";
 import { authentizer } from "../../module_security/middlAuth.js";
-import { User } from "@prisma/client";
 import { signAccessToken, verifyToken } from "../../module_security/jwtUtils.js";
 import prisma from "../prisma/client.js"
 
@@ -63,7 +62,7 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		return reply.send({ status });
 	});
 
-	fastify.get("/by-username/:username",{ preHandler: [authentizer()] },async (req, reply) => {
+	fastify.get("/by-username/:username", { preHandler: [authentizer()] }, async (req, reply) => {
 		const { username } = req.params as { username: string };
 
 		const user = await prisma.user.findUnique({
@@ -80,5 +79,5 @@ export default async function userRoutes(fastify: FastifyInstance) {
 
 		return (reply.send(user));
 	}
-);
+	);
 }

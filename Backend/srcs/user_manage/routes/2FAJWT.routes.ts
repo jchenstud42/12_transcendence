@@ -4,7 +4,6 @@ import { twoFAService } from "../../module_security/2FA.js";
 import { verifyToken, signAccessToken, signRefreshToken } from "../../module_security/jwtUtils.js";
 import { sanitizeInput, validateEmail } from "../../security/inputSecurity.js";
 import jwt from "jsonwebtoken";
-import sign from "jsonwebtoken";
 import { JWT_SECRET } from "../../module_security/jwtUtils.js";
 
 const twofa = new twoFAService();

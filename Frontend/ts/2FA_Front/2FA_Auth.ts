@@ -1,5 +1,7 @@
 import { TranslationKey } from "../traduction/traduction.js";
 import { toggleMenu } from "../UI/UI_helpers.js";
+import { t } from "../traduction/i18n.js";
+import { getServerErrorMessage } from "../utils/utils.js";
 
 
 /*
@@ -55,7 +57,7 @@ let funcs: TwoFACallbacks | null = null;
  */
 function ensureInit() {
 	if (!elems || !funcs)
-		throw new Error("2FA module not initialized. Call init2FA(...) first.");
+		throw new Error(t("twofa_not_init"));
 }
 
 /*
@@ -119,7 +121,7 @@ async function handleEnableDestination() {
 		const data = text ? JSON.parse(text) : null;
 
 		if (!res.ok) {
-			alert("Erreur : " + getServerErrorMessage(data?.error));
+			alert(t("error_prefix") + getServerErrorMessage(data?.error));
 			return;
 		}
 
@@ -278,11 +280,11 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 				});
 
 				if (!res.ok)
-					throw new Error("Failed to enable 2FA");
+					throw new Error(t("failed_enable"));
 
 				const data = await res.json();
 				if (!data.qrCode)
-					throw new Error("Server did not return QR code");
+					throw new Error(t("error_qr"));
 
 				sessionStorage.setItem("2fa-setup-mode", "true");
 
@@ -290,7 +292,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 				qrContainer.innerHTML = `<img src="${data.qrCode}" alt="Scan QR Code" />`;
 
 				twofaForm.classList.remove("hidden");
-				elems!.twofaStatusText.textContent = "Scannez le QR code et entrez le code généré...";
+				elems!.twofaStatusText.textContent = t("scan_qr");
 			} catch (err: any) {
 				console.error("QR enable error:", err);
 				alert(err.message || funcs!.t("network_error"));
@@ -340,7 +342,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 						elems!.twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
 						elems!.twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
 						elems!.twofaTypeMenu.classList.add("hidden");
-						alert("2FA disabled successfully!");
+						alert(t("two_fa_is_disabled"));
 					}
 				} catch (err) {
 					console.error("Error disabling 2FA:", err);
@@ -385,7 +387,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			const code = codeInput.value.trim();
 
 			if (!code)
-				return alert("Enter the 2FA code");
+				return alert(t("enter_2fa_code"));
 			if (!/^\d{6}$/.test(code)) {
 				alert("Le code doit contenir exactement 6 chiffres.");
 				return;
@@ -399,7 +401,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 
 				if (selected2FAType === "email" || selected2FAType === "sms") {
 					if (!twoFAtoken) {
-						throw new Error("Missing 2FA token");
+						throw new Error(t("missing_2fa_code"));
 					}
 					res = await fetch("/verify-2fa", {
 						method: "POST",
@@ -419,18 +421,18 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 						body: JSON.stringify(body)
 					});
 				} else {
-					throw new Error("2FA method not selected");
+					throw new Error(t("method_not_selected"));
 				}
 
 				const data = await res.json();
 				if (!res.ok)
-					throw new Error(data.error || "Erreur lors de la vérification 2FA");
+					throw new Error(getServerErrorMessage(data.error));
 
 				sessionStorage.removeItem("2fa-setup-mode");
 				sessionStorage.removeItem("twoFAtoken");
 
 				if (isSetupMode) {
-					alert("2FA enabled successfully!");
+					alert(t("two_fa_enabled_success"));
 					is2FAEnabled = true;
 					elems!.twofaStatusText.textContent = `${funcs!.t("two_fa_is_enabled")} (${selected2FAType})`;
 					elems!.twofaToggleBtn.textContent = funcs!.t("disable");
@@ -440,7 +442,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 					funcs!.storeToken(data.accessToken);
 					if (data.user) funcs!.storeUser(data.user);
 					if (funcs!.applyLoggedInState) funcs!.applyLoggedInState(data.user);
-					alert("Login successful with 2FA!");
+					alert(t("login_success_2fa"));
 				}
 
 				elems!.twofaForm.reset();

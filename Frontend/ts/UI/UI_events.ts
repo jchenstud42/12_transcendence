@@ -1,9 +1,8 @@
 import { toggleMenu } from "./UI_helpers.js";
 import { initLanguage, setLanguage } from "../traduction/i18n.js";
-import { storeUser } from "../utils/utils.js";
+import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
-
 
 
 /*
@@ -21,12 +20,14 @@ type UIEventElements = {
 	friends_button?: HTMLElement | null;
 	history_button?: HTMLElement | null;
 	language_button?: HTMLElement | null;
+	back_button?: HTMLElement | null;
 
 	registerContainer?: HTMLElement | null;
 	loginContainer?: HTMLElement | null;
 	profile_menu?: HTMLElement | null;
 	edit_menu?: HTMLElement | null;
 	friends_menu?: HTMLElement | null;
+	pong_menu?: HTMLElement | null;
 	history_menu?: HTMLElement | null;
 	twoFA_menu?: HTMLElement | null;
 	twofaTypeMenu?: HTMLElement | null;
@@ -66,17 +67,23 @@ export function initUIEvents(elems: UIEventElements) {
 	);
 
 
+	elems.back_button?.addEventListener("click", () =>
+		elems.pong_menu?.classList.add("hidden")
+	);
+
 	elems.start_button?.addEventListener("click", () =>
-		// toggleMenu(
-		// 	elems.edit_menu,
-		// 	elems.twoFA_menu,
-		// 	elems.friends_menu,
-		// 	elems.history_menu,
-		// 	elems.twofaTypeMenu,
-		// 	elems.language_menu,
-		//  elems.pong_menu
-		// )
-		alert("Bouton du cul")
+		elems.pong_menu?.classList.remove("hidden")
+	);
+
+	elems.start_button?.addEventListener("click", () =>
+		toggleMenu(
+			elems.edit_menu,
+			elems.twoFA_menu,
+			elems.friends_menu,
+			elems.history_menu,
+			elems.twofaTypeMenu,
+			elems.language_menu,
+		)
 	);
 
 	elems.friends_button?.addEventListener("click", () =>
@@ -98,7 +105,7 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.edit_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu
-		)
+		),
 	);
 
 	if (elems.language_button && elems.language_menu) {
@@ -156,19 +163,19 @@ export function initProfile(profileElems: {
 		const errors: string[] = [];
 
 		if (username && !validateTextInput(username, 20))
-			errors.push("Invalid username");
+			errors.push(t("invalid_username"));
 
 		if (email && !validateEmail(email))
-			errors.push("Invalid email");
+			errors.push(t("invalid_email"));
 
 		if (password && !validatePassword(password))
-			errors.push("Invalid password format");
+			errors.push(t("invalid_password_format"));
 
 		if (password !== confirmPass)
-			errors.push("Passwords do not match");
+			errors.push(t("passwords_do_not_match"));
 
 		if (errors.length > 0) {
-			alert("Errors:\n" + errors.join("\n"));
+			alert(t("errors_prefix") + "\n" + errors.join("\n"));
 			return;
 		}
 
@@ -190,12 +197,12 @@ export function initProfile(profileElems: {
 				const user = JSON.parse(localStorage.getItem('user') || '{}');
 				userId = user.id;
 			} catch (e) {
-				alert("Error: Cannot find user ID");
+				alert(t("missing_user_id"));
 				return;
 			}
 		}
 		try {
-			const res = await fetch("/user/update-profile", {
+			const res = await fetch(`/user/profile/${userId}`, {
 				method: "PATCH",
 				credentials: "include",
 				headers: {
@@ -207,7 +214,7 @@ export function initProfile(profileElems: {
 
 			const data = await res.json();
 			if (!res.ok) {
-				alert("Server error: " + data.error);
+				alert(getServerErrorMessage(data.error));
 				return;
 			}
 
@@ -224,11 +231,11 @@ export function initProfile(profileElems: {
 			if (data.user.avatar)
 				profileAvatar.src = data.user.avatar;
 
-			alert("Profile updated!");
+			alert(t("profile_updated"));
 
 		} catch (err) {
 			console.error(err);
-			alert("Network error");
+			alert(t("network_error"));
 		}
 	});
 }
