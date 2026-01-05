@@ -1048,6 +1048,8 @@ const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
 const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
+const aiViewCheckBox = document.getElementById("ai-view-label");
+const aiViewCheckboxInput = document.getElementById("ai-view-checkbox") as HTMLInputElement;
 const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
 const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
 const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
@@ -1058,139 +1060,26 @@ const finalList = document.getElementById("final-list")! as HTMLDivElement;
 const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
 const crownImage = document.getElementById("crown-image")! as HTMLImageElement;
 
-class Player {
-	name: string = "";
-	playerNbr: number = 0;
-	paddle: HTMLDivElement | null = null;
-	point: number = 0;
-	gameWon: number = 0;
-	isAi: boolean = false
+import { Ball } from './Pong/ball.js';
+import { Ai } from './Pong/ai.js';
 
-	constructor(name: string, isAi: boolean, playerNbr: number) {
-		this.name = name;
-		this.isAi = isAi;
-		this.playerNbr = playerNbr;
-	}
-};
-
-class Ball {
-	el: HTMLDivElement;
-	container: HTMLElement;
-	size: number;
-	x = 0;
-	y = 0;
-	vx = 0;
-	vy = 0;
-	speed = 300;
-	active = false;
-	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
+const gameBall = new Ball(ball, pong_menu, paddle_left, paddle_right, BALL_SIZE);
+const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right, 3);
+const aiPlayer2 = new Ai(gameBall, paddle_right, paddle_left, paddle_left, 3);
 
 
-	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
-		this.el = el;
-		this.container = container;
-		this.size = size;
-		this.initBallPos();
-
-	}
-
-	initBallPos() {
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
-		this.x = w / 2 - this.size / 2;
-		this.y = h / 2 - this.size / 2;
-		this.vx = 0;
-		this.vy = 0;
-		this.active = false;
-		this.render();
-	}
-
-	serve(direction: 1 | -1 = (Math.random() < 0.5 ? 1 : -1)) {
-		this.initBallPos();
-		const maxAngle = 45 * (Math.PI / 180);
-		const angle = (Math.random() * maxAngle * 2) - maxAngle;
-		this.speed = 300;
-		this.vx = direction * this.speed * Math.cos(angle);
-		this.vy = this.speed * Math.sin(angle);
-		this.active = true;
-	}
-
-	reset() {
-		this.initBallPos();
-	}
-
-	render() {
-		this.el.style.removeProperty('right');
-		this.el.style.left = `${this.x}px`;
-		this.el.style.top = `${this.y}px`
-	}
-
-	rectsIntersect(ax: number, ay: number, aw: number, ah: number, bx: number, by: number, bw: number, bh: number) {
-		return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-	}
-
-	update(dt: number) {
-		if (!this.active)
-			return;
-
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
-
-		//update ball position
-		this.x += this.vx * dt;
-		this.y += this.vy * dt;
-
-		//wall colision
-		if (this.y <= 0) {
-			this.y = 0;
-			this.vy = -this.vy;
-		}
-		if (this.y + this.size >= h) {
-			this.y = h - this.size;
-			this.vy = -this.vy;
-		}
-
-		const plX = paddle_left.offsetLeft;
-		const plY = paddle_left.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
-			const paddleCenter = plY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
-			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const bounceAngle = relative * (75 * Math.PI / 180);
-			this.speed = Math.min(this.speed + 20, 900);
-			this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
-			this.vy = this.speed * Math.sin(bounceAngle);
-			this.x = plX + PADDLE_WIDTH + 0.5;
-		}
-
-		const prX = paddle_right.offsetLeft;
-		const prY = paddle_right.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
-			const paddleCenter = prY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
-			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const bounceAngle = relative * (75 * Math.PI / 180);
-			this.speed = Math.min(this.speed + 20, 900);
-			this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
-			this.vy = this.speed * Math.sin(bounceAngle);
-			this.x = prX - PADDLE_WIDTH - 0.5;
-		}
-
-		if (this.x + this.size < 0) {
-			console.debug('Ball out left -> right player scores');
-			if (this.onScore) this.onScore('right'); // notifier le Game
-			this.reset();
-		}
-		if (this.x > w) {
-			console.debug('Ball out right -> left player scores');
-			if (this.onScore) this.onScore('left'); // notifier le Game
-			this.reset();
-		}
-		this.render();
-	}
-};
-
-const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+// AI View checkbox event listener
+if (aiViewCheckboxInput) {
+	aiViewCheckboxInput.addEventListener("change", (e) => {
+		const isChecked = (e.target as HTMLInputElement).checked;
+		console.log("AI View checkbox changed:", isChecked);
+		// Add your logic here for when checkbox is checked/unchecked
+		if (isChecked)
+			aiPlayer.showAiPredictions();
+		else
+			aiPlayer.hideAiPredictions();
+	});
+}
 
 //game loop to update ball position;
 let lastTime = performance.now();
@@ -1199,10 +1088,14 @@ function gameLoop(now = performance.now()) {
 	lastTime = now;
 
 	gameBall.update(dt);
+	aiPlayer.updategameElapsedTime(dt);
+	aiPlayer2.updategameElapsedTime(dt);
+
 
 	requestAnimationFrame(gameLoop);
 }
 requestAnimationFrame(gameLoop);
+
 
 //keys list
 const keys = {
@@ -1226,13 +1119,16 @@ function startGame() {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
 			gameBall.serve();
+			//Ai Starts Playing here
+			if (aiViewCheckBox)
+				aiViewCheckBox.classList.remove("hidden");
+			aiPlayer.oneSecondLoop();
+			aiPlayer2.oneSecondLoop();
 		}, 1000);
 	}, 1000);
 }
 
-play_button.addEventListener("click", () => {
-	startMatch();
-});
+play_button.addEventListener("click", startGame);
 
 document.addEventListener("keydown", (event: KeyboardEvent) => {
 	if (event.key === "Enter" && !play_button.classList.contains("hidden")) {
@@ -1312,6 +1208,23 @@ function resetGameMenu() {
 	qmatch_button.classList.add("hidden");
 	tournament_button.classList.add("hidden");
 }
+
+//End of Pong
+
+class Player {
+	name: string = "";
+	playerNbr: number = 0;
+	paddle: HTMLDivElement | null = null;
+	point: number = 0;
+	gameWon: number = 0;
+	isAi: boolean = false
+
+	constructor(name: string, isAi: boolean, playerNbr: number) {
+		this.name = name;
+		this.isAi = isAi;
+		this.playerNbr = playerNbr;
+	}
+};
 
 class Game {
 	players: Player[] = [];
@@ -1558,6 +1471,7 @@ class Game {
 	}
 }
 
+//START
 pong_button.addEventListener("click", () => {
 	pong_button.classList.add("hidden");
 	qmatch_button.classList.remove("hidden");
