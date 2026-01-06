@@ -1,6 +1,8 @@
 import { setSelected2FAType, showTwoFAForm } from "../2FA_Front/2FA_Auth.js";
-import { storeUser } from "../utils/utils.js";
+import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { AVATARS } from "./UI_events.js";
+import { t } from "../traduction/i18n.js";
+
 
 
 /**
@@ -212,7 +214,7 @@ async function updateAvatar(url: string) {
 	const user = JSON.parse(localStorage.getItem("user") || "{}");
 
 	if (!user.id) {
-		alert("User not logged in");
+		alert(t("must_login"));
 		return;
 	}
 
@@ -228,7 +230,7 @@ async function updateAvatar(url: string) {
 
 	const data = await res.json();
 	if (!res.ok) {
-		alert(data.error || "Failed to update avatar");
+		alert(getServerErrorMessage(data.error) || t("failed_update_avatar"));
 		return;
 	}
 
@@ -249,7 +251,7 @@ if (changeAvatarBtn && quickPicker) {
 		AVATARS.forEach((url) => {
 			const img = document.createElement("img");
 			img.src = url;
-			img.className ="w-14 h-14 rounded-full cursor-pointer hover:ring-2 ring-purple-500";
+			img.className = "w-14 h-14 rounded-full cursor-pointer hover:ring-2 ring-purple-500";
 
 			img.addEventListener("click", async () => {
 				await updateAvatar(url);

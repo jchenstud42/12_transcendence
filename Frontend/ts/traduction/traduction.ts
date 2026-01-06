@@ -95,6 +95,7 @@ export const translations = {
 		ready: "READY",
 
 		//Errors and success messages
+		failed_update_avatar: "Failed to update avatar",
 		no_match_history: "No matches yet",
 		failed_fetch_history: "Failed to fetch match history",
 		invalid_username: "Invalid username",
@@ -218,6 +219,7 @@ export const translations = {
 		ready: "PRÊT",
 
 		//Erreur s et messages de succès
+		failed_update_avatar: "Echec du changement d'avatar",
 		no_match_history: "Aucun historique de matchs pour le moment",
 		failed_fetch_history: "Echec de la recuperation de l'historique des matchs",
 		invalid_username: "Nom d'utilisateur invalide",
@@ -341,6 +343,7 @@ export const translations = {
 		ready: "LISTO",
 
 		//Errores y mensajes de éxito
+		failed_update_avatar: "Error al cambiar el avatar",
 		no_match_history: "No hay partidas aun",
 		failed_fetch_history: "Error al obtener el historial de partidas",
 		invalid_username: "Usuario inválido",

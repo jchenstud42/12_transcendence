@@ -6,10 +6,10 @@ import { t } from "../traduction/i18n.js";
 
 
 /*
-	- Les elements html qu'on recupere dans le front/via les params de la function init (main.ts) pour init les events (fonction en dessous)
-	- C'est utilise pour gerer les clicks et cacher/afficher les menus
+  - Les elements html qu'on recupere dans le front/via les params de la function init (main.ts) pour init les events (fonction en dessous)
+  - C'est utilise pour gerer les clicks et cacher/afficher les menus
 
-	bisous baveux
+  bisous baveux
 */
 type UIEventElements = {
 	register_button?: HTMLElement | null;
@@ -36,10 +36,10 @@ type UIEventElements = {
 
 
 /*
-	- On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus on affiche le menu et cache les autres)
-	- On initialise aussi le menu de langue et on set les events pour changer de langue
+  - On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus on affiche le menu et cache les autres)
+  - On initialise aussi le menu de langue et on set les events pour changer de langue
 
-	langue hehe
+  langue hehe
  */
 export function initUIEvents(elems: UIEventElements) {
 
@@ -72,16 +72,18 @@ export function initUIEvents(elems: UIEventElements) {
 	);
 
 	elems.start_button?.addEventListener("click", () =>
-		// toggleMenu(
-		// 	elems.edit_menu,
-		// 	elems.twoFA_menu,
-		// 	elems.friends_menu,
-		// 	elems.history_menu,
-		// 	elems.twofaTypeMenu,
-		// 	elems.language_menu,
-		//	elems.pong_menu
-		// )
-		alert("Bouton du cul")
+		elems.pong_menu?.classList.remove("hidden")
+	);
+
+	elems.start_button?.addEventListener("click", () =>
+		toggleMenu(
+			elems.edit_menu,
+			elems.twoFA_menu,
+			elems.friends_menu,
+			elems.history_menu,
+			elems.twofaTypeMenu,
+			elems.language_menu,
+		)
 	);
 
 	elems.friends_button?.addEventListener("click", () =>
@@ -126,20 +128,21 @@ export function initUIEvents(elems: UIEventElements) {
 
 export const AVATARS = [
 	"../assets/avatars/PPRomain.png",
+	"../assets/avatars/Corgi.jpeg",
 	"../assets/avatars/Gamer.png",
 	"../assets/avatars/Journey.png",
 	"../assets/avatars/avatar4.png",
 ];
 
 /*
-	- Meme chose on initialise les events pour le profil et le menu de langue
-	- Ensuite on gere les inputs du profil pour sauvegarder les modifs
-	- On sanitize et on valide les inputs avant d'envoyer la requete au back
-	- On recupere le userId soit via le param ou via le localstorage si null
-	- On envoie la requete PATCH au back pour update le profil
-	- On met a jour le localstorage et l'UI si reussi
+  - Meme chose on initialise les events pour le profil et le menu de langue
+  - Ensuite on gere les inputs du profil pour sauvegarder les modifs
+  - On sanitize et on valide les inputs avant d'envoyer la requete au back
+  - On recupere le userId soit via le param ou via le localstorage si null
+  - On envoie la requete PATCH au back pour update le profil
+  - On met a jour le localstorage et l'UI si reussi
 
-	love you <3
+  love you <3
 */
 export function initProfile(profileElems: {
 	saveProfileBtn: HTMLElement;
@@ -151,7 +154,7 @@ export function initProfile(profileElems: {
 	menuUsername: HTMLElement;
 	menuEmail: HTMLElement;
 	profileAvatar: HTMLImageElement;
-	}, currentUserId: number | null) {
+}, currentUserId: number | null) {
 	const { saveProfileBtn } = profileElems;
 
 	let selectedAvatar: string | null = null;
@@ -177,10 +180,12 @@ export function initProfile(profileElems: {
 	}
 
 
+
 	saveProfileBtn.addEventListener("click", async () => {
 
 		const username = (document.getElementById("edit-username") as HTMLInputElement).value.trim();
 		const email = (document.getElementById("edit-email") as HTMLInputElement).value.trim();
+		const avatar = (document.getElementById("edit-avatar") as HTMLInputElement).value.trim();
 		const password = (document.getElementById("edit-password") as HTMLInputElement).value;
 		const confirmPass = (document.getElementById("edit-password-confirm") as HTMLInputElement).value;
 
@@ -208,6 +213,8 @@ export function initProfile(profileElems: {
 			payload.username = sanitizeInput(username);
 		if (email)
 			payload.email = sanitizeInput(email);
+		if (avatar)
+			payload.avatar = sanitizeInput(avatar);
 		if (password)
 			payload.password = password;
 		if (selectedAvatar)
