@@ -145,28 +145,40 @@
 
 <body id="page" class="relative min-h-screen overflow-x-hidden m-0 p-0">
 	<!--background-->
-	<div class="absolute inset-0 bg-[url('./assets/light.png')] bg-cover bg-center z-10 animate-flicker"></div>
-	<div class="absolute inset-0 bg-[url('./assets/background.png')] bg-cover bg-center z-0"></div>
+	<div
+		class="absolute inset-0 bg-[url('./assets/light.png')] bg-cover bg-center z-10 animate-flicker pointer-events-none">
+	</div>
+	<div class="absolute inset-0 bg-[url('./assets/background.png')] bg-cover bg-center z-0 pointer-events-none"></div>
 	<!--register, login  and language button-->
-	<div class="absolute top-4 right-4 z-10">
+
+	<div class="absolute top-4 right-4 z-50">
 		<div class="flex justify-end space-x-4 mb-2">
 
-			<button id="register-button"
-				class="text-[#dc3cf0] font-bold border-2 border-[#dc3cf0] hover:bg-[#dc3cf0] hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-				type="button" data-i18n="register">
-				Register
+			<button id="register-button" type="button" data-i18n="register"
+				class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+				<span class="relative z-10 block px-4 py-2">
+					<div class="flex items-center justify-center space-x-2">
+						<span class="transition-colors duration-500 group-hover:text-white">Register</span>
+					</div>
+				</span>
 			</button>
 
-			<button id="login-button"
-				class="text-[#dc3cf0] font-bold border-2 border-[#dc3cf0] hover:bg-[#dc3cf0] hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-				type="button" data-i18n="login">
-				Login
+			<button id="login-button" type="button" data-i18n="login"
+				class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+				<span class="relative z-10 block px-4 py-2">
+					<div class="flex items-center justify-center space-x-2">
+						<span class="transition-colors duration-500 group-hover:text-white">Login</span>
+					</div>
+				</span>
 			</button>
 
-			<button id="language-button"
-				class="text-[#dc3cf0] font-bold border-2 border-[#dc3cf0] hover:bg-[#dc3cf0] hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-				type="button" data-i18n="language">
-				Language
+			<button id="language-button" type="button" data-i18n="language"
+				class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+				<span class="relative z-10 block px-4 py-2">
+					<div class="flex items-center justify-center space-x-2">
+						<span class="transition-colors duration-500 group-hover:text-white">Language</span>
+					</div>
+				</span>
 			</button>
 
 		</div>
