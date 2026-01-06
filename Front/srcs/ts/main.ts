@@ -1307,6 +1307,11 @@ function resetGameMenu() {
 	playerNbr = 2;
 	maxPlayer = 2;
 	aiNbr = 0;
+	paddle_left.style.top = `${PONG_HEIGHT / 2}`;
+	paddle_right.style.top = `${PONG_HEIGHT / 2}`;
+
+	playerNbr_text.textContent = playerNbr.toString();
+	aiNbr_text.textContent = aiNbr.toString();
 
 	pong_button.classList.remove("hidden");
 	qmatch_button.classList.add("hidden");
@@ -1361,6 +1366,8 @@ class Game {
 			} else {
 				// Reset ball for next point
 				gameBall.reset();
+				paddle_left.style.top = `${PONG_HEIGHT / 2}`;
+				paddle_right.style.top = `${PONG_HEIGHT / 2}`;
 				ball.classList.add("hidden");
 				play_button.classList.remove("hidden");
 			}
