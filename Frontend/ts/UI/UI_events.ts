@@ -3,6 +3,7 @@ import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
+import { resetGameMenu } from "../main.js";
 
 
 /*
@@ -71,9 +72,10 @@ export function initUIEvents(elems: UIEventElements) {
 		elems.pong_menu?.classList.add("hidden")
 	);
 
-	elems.start_button?.addEventListener("click", () =>
-		elems.pong_menu?.classList.remove("hidden")
-	);
+	elems.start_button?.addEventListener("click", () => {
+		elems.pong_menu?.classList.remove("hidden");
+		resetGameMenu();
+	});
 
 	elems.start_button?.addEventListener("click", () =>
 		toggleMenu(

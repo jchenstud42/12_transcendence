@@ -1181,6 +1181,24 @@ function showTournamentMatch() {
 	crownImage.classList.remove("hidden");
 }
 
+export function resetGameMenu() {
+	if (score_left) score_left.textContent = "0";
+	if (score_right) score_right.textContent = "0";
+
+	if (players_area) players_area.classList.add("hidden");
+	playersList.innerHTML = "";
+	playerNames = [];
+	nameEntered = 0;
+	isTournament = false;
+	playerNbr = 2;
+	maxPlayer = 2;
+	aiNbr = 0;
+
+	pong_button.classList.remove("hidden");
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+}
+
 function addFinalNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
