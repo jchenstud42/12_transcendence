@@ -150,7 +150,7 @@ export function initProfile(profileElems: {
 	saveProfileBtn: HTMLElement;
 	usernameInput: HTMLInputElement;
 	emailInput: HTMLInputElement;
-	avatarInput: HTMLInputElement;
+	// avatarInput: HTMLInputElement;
 	passwordInput: HTMLInputElement;
 	confirmPasswordInput: HTMLInputElement;
 	menuUsername: HTMLElement;
@@ -187,7 +187,7 @@ export function initProfile(profileElems: {
 
 		const username = (document.getElementById("edit-username") as HTMLInputElement).value.trim();
 		const email = (document.getElementById("edit-email") as HTMLInputElement).value.trim();
-		const avatar = (document.getElementById("edit-avatar") as HTMLInputElement).value.trim();
+		// const avatar = (document.getElementById("edit-avatar")! as HTMLInputElement).value.trim();
 		const password = (document.getElementById("edit-password") as HTMLInputElement).value;
 		const confirmPass = (document.getElementById("edit-password-confirm") as HTMLInputElement).value;
 
@@ -215,8 +215,6 @@ export function initProfile(profileElems: {
 			payload.username = sanitizeInput(username);
 		if (email)
 			payload.email = sanitizeInput(email);
-		if (avatar)
-			payload.avatar = sanitizeInput(avatar);
 		if (password)
 			payload.password = password;
 		if (selectedAvatar)

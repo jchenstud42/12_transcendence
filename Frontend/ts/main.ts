@@ -83,12 +83,13 @@ initUIEvents(
 		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu: document.getElementById("pong-menu"), back_button
 	});
 
+
 initProfile(
 	{
+		// avatarInput: document.getElementById("edit-avatar") as HTMLInputElement,
 		saveProfileBtn: document.getElementById("btn-save-profile")!,
 		usernameInput: document.getElementById("edit-username") as HTMLInputElement,
 		emailInput: document.getElementById("edit-email") as HTMLInputElement,
-		avatarInput: document.getElementById("edit-avatar") as HTMLInputElement,
 		passwordInput: document.getElementById("edit-password") as HTMLInputElement,
 		confirmPasswordInput: document.getElementById("edit-password-confirm") as HTMLInputElement,
 		menuUsername: document.getElementById("menu-username")!,
@@ -954,7 +955,7 @@ function startMatch() {
 			ball.classList.remove("hidden");
 			paddle_left.classList.remove("hidden");
 			paddle_right.classList.remove("hidden");
-			
+
 			gameBall.active = true;
 			gameBall.serve();
 		}, 1000);
@@ -1037,7 +1038,7 @@ class Game {
 			finalList.classList.add("hidden");
 			winnerName.classList.add("hidden");
 			crownImage.classList.add("hidden");
-			
+
 			// Call async tournament without await in constructor
 			this.createTournament();
 		} else {
@@ -1049,7 +1050,7 @@ class Game {
 		const pointIndex = playerSide === 'left' ? 0 : 1;
 		if (this.players[pointIndex]) {
 			this.players[pointIndex].point++;
-			
+
 			// Update score display
 			if (playerSide === 'left' && score_left) {
 				score_left.textContent = this.players[pointIndex].point.toString();
@@ -1147,7 +1148,7 @@ class Game {
 				const handler = (side: 'left' | 'right') => {
 					if (side === 'left') leftScore++;
 					else rightScore++;
-					
+
 					updateScores();
 
 					if (leftScore >= pointsToWin || rightScore >= pointsToWin) {
@@ -1167,15 +1168,15 @@ class Game {
 					ball.classList.add("hidden");
 					play_button.classList.remove("hidden");
 				};
-				
+
 				gameBall.onScore = handler;
-				
+
 				// One-time listener for play button click to start countdown
 				const startMatchListener = () => {
 					console.log("startMatchListener triggered");
 					play_button.removeEventListener("click", startMatchListener);
 					play_button.classList.add("hidden");
-					
+
 					ready_text.classList.remove("hidden");
 					setTimeout(() => {
 						ready_text.classList.add("hidden");
@@ -1188,7 +1189,7 @@ class Game {
 						}, 800);
 					}, 800);
 				};
-				
+
 				if (play_button) {
 					play_button.addEventListener("click", () => {
 						startMatch();
@@ -1196,7 +1197,7 @@ class Game {
 				} else {
 					console.error("play_button not found at script load");
 				}
-				
+
 				document.addEventListener("keydown", (event: KeyboardEvent) => {
 					if (event.key === "Enter" && play_button && !play_button.classList.contains("hidden")) {
 						startMatch();
@@ -1209,31 +1210,31 @@ class Game {
 		while (bracket.length > 1) {
 			console.log(`Round ${round} started with ${bracket.length} players`);
 			const nextRound: Player[] = [];
-			
+
 			for (let i = 0; i < bracket.length; i += 2) {
 				const p1 = bracket[i];
 				const p2 = bracket[i + 1];
-				
+
 				showPair(p1, p2);
-				
+
 				const winner = await runMatch(p1, p2);
-				
+
 				nextRound.push(winner);
-				
+
 				const label = document.createElement("div");
 				label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
 				label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Round ${round} winner</span><br>${winner.name}`;
 				finalList.appendChild(label);
 				finalList.classList.remove("hidden");
-				
+
 				await new Promise(r => setTimeout(r, 400));
 			}
-			
+
 			bracket = nextRound;
 			round++;
 			playersList.innerHTML = "";
 		}
-		
+
 		const champion = bracket[0];
 		if (champion) {
 			winnerName.innerHTML = "";
@@ -1245,18 +1246,18 @@ class Game {
 			crownImage.classList.remove("hidden");
 			alert(`${champion.name} remporte le tournoi !`);
 		}
-		
+
 		if (players_area) players_area.classList.add("hidden");
 		if (score_left) score_left.textContent = "0";
 		if (score_right) score_right.textContent = "0";
 		gameBall.onScore = null;
-		
+
 		// After tournament ends, return to menu
 		setTimeout(() => {
 			resetGameMenu();
 		}, 1000);
 	}
-	
+
 
 
 	public createQuickMatch() {
