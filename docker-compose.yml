@@ -4,6 +4,8 @@ services:
       context: ./Front
     ports:
       - "8443:8443"
+    depends_on:
+      - backend
     restart: on-failure
 
   backend:
