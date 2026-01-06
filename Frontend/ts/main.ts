@@ -1074,7 +1074,7 @@ class Game {
 		}
 	}
 
-	private endGame(winner: Player) {
+	private async endGame(winner: Player) {
 		this.winner = winner;
 		console.log(`${winner.name} wins the match!`);
 		gameBall.active = false;
@@ -1085,7 +1085,50 @@ class Game {
 
 		alert(`${winner.name} wins with ${winner.point} points!`);
 
-		// Reset everything and go back to menu
+		const token = localStorage.getItem("accessToken");
+		if (!token) {
+			console.warn("User not logged in → match not saved");
+			resetGameMenu();
+			return;
+		}
+
+		if (this.players.length < 2) {
+			console.warn("Not enough players → match not saved");
+			resetGameMenu();
+			return;
+		}
+
+		const player1 = this.players[0];
+		const player2 = this.players[1];
+	
+		const payload = {
+			player1Id: player1.userId,
+			player2Id: player2.userId,
+			score1: player1.point,
+			score2: player2.point,
+			winnerId: winner.userId
+		};
+
+		try {
+			const res = await fetch("/match", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`
+				},
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) {
+				console.error("Match save failed:", await res.text());
+			}
+		} catch (err) {
+			console.error("Error saving match:", err);
+		}
+
+		/* ========================= */
+
 		setTimeout(() => {
 			resetGameMenu();
 		}, 1000);
