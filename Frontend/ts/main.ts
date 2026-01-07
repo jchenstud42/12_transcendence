@@ -41,6 +41,8 @@ const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
 const history_button = document.getElementById("history-button")!;
 
+const pong_menu = document.getElementById("pong-menu") as HTMLDivElement;
+const pong_overlay = document.getElementById("pong-overlay") as HTMLDivElement;
 const back_button = document.getElementById("back-button")!;
 
 // const add_friend_button = document.getElementById("btn-add-friend")!;
@@ -80,7 +82,7 @@ init2FA(
 initUIEvents(
 	{
 		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button,
-		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu: document.getElementById("pong-menu"), back_button
+		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu, back_button, pong_overlay
 	});
 
 
@@ -673,8 +675,8 @@ function renderMatchHistory(matches: any[]) {
 		const date = match.date ? new Date(match.date).toLocaleDateString() : "N/A";
 		const winner =
 			match.winnerId === match.player1?.id ? p1 :
-			match.winnerId === match.player2?.id ? p2 :
-			t("draw");
+				match.winnerId === match.player2?.id ? p2 :
+					t("draw");
 
 		const div = document.createElement("div");
 		div.innerHTML = `${date} | ${p1} ${match.score1} - ${match.score2} ${p2}`;
@@ -713,7 +715,6 @@ const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
-const pong_menu = document.getElementById("pong-menu") as HTMLDivElement;
 const pong_button = document.getElementById("pong-button")!;
 const qmatch_button = document.getElementById("quick-match-button")!;
 const tournament_button = document.getElementById("tournament-button")!;
@@ -774,7 +775,7 @@ class Player {
 
 		if (userId !== null) {
 			this.userId = userId;
-		} 
+		}
 		else {
 			this.userId = generateGuestId();
 			guestPlayers.set(this.userId, name);
@@ -1102,9 +1103,9 @@ class Game {
 		const player1 = this.players[0];
 		const player2 = this.players[1];
 
-		const hasRealUser = (player1.userId >= 100 && player1.userId < 200) || 
-							(player2.userId >= 200 && player2.userId < 300);
-		
+		const hasRealUser = (player1.userId >= 100 && player1.userId < 200) ||
+			(player2.userId >= 200 && player2.userId < 300);
+
 		if (!token || !hasRealUser) {
 			console.log("No logged-in user");
 			setTimeout(() => {

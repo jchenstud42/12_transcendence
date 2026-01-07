@@ -29,12 +29,33 @@ type UIEventElements = {
 	edit_menu?: HTMLElement | null;
 	friends_menu?: HTMLElement | null;
 	pong_menu?: HTMLElement | null;
+	pong_overlay?: HTMLElement | null;
 	history_menu?: HTMLElement | null;
 	twoFA_menu?: HTMLElement | null;
 	twofaTypeMenu?: HTMLElement | null;
 	language_menu?: HTMLElement | null;
 };
 
+function openPong(elems: UIEventElements) {
+	elems.pong_overlay?.classList.remove("opacity-0", "pointer-events-none", "hidden");
+	elems.pong_menu?.classList.remove("opacity-0", "scale-95", "hidden");
+	elems.back_button?.classList.remove("hidden");
+
+	document.body.classList.add("overflow-hidden");
+}
+
+function closePong(elems: UIEventElements) {
+	elems.pong_overlay?.classList.add("opacity-0", "pointer-events-none");
+	elems.pong_menu?.classList.add("opacity-0", "scale-95");
+	elems.back_button?.classList.add("hidden");
+
+	document.body.classList.remove("overflow-hidden");
+
+	setTimeout(() => {
+		elems.pong_overlay?.classList.add("hidden");
+		elems.pong_menu?.classList.add("hidden");
+	}, 300);
+}
 
 /*
   - On initialise les events pour les differents boutons et menu (on ecoute pour savoir quand l'user clique dessus on affiche le menu et cache les autres)
@@ -69,13 +90,15 @@ export function initUIEvents(elems: UIEventElements) {
 
 
 	elems.back_button?.addEventListener("click", () =>
-		elems.pong_menu?.classList.add("hidden")
+		closePong(elems)
 	);
 
+
 	elems.start_button?.addEventListener("click", () => {
-		elems.pong_menu?.classList.remove("hidden");
+		openPong(elems);
 		resetGameMenu();
 	});
+
 
 	elems.start_button?.addEventListener("click", () =>
 		toggleMenu(
