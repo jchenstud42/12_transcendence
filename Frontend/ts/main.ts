@@ -567,10 +567,10 @@ function renderPendingRequests(requests: any[], currentUserId: number) {
 		const div = document.createElement("div");
 		div.className = "pending-item";
 		div.innerHTML = `
-            <span>${r.sendBy.username}</span>
-            <button class="accept-btn" data-request-id="${r.id}"> ✅ </button>
-            <button class="reject-btn" data-request-id="${r.id}"> ❌ </button>
-        `;
+			<span>${r.sendBy.username}</span>
+			<button class="accept-btn" data-request-id="${r.id}"> ✅ </button>
+			<button class="reject-btn" data-request-id="${r.id}"> ❌ </button>
+		`;
 		friendsMenuList.appendChild(div);
 	});
 
@@ -635,18 +635,18 @@ async function rejectFriendRequest(requestId: number, userId: number) {
 
 async function fetchMatchHistory(userId: number) {
 	try {
-		const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '8443') ? 'http://localhost:8443' : '';
-		const res = await fetch(`${apiBase}/match/${userId}`, {
+		const res = await fetch(`/match/${userId}`, {
 			credentials: "include",
 			headers: getAuthHeaders()
 		});
-		const text = await res.text();
 
-		if (!res.ok)
-			throw new Error(t("failed_fetch_history"));
+		const text = await res.text();
+		console.log("Match history raw:", text);
+
+		if (!res.ok) throw new Error(text);
 
 		const data = JSON.parse(text);
-		return data;
+		return Array.isArray(data) ? data : data.matches ?? [];
 	} catch (err) {
 		console.error("fetchMatchHistory error:", err);
 		return [];
@@ -655,46 +655,30 @@ async function fetchMatchHistory(userId: number) {
 
 const historyMenuList = document.createElement("div");
 historyMenuList.id = "history-list";
+if (history_menu) {
+	history_menu.appendChild(historyMenuList);
+}
 
 function renderMatchHistory(matches: any[]) {
-	const historyContainer = document.getElementById("history-list");
-	if (!historyContainer) return;
+	historyMenuList.innerHTML = "";
 
-	historyContainer.innerHTML = "";
-
-	if (matches.length === 0) {
-		const div = document.createElement("div");
-		div.textContent = t("no_match_history");
-		historyContainer.appendChild(div);
+	if (!matches.length) {
+		historyMenuList.textContent = t("no_match_history");
 		return;
 	}
 
 	matches.forEach(match => {
+		const p1 = match.player1?.username ?? "Unknown";
+		const p2 = match.player2?.username ?? "Unknown";
+		const date = match.date ? new Date(match.date).toLocaleDateString() : "N/A";
+		const winner =
+			match.winnerId === match.player1?.id ? p1 :
+			match.winnerId === match.player2?.id ? p2 :
+			t("draw");
+
 		const div = document.createElement("div");
-		div.className = "match-item bg-gray-100 p-3 rounded mb-2";
-
-		const date = new Date(match.date).toLocaleDateString();
-		const winner = match.winnerId ? (match.winnerId === match.player1?.id ? match.player1?.username : match.player2?.username) : t("draw");
-		const player1Name = match.player1?.username || "`NULL";
-		const player2Name = match.player2?.username || "NULL";
-
-		div.innerHTML = `
-			<div class="flex justify-between items-center">
-				<div class="flex-1">
-					<span class="font-semibold">${player1Name}</span>
-					<span class="mx-2">${match.score1}</span>
-					<span>-</span>
-					<span class="mx-2">${match.score2}</span>
-					<span class="font-semibold">${player2Name}</span>
-				</div>
-			</div>
-			<div class="text-sm text-gray-600 mt-1">
-				<span>Winner: <span class="font-semibold">${winner}</span></span>
-				<span class="mx-2">|</span>
-				<span>${date}</span>
-			</div>
-		`;
-		historyContainer.appendChild(div);
+		div.innerHTML = `${date} | ${p1} ${match.score1} - ${match.score2} ${p2}`;
+		historyMenuList.appendChild(div);
 	});
 }
 
@@ -756,22 +740,48 @@ const finalList = document.getElementById("final-list")! as HTMLDivElement;
 const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
 const crownImage = document.getElementById("crown-image")! as HTMLImageElement;
 
+const guestPlayers = new Map<number, string>();
+let loggedUserCounter = 100;
+let guestIdCounter = 200;
+
+function generateLoggedUserId(): number {
+	const id = loggedUserCounter;
+	loggedUserCounter++;
+	if (loggedUserCounter >= 200) loggedUserCounter = 100;
+	return id;
+}
+
+function generateGuestId(): number {
+	const id = guestIdCounter;
+	guestIdCounter++;
+	if (guestIdCounter >= 300) guestIdCounter = 200;
+	return id;
+}
+
 class Player {
 	name: string = "";
 	playerNbr: number = 0;
 	paddle: HTMLDivElement | null = null;
 	point: number = 0;
 	gameWon: number = 0;
-	isAi: boolean = false
-	userId?: number;
+	isAi: boolean = false;
+	userId: number;
 
-	constructor(name: string, isAi: boolean, playerNbr: number, userId?: number) {
+	constructor(name: string, isAi: boolean, playerNbr: number, userId: number | null = null) {
 		this.name = name;
 		this.isAi = isAi;
 		this.playerNbr = playerNbr;
-		this.userId = userId;
+
+		if (userId !== null) {
+			this.userId = userId;
+		} 
+		else {
+			this.userId = generateGuestId();
+			guestPlayers.set(this.userId, name);
+		}
+
 	}
-};
+}
 
 class Ball {
 	el: HTMLDivElement;
@@ -1021,11 +1031,17 @@ export function resetGameMenu() {
 class Game {
 	players: Player[] = [];
 	winner: Player | null = null;
-	pointsToWin = 5;
+	pointsToWin = 2;
 	isQuickMatch = false;
 
 	constructor(playersName: [string, boolean][]) {
-		this.players = playersName.map(([playerName, isAi], playerNbr) => new Player(playerName, isAi, playerNbr));
+		const currentUserRaw = localStorage.getItem("user");
+		const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+
+		this.players = playersName.map(([playerName, isAi], playerNbr) => {
+			const isCurrentUser = currentUser && !isAi && playerName === currentUser.username;
+			return new Player(playerName, isAi, playerNbr, isCurrentUser ? currentUser.id : null);
+		});
 
 		this.isQuickMatch = !isTournament;
 
@@ -1034,12 +1050,9 @@ class Game {
 		};
 
 		if (playersName.length > 2) {
-			// Hide tournament tree during matches
 			finalList.classList.add("hidden");
 			winnerName.classList.add("hidden");
 			crownImage.classList.add("hidden");
-
-			// Call async tournament without await in constructor
 			this.createTournament();
 		} else {
 			play_button.classList.remove("hidden");
@@ -1086,27 +1099,34 @@ class Game {
 		alert(`${winner.name} wins with ${winner.point} points!`);
 
 		const token = localStorage.getItem("accessToken");
-		if (!token) {
-			console.warn("User not logged in → match not saved");
-			resetGameMenu();
+		const player1 = this.players[0];
+		const player2 = this.players[1];
+
+		const hasRealUser = (player1.userId >= 100 && player1.userId < 200) || 
+							(player2.userId >= 200 && player2.userId < 300);
+		
+		if (!token || !hasRealUser) {
+			console.log("No logged-in user");
+			setTimeout(() => {
+				resetGameMenu();
+			}, 1000);
 			return;
 		}
 
 		if (this.players.length < 2) {
-			console.warn("Not enough players → match not saved");
+			console.warn("Not enough players");
 			resetGameMenu();
 			return;
 		}
 
-		const player1 = this.players[0];
-		const player2 = this.players[1];
-	
 		const payload = {
 			player1Id: player1.userId,
 			player2Id: player2.userId,
 			score1: player1.point,
 			score2: player2.point,
-			winnerId: winner.userId
+			winnerId: winner.userId,
+			player1Name: player1.userId >= 200 ? player1.name : undefined,
+			player2Name: player2.userId >= 200 ? player2.name : undefined,
 		};
 
 		try {
@@ -1122,12 +1142,12 @@ class Game {
 
 			if (!res.ok) {
 				console.error("Match save failed:", await res.text());
+			} else {
+				console.log("Match saved successfully!");
 			}
 		} catch (err) {
 			console.error("Error saving match:", err);
 		}
-
-		/* ========================= */
 
 		setTimeout(() => {
 			resetGameMenu();
