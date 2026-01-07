@@ -37,24 +37,41 @@ type UIEventElements = {
 };
 
 function openPong(elems: UIEventElements) {
-	elems.pong_overlay?.classList.remove("opacity-0", "pointer-events-none", "hidden");
-	elems.pong_menu?.classList.remove("opacity-0", "scale-95", "hidden");
+	if (!elems.pong_overlay || !elems.pong_menu) return;
+
+	elems.pong_overlay.classList.remove("hidden");
+	elems.pong_menu.classList.remove("hidden");
 	elems.back_button?.classList.remove("hidden");
+
+	elems.pong_overlay.offsetHeight;
+	elems.pong_menu.offsetHeight;
+
+	elems.pong_overlay.classList.remove("opacity-0", "pointer-events-none");
+	elems.pong_overlay.classList.add("opacity-100");
+
+	elems.pong_menu.classList.remove("opacity-0", "scale-95");
+	elems.pong_menu.classList.add("opacity-100", "scale-100");
 
 	document.body.classList.add("overflow-hidden");
 }
 
 function closePong(elems: UIEventElements) {
-	elems.pong_overlay?.classList.add("opacity-0", "pointer-events-none");
-	elems.pong_menu?.classList.add("opacity-0", "scale-95");
-	elems.back_button?.classList.add("hidden");
+	if (!elems.pong_overlay || !elems.pong_menu) return;
 
+	elems.pong_overlay.classList.remove("opacity-100");
+	elems.pong_overlay.classList.add("opacity-0", "pointer-events-none");
+
+	elems.pong_menu.classList.remove("opacity-100", "scale-100");
+	elems.pong_menu.classList.add("opacity-0", "scale-95");
+
+	elems.back_button?.classList.add("hidden");
 	document.body.classList.remove("overflow-hidden");
 
+	const duration = 300;
 	setTimeout(() => {
 		elems.pong_overlay?.classList.add("hidden");
 		elems.pong_menu?.classList.add("hidden");
-	}, 300);
+	}, duration);
 }
 
 /*
@@ -93,14 +110,8 @@ export function initUIEvents(elems: UIEventElements) {
 		closePong(elems)
 	);
 
-
 	elems.start_button?.addEventListener("click", () => {
 		openPong(elems);
-		resetGameMenu();
-	});
-
-
-	elems.start_button?.addEventListener("click", () =>
 		toggleMenu(
 			elems.edit_menu,
 			elems.twoFA_menu,
@@ -108,8 +119,12 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.history_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu,
-		)
-	);
+			elems.registerContainer,
+			elems.loginContainer,
+			elems.profile_menu
+		);
+		resetGameMenu();
+	});
 
 	elems.friends_button?.addEventListener("click", () =>
 		toggleMenu(
