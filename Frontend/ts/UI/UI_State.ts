@@ -97,11 +97,15 @@ export function applyLoggedInState(user: { id: number; username: string; email: 
 	const menuUsername = document.getElementById('menu-username');
 	const menuEmail = document.getElementById('menu-email');
 	const profileAvatar = document.getElementById('profile-avatar') as HTMLImageElement | null;
+	const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 	if (menuUsername) menuUsername.textContent = user.username || '';
 	if (menuEmail) menuEmail.textContent = user.email || '';
 	if (profileAvatar) {
-		profileAvatar.src = profileAvatar.src || '../assets/default-avatar.png';
-	}
+	if (storedUser.avatar)
+		profileAvatar.src = storedUser.avatar;
+	else
+		profileAvatar.src = "../assets/default-avatar.png";
+}
 
 	const profileBtn = document.getElementById('profile-button');
 	if (profileBtn) profileBtn.classList.remove('hidden');

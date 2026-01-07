@@ -169,11 +169,13 @@ export const AVATARS = [
 
   love you <3
 */
+
+
+
 export function initProfile(profileElems: {
 	saveProfileBtn: HTMLElement;
 	usernameInput: HTMLInputElement;
 	emailInput: HTMLInputElement;
-	// avatarInput: HTMLInputElement;
 	passwordInput: HTMLInputElement;
 	confirmPasswordInput: HTMLInputElement;
 	menuUsername: HTMLElement;
@@ -182,7 +184,11 @@ export function initProfile(profileElems: {
 }, currentUserId: number | null) {
 	const { saveProfileBtn } = profileElems;
 
-	let selectedAvatar: string | null = null;
+	let selectedAvatar: string | null = localStorage.getItem("selectedAvatar");
+
+	if (selectedAvatar && profileElems.profileAvatar) {
+		profileElems.profileAvatar.src = selectedAvatar;
+	}
 
 	const avatarPicker = document.getElementById("avatar-picker");
 
@@ -195,10 +201,12 @@ export function initProfile(profileElems: {
 			img.className = "w-16 h-16 rounded-full cursor-pointer hover:ring-2 ring-purple-500";
 			img.addEventListener("click", () => {
 				selectedAvatar = url;
+				localStorage.setItem("selectedAvatar", selectedAvatar);
 				avatarPicker.querySelectorAll("img").forEach(i =>
 					i.classList.remove("ring-2")
 				);
 				img.classList.add("ring-2", "ring-purple-500");
+				profileElems.profileAvatar.src = selectedAvatar;
 			});
 			avatarPicker.appendChild(img);
 		});
@@ -210,7 +218,6 @@ export function initProfile(profileElems: {
 
 		const username = (document.getElementById("edit-username") as HTMLInputElement).value.trim();
 		const email = (document.getElementById("edit-email") as HTMLInputElement).value.trim();
-		// const avatar = (document.getElementById("edit-avatar")! as HTMLInputElement).value.trim();
 		const password = (document.getElementById("edit-password") as HTMLInputElement).value;
 		const confirmPass = (document.getElementById("edit-password-confirm") as HTMLInputElement).value;
 
