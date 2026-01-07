@@ -170,8 +170,7 @@ export const AVATARS = [
 	"../assets/avatars/PPRomain.png",
 	"../assets/avatars/Corgi.jpeg",
 	"../assets/avatars/Gamer.png",
-	"../assets/avatars/Journey.png",
-	"../assets/avatars/avatar4.png",
+	"../assets/avatars/Journey.png"
 ];
 
 /*
