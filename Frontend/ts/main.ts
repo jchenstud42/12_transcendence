@@ -937,6 +937,7 @@ function startGame() {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
 			gameBall.serve();
+			enableKeyListeners();
 		}, 1000);
 	}, 1000);
 }
@@ -951,12 +952,9 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 	}
 });
 
-
 function startMatch() {
 	play_button?.classList.add("hidden");
-
 	ready_text.classList.remove("hidden");
-
 	setTimeout(() => {
 		ready_text.classList.add("hidden");
 		go_text.classList.remove("hidden");
@@ -966,24 +964,38 @@ function startMatch() {
 			ball.classList.remove("hidden");
 			paddle_left.classList.remove("hidden");
 			paddle_right.classList.remove("hidden");
-
 			gameBall.active = true;
 			gameBall.serve();
+			enableKeyListeners();
 		}, 1000);
 	}, 1000);
 }
 
 //Set true or False wether a key is press among the "keys" listtwofaForm
-document.addEventListener('keydown', (e) => {
+const handleKeyDown = (e: KeyboardEvent) => {
 	if (e.key in keys) {
 		keys[e.key as keyof typeof keys] = true;
 	}
-});
-document.addEventListener('keyup', (e) => {
+};
+
+const handleKeyUp = (e: KeyboardEvent) => {
 	if (e.key in keys) {
 		keys[e.key as keyof typeof keys] = false;
 	}
-});
+};
+
+// Fonctions pour activer/désactiver les event listeners
+function enableKeyListeners() {
+	document.addEventListener('keydown', handleKeyDown);
+	document.addEventListener('keyup', handleKeyUp);
+}
+
+function disableKeyListeners() {
+	document.removeEventListener('keydown', handleKeyDown);
+	document.removeEventListener('keyup', handleKeyUp);
+}
+
+disableKeyListeners();
 
 //Fonction pour bouger les paddles en fonction de la key press
 function updatePaddlePositions() {
@@ -1018,8 +1030,8 @@ export function resetGameMenu() {
 	playerNbr = 2;
 	maxPlayer = 2;
 	aiNbr = 0;
-	paddle_left.style.top = `${PONG_HEIGHT / 2}`;
-	paddle_right.style.top = `${PONG_HEIGHT / 2}`;
+	paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+	paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 
 	playerNbr_text.textContent = playerNbr.toString();
 	aiNbr_text.textContent = aiNbr.toString();
@@ -1080,8 +1092,8 @@ class Game {
 			} else {
 				// Reset ball for next point
 				gameBall.reset();
-				paddle_left.style.top = `${PONG_HEIGHT / 2}`;
-				paddle_right.style.top = `${PONG_HEIGHT / 2}`;
+				paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+				paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 				ball.classList.add("hidden");
 				play_button.classList.remove("hidden");
 			}
