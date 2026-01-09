@@ -22,8 +22,8 @@
 		}
 
 		.play-btn {
-			width: calc(var(--game-width) * 0.2);
-			height: calc(var(--game-height) * 0.1);
+			width: calc(var(--game-width) * 0.12);
+			height: calc(var(--game-height) * 0.06);
 		}
 
 		.quick-match-btn {
@@ -336,17 +336,21 @@
 
 		<!-- Pong background overlay-->
 		<div id="pong-overlay" class="fixed inset-0 bg-black bg-opacity-65 backdrop-blur-sm
-	       opacity-0 pointer-events-none
-	       transition-opacity duration-300 ease-out
-	       z-10">
+			opacity-0 pointer-events-none
+			transition-opacity duration-300 ease-out
+			z-10">
 		</div>
 
 		<!-- Pong back button -->
 		<button id="back-button" class="hidden fixed z-30 text-white text-4xl font-bold rounded-lg shadow-md
-           transition-opacity duration-300 ease-out
-           top-[calc(50%-300px+10px)] left-[calc(50%-400px-45px)]">
+			transition-opacity duration-300 ease-out
+			top-[calc(50%-300px+10px)] left-[calc(50%-400px-45px)]">
 			↩
 		</button>
+
+		<!-- Tournament Bracket -->
+		<div id="final-list" class="fixed top-1/2 -translate-y-1/2 flex flex-col gap-1 text-white z-50 hidden" style="left: calc(50% + 660px); width: 50px; font-size: 10px;">
+		</div>
 
 		<!-- Pong menu button-->
 		<div id="pong-menu" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black hidden overflow-hidden border-4 border-white z-20" style="width: var(--game-width); height: var(--game-height);">
@@ -396,11 +400,8 @@
 				<input id="playerName-input" type="text" maxlength="8" class="text-center text-black text-xl font-bold px-3 py-2 rounded bg-white w-48">
 			</div>
 
-			<div id="players-area" class="absolute top-3/4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 hidden">
-				<div id="players-list" class="flex flex-row gap-2 text-white text-lg">
-				</div>
-
-				<div id="scores" class="mt-1 flex flex-row items-center gap-8 text-white text-2xl opacity-80 select-none pointer-events-none">
+			<div id="players-area" class="absolute left-1/2 -translate-x-1/2 w-full h-full flex flex-col items-center justify-between hidden pointer-events-none" style="padding-top: 20px; padding-bottom: 20px;">
+				<div id="scores" class="flex flex-row items-center gap-8 text-white text-2xl opacity-80 select-none pointer-events-none">
 					<div id="score-left" class="min-w-[2ch] text-center">
 						0
 					</div>
@@ -409,15 +410,13 @@
 						0
 					</div>
 				</div>
-			</div>
 
-			<div id="final-list" class="absolute top-1/2 left-1/2 -translate-x-1/2 flex flex-row gap-32 text-white text-lg hidden">
+				<div id="players-list" class="flex flex-row gap-2 text-white text-sm">
+				</div>
 			</div>
 
 			<div id="winner-name" class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
 			</div>
-
-			<img id="crown-image" src="assets/crown.png" alt="Crown" class="absolute top-10 left-1/2 -translate-x-1/2 w-16 h-16 hidden" />
 
 			<button id="play-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" data-i18n="play">
 				PLAY
