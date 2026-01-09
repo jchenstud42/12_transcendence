@@ -292,6 +292,7 @@ else {
 
 
 const logoutButton = document.getElementById("logout-button") as HTMLButtonElement;
+
 if (logoutButton) {
 	logoutButton.addEventListener("click", async () => {
 		try {
@@ -326,11 +327,16 @@ if (logoutButton) {
 			if (res.ok) {
 				storedUserId = null;
 				localStorage.removeItem("accessToken");
-				alert(t("logout_success"));
-				localStorage.removeItem('user');
+				localStorage.removeItem("user");
 				sessionStorage.removeItem("twoFAtoken");
 				selected2FAType = null;
-				twofaForm.classList.add("hidden");
+				try {
+					await fetch("/logout", {
+						method: "POST",
+						credentials: "include",
+						headers: { "Content-Type": "application/json" }
+					});
+				} catch (_) {}
 				location.reload();
 			} else {
 				let serverBody: any = null;
@@ -1404,17 +1410,35 @@ OK_button.addEventListener("click", () => {
 	hidePlayerNbrMenu();
 	if (players_area) {
 		players_area.classList.remove("hidden");
-	} else {
-		console.warn("players-area element not found in DOM");
 	}
+	const loggedUsername = getLoggedUsername();
 
-	if (playerNbr > 0) {
+	if (loggedUsername) {
+		playerNames.push([loggedUsername, false]);
+		addPlayerNameLabel(loggedUsername, 0, false);
+		nameEntered = 1;
+	}
+	if (playerNbr > nameEntered) {
 		enterPlayerName();
 	} else {
 		addAiNameLabel();
-		const game = new Game(playerNames);
+		new Game(playerNames);
 	}
 });
+
+function getLoggedUsername(): string | null {
+	const userRaw = localStorage.getItem("user");
+	if (!userRaw)
+		return (null);
+
+	try {
+		const user = JSON.parse(userRaw);
+		return (user?.username ?? null);
+	}
+	catch {
+		return (null);
+	}
+}
 
 function hidePlayerNbrMenu() {
 	enterPlayerNbr_text.classList.add("hidden")
