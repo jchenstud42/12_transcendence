@@ -6,6 +6,7 @@ import { initProfile } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
 import { toggleMenu, hideMenu } from "./UI/UI_helpers.js";
+import { PONG_UI } from "./Pong/elements.js";
 
 // CA C LE DIV DANS LE HTML
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
@@ -711,9 +712,6 @@ history_button.addEventListener("click", async () => {
 
 
 // POOOONNNNNNNG
-const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
-const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
-const ball = document.getElementById("ball") as HTMLDivElement;
 
 const PONG_WIDTH = 800;
 const PONG_HEIGHT = 600;
@@ -722,32 +720,8 @@ const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
-const pong_button = document.getElementById("pong-button")!;
-const qmatch_button = document.getElementById("quick-match-button")!;
-const tournament_button = document.getElementById("tournament-button")!;
-
-const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
-const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
-const playerIncr_button = document.getElementById("increasePlayer-button")!;
-const playerDecr_button = document.getElementById("decreasePlayer-button")!;
-const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
-const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
-const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
-const play_button = document.getElementById("play-button") as HTMLButtonElement;
-const ready_text = document.getElementById("ready-text")!;
-const go_text = document.getElementById("go-text")!;
-
-const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
-const decreasePlayer_button = document.getElementById("decreasePlayer-button")!;
-const increasePlayer_button = document.getElementById("increasePlayer-button")!;
-const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
-const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
-const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
-const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
-const playersList = document.getElementById("players-list")! as HTMLDivElement;
-const finalList = document.getElementById("final-list")! as HTMLDivElement;
-const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
+import { Ball } from './Pong/ball.js';
+import { Ai } from './Pong/ai.js';
 
 const guestPlayers = new Map<number, string>();
 let loggedUserCounter = 100;
@@ -792,124 +766,23 @@ class Player {
 	}
 }
 
-class Ball {
-	el: HTMLDivElement;
-	container: HTMLElement;
-	size: number;
-	x = 0;
-	y = 0;
-	vx = 0;
-	vy = 0;
-	speed = 300;
-	active = false;
-	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
+const gameBall = new Ball(PONG_UI.ball, pong_menu, BALL_SIZE);
 
+/* const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right, 3);
+const aiPlayer2 = new Ai(gameBall, paddle_right, paddle_left, paddle_left, 3);
 
-	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
-		this.el = el;
-		this.container = container;
-		this.size = size;
-		this.initBallPos();
-
-	}
-
-	initBallPos() {
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
-		this.x = w / 2 - this.size / 2;
-		this.y = h / 2 - this.size / 2;
-		this.vx = 0;
-		this.vy = 0;
-		this.active = false;
-		this.render();
-	}
-
-	serve(direction: 1 | -1 = (Math.random() < 0.5 ? 1 : -1)) {
-		this.initBallPos();
-		const maxAngle = 45 * (Math.PI / 180);
-		const angle = (Math.random() * maxAngle * 2) - maxAngle;
-		this.speed = 300;
-		this.vx = direction * this.speed * Math.cos(angle);
-		this.vy = this.speed * Math.sin(angle);
-		this.active = true;
-	}
-
-	reset() {
-		this.initBallPos();
-	}
-
-	render() {
-		this.el.style.removeProperty('right');
-		this.el.style.left = `${this.x}px`;
-		this.el.style.top = `${this.y}px`
-	}
-
-	rectsIntersect(ax: number, ay: number, aw: number, ah: number, bx: number, by: number, bw: number, bh: number) {
-		return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-	}
-
-	update(dt: number) {
-		if (!this.active)
-			return;
-
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
-
-		//update ball position
-		this.x += this.vx * dt;
-		this.y += this.vy * dt;
-
-		//wall colision
-		if (this.y <= 0) {
-			this.y = 0;
-			this.vy = -this.vy;
-		}
-		if (this.y + this.size >= h) {
-			this.y = h - this.size;
-			this.vy = -this.vy;
-		}
-
-		const plX = paddle_left.offsetLeft;
-		const plY = paddle_left.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
-			const paddleCenter = plY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
-			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const bounceAngle = relative * (75 * Math.PI / 180);
-			this.speed = Math.min(this.speed + 20, 900);
-			this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
-			this.vy = this.speed * Math.sin(bounceAngle);
-			this.x = plX + PADDLE_WIDTH + 0.5;
-		}
-
-		const prX = paddle_right.offsetLeft;
-		const prY = paddle_right.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
-			const paddleCenter = prY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
-			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
-			const bounceAngle = relative * (75 * Math.PI / 180);
-			this.speed = Math.min(this.speed + 20, 900);
-			this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
-			this.vy = this.speed * Math.sin(bounceAngle);
-			this.x = prX - PADDLE_WIDTH - 0.5;
-		}
-
-		if (this.x + this.size < 0) {
-			console.debug('Ball out left -> right player scores');
-			if (this.onScore) this.onScore('right'); // notifier le Game
-			this.reset();
-		}
-		if (this.x > w) {
-			console.debug('Ball out right -> left player scores');
-			if (this.onScore) this.onScore('left'); // notifier le Game
-			this.reset();
-		}
-		this.render();
-	}
-};
-
-const gameBall = new Ball(ball, pong_menu, BALL_SIZE);
+// AI View checkbox event listener
+if (aiViewCheckboxInput) {
+	aiViewCheckboxInput.addEventListener("change", (e) => {
+		const isChecked = (e.target as HTMLInputElement).checked;
+		console.log("AI View checkbox changed:", isChecked);
+		// Add your logic here for when checkbox is checked/unchecked
+		if (isChecked)
+			aiPlayer.showAiPredictions();
+		else
+			aiPlayer.hideAiPredictions();
+	});
+} */
 
 //game loop to update ball position;
 let lastTime = performance.now();
@@ -918,6 +791,8 @@ function gameLoop(now = performance.now()) {
 	lastTime = now;
 
 	gameBall.update(dt);
+/* 	aiPlayer.updategameElapsedTime(dt);
+	aiPlayer2.updategameElapsedTime(dt); */
 
 	requestAnimationFrame(gameLoop);
 }
@@ -932,48 +807,53 @@ const keys = {
 };
 
 //Start count down when Pong button is pressed
-function startGame() {
-	play_button.classList.add("hidden");
-	paddle_left.classList.remove("hidden");
-	paddle_right.classList.remove("hidden");
-	ready_text.classList.remove("hidden");
+/* function startGame() {
+	PONG_UI.playButton.classList.add("hidden");
+	PONG_UI.leftPaddle.classList.remove("hidden");
+	PONG_UI.rightPaddle.classList.remove("hidden");
+	PONG_UI.readyText.classList.remove("hidden");
 
 	pendingTimeouts.push(setTimeout(() => {
-		ready_text.classList.add("hidden");
-		go_text.classList.remove("hidden");
+		PONG_UI.readyText.classList.add("hidden");
+		PONG_UI.goText.classList.remove("hidden");
 		pendingTimeouts.push(setTimeout(() => {
-			go_text.classList.add("hidden");
-			ball.classList.remove("hidden");
+			PONG_UI.goText.classList.add("hidden");
+			PONG_UI.ball.classList.remove("hidden");
 			gameBall.serve();
 			enableKeyListeners();
 		}, 1000));
 	}, 1000));
-}
+} */
 
-play_button.addEventListener("click", () => {
+PONG_UI.playButton.addEventListener("click", () => {
 	startMatch();
 });
 
 document.addEventListener("keydown", (event: KeyboardEvent) => {
-	if (event.key === "Enter" && !play_button.classList.contains("hidden")) {
+	if (event.key === "Enter" && !PONG_UI.playButton.classList.contains("hidden")) {
 		startMatch();
 	}
 });
 
 function startMatch() {
-	play_button?.classList.add("hidden");
-	ready_text.classList.remove("hidden");
+	PONG_UI.playButton?.classList.add("hidden");
+	PONG_UI.readyText.classList.remove("hidden");
 	pendingTimeouts.push(setTimeout(() => {
-		ready_text.classList.add("hidden");
-		go_text.classList.remove("hidden");
+		PONG_UI.readyText.classList.add("hidden");
+		PONG_UI.goText.classList.remove("hidden");
 
 		pendingTimeouts.push(setTimeout(() => {
-			go_text.classList.add("hidden");
-			ball.classList.remove("hidden");
-			paddle_left.classList.remove("hidden");
-			paddle_right.classList.remove("hidden");
+			PONG_UI.goText.classList.add("hidden");
+			PONG_UI.ball.classList.remove("hidden");
+			PONG_UI.leftPaddle.classList.remove("hidden");
+			PONG_UI.rightPaddle.classList.remove("hidden");
 			gameBall.active = true;
 			gameBall.serve();
+/* 			//Ai Starts Playing here
+			if (PONG_UI.aiViewCheckBox)
+				PONG_UI.aiViewCheckBox.classList.remove("hidden");
+			aiPlayer.oneSecondLoop();
+			aiPlayer2.oneSecondLoop(); */
 			enableKeyListeners();
 		}, 1000));
 	}, 1000));
@@ -1007,18 +887,18 @@ disableKeyListeners();
 
 //Fonction pour bouger les paddles en fonction de la key press
 function updatePaddlePositions() {
-	if (keys.w && paddle_left.offsetTop > 0) {
-		paddle_left.style.top = `${paddle_left.offsetTop - PADDLE_SPEED}px`;
+	if (keys.w && PONG_UI.leftPaddle.offsetTop > 0) {
+		PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop - PADDLE_SPEED}px`;
 	}
-	if (keys.s && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
-		paddle_left.style.top = `${paddle_left.offsetTop + PADDLE_SPEED}px`;
+	if (keys.s && PONG_UI.leftPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+		PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop + PADDLE_SPEED}px`;
 	}
 
-	if (keys.ArrowUp && paddle_right.offsetTop > 0) {
-		paddle_right.style.top = `${paddle_right.offsetTop - PADDLE_SPEED}px`;
+	if (keys.ArrowUp && PONG_UI.rightPaddle.offsetTop > 0) {
+		PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop - PADDLE_SPEED}px`;
 	}
-	if (keys.ArrowDown && paddle_right.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
-		paddle_right.style.top = `${paddle_right.offsetTop + PADDLE_SPEED}px`;
+	if (keys.ArrowDown && PONG_UI.rightPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+		PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop + PADDLE_SPEED}px`;
 	}
 
 	requestAnimationFrame(updatePaddlePositions);
@@ -1044,36 +924,36 @@ export function resetGameMenu() {
 	gameBall.reset();
 	gameBall.initBallPos();
 
-	if (score_left) score_left.textContent = "0";
-	if (score_right) score_right.textContent = "0";
+	if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
+	if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
-	hideMenu(OK_button, paddle_left, paddle_right, ready_text, go_text, playerName_container, increasePlayer_button,
-		decreasePlayer_button, ball, aiCounter, players_area
+	hideMenu(PONG_UI.okButton, PONG_UI.leftPaddle, PONG_UI.rightPaddle, PONG_UI.readyText, PONG_UI.goText, PONG_UI.playerNameContainer, PONG_UI.increasePlayerButton,
+		PONG_UI.decreasePlayerButton, PONG_UI.ball, PONG_UI.aiCounter, PONG_UI.playersArea
 
 	);
 
-	enterPlayerNbr_text.classList.add("hidden");
-	playerNbr_text.classList.add("hidden");
-	playersList.innerHTML = "";
-	finalList.innerHTML = "";
-	finalList.classList.add("hidden");
-	winnerName.innerHTML = "";
+	PONG_UI.enterPlayerNbrText.classList.add("hidden");
+	PONG_UI.playerNbrText.classList.add("hidden");
+	PONG_UI.playersList.innerHTML = "";
+	PONG_UI.finalList.innerHTML = "";
+	PONG_UI.finalList.classList.add("hidden");
+	PONG_UI.winnerName.innerHTML = "";
 	playerNames = [];
 	nameEntered = 0;
 	isTournament = false;
 	playerNbr = 2;
 	maxPlayer = 2;
 	aiNbr = 0;
-	paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-	paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+	PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+	PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 
-	playerNbr_text.textContent = playerNbr.toString();
-	aiNbr_text.textContent = aiNbr.toString();
+	PONG_UI.playerNbrText.textContent = playerNbr.toString();
+	PONG_UI.aiNbrText.textContent = aiNbr.toString();
 
-	pong_button.classList.remove("hidden");
-	qmatch_button.classList.add("hidden");
-	tournament_button.classList.add("hidden");
-	play_button.classList.add("hidden");
+	PONG_UI.pongButton.classList.remove("hidden");
+	PONG_UI.qmatchButton.classList.add("hidden");
+	PONG_UI.tournamentButton.classList.add("hidden");
+	PONG_UI.playButton.classList.add("hidden");
 }
 
 class Game {
@@ -1098,10 +978,10 @@ class Game {
 		};
 
 		if (playersName.length > 2) {
-			finalList.classList.remove("hidden");
+			PONG_UI.finalList.classList.remove("hidden");
 			this.createTournament();
 		} else {
-			play_button.classList.remove("hidden");
+			PONG_UI.playButton.classList.remove("hidden");
 		}
 	}
 
@@ -1111,10 +991,10 @@ class Game {
 			this.players[pointIndex].point++;
 
 			// Update score display
-			if (playerSide === 'left' && score_left) {
-				score_left.textContent = this.players[pointIndex].point.toString();
-			} else if (playerSide === 'right' && score_right) {
-				score_right.textContent = this.players[pointIndex].point.toString();
+			if (playerSide === 'left' && PONG_UI.scoreLeft) {
+				PONG_UI.scoreLeft.textContent = this.players[pointIndex].point.toString();
+			} else if (playerSide === 'right' && PONG_UI.scoreRight) {
+				PONG_UI.scoreRight.textContent = this.players[pointIndex].point.toString();
 			}
 
 			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
@@ -1125,13 +1005,13 @@ class Game {
 			} else {
 				// Reset ball for next point
 				gameBall.reset();
-				paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-				paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-				ball.classList.add("hidden");
+				PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+				PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+				PONG_UI.ball.classList.add("hidden");
 				disableKeyListeners();
-				paddle_left.classList.add("hidden");
-				paddle_right.classList.add("hidden");
-				play_button.classList.remove("hidden");
+				PONG_UI.leftPaddle.classList.add("hidden");
+				PONG_UI.rightPaddle.classList.add("hidden");
+				PONG_UI.playButton.classList.remove("hidden");
 			}
 		}
 	}
@@ -1140,10 +1020,10 @@ class Game {
 		this.winner = winner;
 		console.log(`${winner.name} wins the match!`);
 		gameBall.active = false;
-		ball.classList.add("hidden");
-		paddle_left.classList.add("hidden");
-		paddle_right.classList.add("hidden");
-		play_button.classList.add("hidden");
+		PONG_UI.ball.classList.add("hidden");
+		PONG_UI.leftPaddle.classList.add("hidden");
+		PONG_UI.rightPaddle.classList.add("hidden");
+		PONG_UI.playButton.classList.add("hidden");
 
 		alert(`${winner.name} wins with ${winner.point} points!`);
 
@@ -1203,24 +1083,15 @@ class Game {
 		}, 1000);
 	}
 
-
-	// public createTournament() {
-	// 	const shuffled: Player[] = shuffleArray(this.players);
-	// 	playersList.innerHTML = "";
-	// 	shuffled.forEach(({ name, playerNbr, isAi }) => {
-	// 		addPlayerNameLabel(name, playerNbr, isAi);
-	// 	});
-	// 	showTournamentMatch();
-	// }
 	public async createTournament() {
 		console.log("createTournament started");
 
 		const pointsToWin = 1;
 		let bracket: Player[] = shuffleArray(this.players.slice());
 
-		playersList.innerHTML = "";
-		finalList.innerHTML = "";
-		winnerName.innerHTML = "";
+		PONG_UI.playersList.innerHTML = "";
+		PONG_UI.finalList.innerHTML = "";
+		PONG_UI.winnerName.innerHTML = "";
 
 		// Create tournament bracket structure
 		const bracketDisplay = document.createElement("div");
@@ -1264,17 +1135,18 @@ class Game {
 		bracketDisplay.appendChild(semifinalsRow);
 		bracketDisplay.appendChild(playersRow);
 
-		finalList.appendChild(bracketDisplay);
-		finalList.classList.remove("hidden");
+		PONG_UI.finalList.appendChild(bracketDisplay);
+		PONG_UI.finalList.classList.remove("hidden");
 
 		const showPair = (a: Player, b: Player) => {
 			console.log("Showing pair:", a.name, "vs", b.name);
-			playersList.innerHTML = "";
+			PONG_UI.playersList.innerHTML = "";
 			addPlayerNameLabel(a.name, a.playerNbr, a.isAi);
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
-			if (players_area) players_area.classList.remove("hidden");
+			if (PONG_UI.playersArea) PONG_UI.playersArea.classList.remove("hidden");
 		};
 		
+		//TO CHECK FOR PLAYER INFOS
 		const saveTournamentMatch = async (player1: Player, player2: Player, score1: number, score2: number, winner: Player) => {
 			const token = localStorage.getItem("accessToken");
 			if (!token)
@@ -1315,13 +1187,13 @@ class Game {
 				let rightScore = 0;
 
 				const updateScores = () => {
-					if (score_left) score_left.textContent = String(leftScore);
-					if (score_right) score_right.textContent = String(rightScore);
+					if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = String(leftScore);
+					if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = String(rightScore);
 				};
 				updateScores();
 
-				ball.classList.add("hidden");
-				play_button.classList.remove("hidden");
+				PONG_UI.ball.classList.add("hidden");
+				PONG_UI.playButton.classList.remove("hidden");
 
 				// Define handler BEFORE user starts
 				const handler = (side: 'left' | 'right') => {
@@ -1333,10 +1205,10 @@ class Game {
 					if (leftScore >= pointsToWin || rightScore >= pointsToWin) {
 						gameBall.onScore = null;
 						gameBall.active = false;
-						ball.classList.add("hidden");
-						paddle_left.classList.add("hidden");
-						paddle_right.classList.add("hidden");
-						play_button.classList.add("hidden");
+						PONG_UI.ball.classList.add("hidden");
+						PONG_UI.leftPaddle.classList.add("hidden");
+						PONG_UI.rightPaddle.classList.add("hidden");
+						PONG_UI.playButton.classList.add("hidden");
 
 						const winner = leftScore > rightScore ? left : right;
 						console.log("Match winner:", winner.name);
@@ -1345,33 +1217,33 @@ class Game {
 						return;
 					}
 					gameBall.reset();
-					paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-					paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-					ball.classList.add("hidden");
+					PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+					PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+					PONG_UI.ball.classList.add("hidden");
 					disableKeyListeners();
-					paddle_left.classList.add("hidden");
-					paddle_right.classList.add("hidden");
-					play_button.classList.remove("hidden");
+					PONG_UI.leftPaddle.classList.add("hidden");
+					PONG_UI.rightPaddle.classList.add("hidden");
+					PONG_UI.playButton.classList.remove("hidden");
 				};
 
 				gameBall.onScore = handler;
 
 				// Handler pour le click du play button
 				const playClickHandler = () => {
-					play_button.removeEventListener("click", playClickHandler);
+					PONG_UI.playButton.removeEventListener("click", playClickHandler);
 					document.removeEventListener("keydown", keyHandler);
 					onPlayClick(); // Appeler showPair
 					startMatch();
 				};
 
 				const keyHandler = (event: KeyboardEvent) => {
-					if (event.key === "Enter" && play_button && !play_button.classList.contains("hidden")) {
+					if (event.key === "Enter" && PONG_UI.playButton && !PONG_UI.playButton.classList.contains("hidden")) {
 						playClickHandler();
 					}
 				};
 
-				if (play_button) {
-					play_button.addEventListener("click", playClickHandler);
+				if (PONG_UI.playButton) {
+					PONG_UI.playButton.addEventListener("click", playClickHandler);
 				} else {
 					console.error("play_button not found at script load");
 				}
@@ -1389,7 +1261,7 @@ class Game {
 				const p1 = bracket[i];
 				const p2 = bracket[i + 1];
 
-				play_button.classList.remove("hidden");
+				PONG_UI.playButton.classList.remove("hidden");
 
 				const winner = await runMatch(p1, p2, () => showPair(p1, p2));
 
@@ -1399,13 +1271,13 @@ class Game {
 				if (round === 1) {
 					const semiDiv = document.getElementById(`semi-${i / 2}`);
 					if (semiDiv) {
-						const colorClass = playerColors[winner.playerNbr];
+						const colorClass = PONG_UI.playerColors[winner.playerNbr];
 						semiDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i / 2 + 1}</span><br><span class="${colorClass}">${winner.name}</span>`;
 					}
 				} else if (round === 2) {
 					const finalDiv = document.getElementById("final-winner");
 					if (finalDiv) {
-						const colorClass = playerColors[winner.playerNbr];
+						const colorClass = PONG_UI.playerColors[winner.playerNbr];
 						finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br><span class="${colorClass}">${winner.name}</span>`;
 					}
 				}
@@ -1415,7 +1287,7 @@ class Game {
 
 			bracket = nextRound;
 			round++;
-			playersList.innerHTML = "";
+			PONG_UI.playersList.innerHTML = "";
 		}
 
 		const champion = bracket[0];
@@ -1423,9 +1295,9 @@ class Game {
 			alert(`${champion.name} remporte le tournoi !`);
 		}
 
-		if (players_area) players_area.classList.add("hidden");
-		if (score_left) score_left.textContent = "0";
-		if (score_right) score_right.textContent = "0";
+		if (PONG_UI.playersArea) PONG_UI.playersArea.classList.add("hidden");
+		if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
+		if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 		gameBall.onScore = null;
 
 		// Afficher le bouton retour
@@ -1446,14 +1318,14 @@ class Game {
 
 
 	public createQuickMatch() {
-		play_button.classList.remove("hidden");
+		PONG_UI.playButton.classList.remove("hidden");
 	}
 }
 
-pong_button.addEventListener("click", () => {
-	pong_button.classList.add("hidden");
-	qmatch_button.classList.remove("hidden");
-	tournament_button.classList.remove("hidden");
+PONG_UI.pongButton.addEventListener("click", () => {
+	PONG_UI.pongButton.classList.add("hidden");
+	PONG_UI.qmatchButton.classList.remove("hidden");
+	PONG_UI.tournamentButton.classList.remove("hidden");
 });
 
 let isTournament = false;
@@ -1461,58 +1333,58 @@ let playerNbr = 2;
 let maxPlayer = 2;
 let aiNbr = 0;
 
-qmatch_button.addEventListener("click", () => {
-	qmatch_button.classList.add("hidden");
-	tournament_button.classList.add("hidden");
+PONG_UI.qmatchButton.addEventListener("click", () => {
+	PONG_UI.qmatchButton.classList.add("hidden");
+	PONG_UI.tournamentButton.classList.add("hidden");
 	enterPlayerNbr();
 });
 
-tournament_button.addEventListener("click", () => {
-	qmatch_button.classList.add("hidden");
-	tournament_button.classList.add("hidden");
+PONG_UI.tournamentButton.addEventListener("click", () => {
+	PONG_UI.qmatchButton.classList.add("hidden");
+	PONG_UI.tournamentButton.classList.add("hidden");
 	isTournament = true;
 	playerNbr = 4;
 	maxPlayer = 4;
-	playerNbr_text.textContent = playerNbr.toString();
+	PONG_UI.playerNbrText.textContent = playerNbr.toString();
 	enterPlayerNbr();
 });
 
 
 function enterPlayerNbr() {
-	enterPlayerNbr_text.classList.remove("hidden");
-	playerNbr_text.classList.remove("hidden");
-	playerIncr_button.classList.remove("hidden");
-	playerDecr_button.classList.remove("hidden");
+	PONG_UI.enterPlayerNbrText.classList.remove("hidden");
+	PONG_UI.playerNbrText.classList.remove("hidden");
+	PONG_UI.playerIncrButton.classList.remove("hidden");
+	PONG_UI.playerDecrButton.classList.remove("hidden");
 
-	aiCounter.classList.remove("hidden");
+	PONG_UI.aiCounter.classList.remove("hidden");
 
-	OK_button.classList.remove("hidden");
+	PONG_UI.okButton.classList.remove("hidden");
 }
 
-playerIncr_button.addEventListener("click", () => {
+PONG_UI.playerIncrButton.addEventListener("click", () => {
 	if (playerNbr < maxPlayer) {
 		playerNbr++;
-		playerNbr_text.textContent = playerNbr.toString();
+		PONG_UI.playerNbrText.textContent = playerNbr.toString();
 
 		aiNbr--;
-		aiNbr_text.textContent = aiNbr.toString();
+		PONG_UI.aiNbrText.textContent = aiNbr.toString();
 	}
 })
 
-playerDecr_button.addEventListener("click", () => {
+PONG_UI.playerDecrButton.addEventListener("click", () => {
 	if (playerNbr > 0) {
 		playerNbr--;
-		playerNbr_text.textContent = playerNbr.toString();
+		PONG_UI.playerNbrText.textContent = playerNbr.toString();
 
 		aiNbr++;
-		aiNbr_text.textContent = aiNbr.toString();
+		PONG_UI.aiNbrText.textContent = aiNbr.toString();
 	}
 })
 
-OK_button.addEventListener("click", () => {
+PONG_UI.okButton.addEventListener("click", () => {
 	hidePlayerNbrMenu();
-	if (players_area) {
-		players_area.classList.remove("hidden");
+	if (PONG_UI.playersArea) {
+		PONG_UI.playersArea.classList.remove("hidden");
 	}
 	const loggedUsername = getLoggedUsername();
 
@@ -1544,12 +1416,12 @@ function getLoggedUsername(): string | null {
 }
 
 function hidePlayerNbrMenu() {
-	enterPlayerNbr_text.classList.add("hidden")
-	playerNbr_text.classList.add("hidden")
-	aiCounter.classList.add("hidden");
-	playerIncr_button.classList.add("hidden")
-	playerDecr_button.classList.add("hidden")
-	OK_button.classList.add("hidden")
+	PONG_UI.enterPlayerNbrText.classList.add("hidden")
+	PONG_UI.playerNbrText.classList.add("hidden")
+	PONG_UI.aiCounter.classList.add("hidden");
+	PONG_UI.playerIncrButton.classList.add("hidden")
+	PONG_UI.playerDecrButton.classList.add("hidden")
+	PONG_UI.okButton.classList.add("hidden")
 }
 
 let playerNames: [string, boolean][] = [];
@@ -1557,30 +1429,30 @@ const aiNames = ["Nietzche", "Aurele", "Sun Tzu", "Socrate"]
 let nameEntered = 0;
 
 function enterPlayerName() {
-	playerName_container.classList.remove("hidden")
+	PONG_UI.playerNameContainer.classList.remove("hidden")
 }
 
-playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
+PONG_UI.playerNameInput.addEventListener("keydown", (event: KeyboardEvent) => {
 	if (event.key === "Enter") {
-		const playerName = playerName_input.value.trim();
+		const playerName = PONG_UI.playerNameInput.value.trim();
 
 		const nameAlreadyUsed = playerNames.some(
 			([name, _isAI]) => name === playerName
 		);
 
 		if (playerName !== "" && !nameAlreadyUsed) {
-			playerName_input.value = "";
+			PONG_UI.playerNameInput.value = "";
 			playerNames.push([playerName, false]);
 			addPlayerNameLabel(playerName, nameEntered, false);
 			nameEntered++;
 		}
 
 		if (nameEntered === playerNbr) {
-			playerName_container.classList.add("hidden")
+			PONG_UI.playerNameContainer.classList.add("hidden")
 
 			// Reset scores display
-			if (score_left) score_left.textContent = "0";
-			if (score_right) score_right.textContent = "0";
+			if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
+			if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
 			addAiNameLabel();
 			const game = new Game(playerNames);
@@ -1591,14 +1463,14 @@ playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
-	const colorClass = playerColors[index];
+	const colorClass = PONG_UI.playerColors[index];
 	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
 	if (!isAi)
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 
-	playersList.appendChild(label);
+	PONG_UI.playersList.appendChild(label);
 
 }
 
@@ -1611,7 +1483,7 @@ function addAiNameLabel() {
 	}
 }
 
-function showTournamentMatch() {
+/* function showTournamentMatch() {
 	//Create/show Final Boxex (holder of the results of the first match)
 	for (let i = 0; i < 2; i++) {
 		const label = document.createElement("div");
@@ -1619,9 +1491,9 @@ function showTournamentMatch() {
 		label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
 
-		finalList.appendChild(label);
+		PONG_UI.finalList.appendChild(label);
 	}
-	finalList.classList.remove("hidden");
+	PONG_UI.finalList.classList.remove("hidden");
 
 	//Create/show Winner Box (holder of the results of the second match)
 	const label = document.createElement("div");
@@ -1629,19 +1501,19 @@ function showTournamentMatch() {
 	label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
 	label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
 
-	winnerName.appendChild(label);
-	winnerName.classList.remove("hidden");
+	PONG_UI.winnerName.appendChild(label);
+	PONG_UI.winnerName.classList.remove("hidden");
 }
 
 function addFinalNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
-	const colorClass = playerColors[index];
+	const colorClass = PONG_UI.playerColors[index];
 	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
 	if (!isAi)
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
 	else
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 
-	playersList.appendChild(label);
-}
+	PONG_UI.playersList.appendChild(label);
+} */
