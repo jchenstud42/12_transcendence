@@ -1229,6 +1229,38 @@ class Game {
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
 			if (players_area) players_area.classList.remove("hidden");
 		};
+		
+		const saveTournamentMatch = async (player1: Player, player2: Player, score1: number, score2: number, winner: Player) => {
+			const token = localStorage.getItem("accessToken");
+			if (!token)
+				return;
+
+			const payload = {
+				player1Id: player1.userId,
+				player2Id: player2.userId,
+				score1,
+				score2,
+				winnerId: winner.userId,
+				player1Name: player1.userId >= 100 ? player1.name : undefined,
+				player2Name: player2.userId >= 100 ? player2.name : undefined,
+			};
+
+			try {
+				const res = await fetch("/match", {
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+						"Authorization": `Bearer ${token}`
+					},
+					body: JSON.stringify(payload)
+				});
+
+				if (!res.ok) console.error("Tournament match save failed:", await res.text());
+			} catch (err) {
+				console.error("Error saving tournament match:", err);
+			}
+		};
 
 		const runMatch = (left: Player, right: Player): Promise<Player> => {
 			return new Promise((resolve) => {
@@ -1272,6 +1304,7 @@ class Game {
 
 						const winner = leftScore > rightScore ? left : right;
 						console.log("Match winner:", winner.name);
+						saveTournamentMatch(left, right, leftScore, rightScore, winner);
 						setTimeout(() => resolve(winner), 300);
 						return;
 					}
