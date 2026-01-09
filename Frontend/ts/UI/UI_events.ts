@@ -106,11 +106,14 @@ export function initUIEvents(elems: UIEventElements) {
 	);
 
 
-	elems.back_button?.addEventListener("click", () =>
-		closePong(elems)
+	elems.back_button?.addEventListener("click", () => {
+		closePong(elems);
+		resetGameMenu();
+	}
 	);
 
 	elems.start_button?.addEventListener("click", () => {
+		elems.pong_menu?.classList.remove("hidden");
 		openPong(elems);
 		toggleMenu(
 			elems.edit_menu,

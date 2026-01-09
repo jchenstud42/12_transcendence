@@ -5,6 +5,7 @@ import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js
 import { initProfile } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
+import { toggleMenu, hideMenu } from "./UI/UI_helpers.js";
 
 // CA C LE DIV DANS LE HTML
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
@@ -18,7 +19,7 @@ const login_button = document.getElementById("login-button")!;
 
 const oauth42Btn = document.getElementById("oauth-42-button");
 
-const start_button = document.getElementById("pong-start-button")
+const start_button = document.getElementById("pong-start-button");
 
 
 // 2FA Elements
@@ -336,7 +337,7 @@ if (logoutButton) {
 						credentials: "include",
 						headers: { "Content-Type": "application/json" }
 					});
-				} catch (_) {}
+				} catch (_) { }
 				location.reload();
 			} else {
 				let serverBody: any = null;
@@ -737,6 +738,8 @@ const ready_text = document.getElementById("ready-text")!;
 const go_text = document.getElementById("go-text")!;
 
 const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
+const decreasePlayer_button = document.getElementById("decreasePlayer-button")!;
+const increasePlayer_button = document.getElementById("increasePlayer-button")!;
 const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
 const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
 const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
@@ -936,16 +939,16 @@ function startGame() {
 	paddle_right.classList.remove("hidden");
 	ready_text.classList.remove("hidden");
 
-	setTimeout(() => {
+	pendingTimeouts.push(setTimeout(() => {
 		ready_text.classList.add("hidden");
 		go_text.classList.remove("hidden");
-		setTimeout(() => {
+		pendingTimeouts.push(setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
 			gameBall.serve();
 			enableKeyListeners();
-		}, 1000);
-	}, 1000);
+		}, 1000));
+	}, 1000));
 }
 
 play_button.addEventListener("click", () => {
@@ -961,11 +964,11 @@ document.addEventListener("keydown", (event: KeyboardEvent) => {
 function startMatch() {
 	play_button?.classList.add("hidden");
 	ready_text.classList.remove("hidden");
-	setTimeout(() => {
+	pendingTimeouts.push(setTimeout(() => {
 		ready_text.classList.add("hidden");
 		go_text.classList.remove("hidden");
 
-		setTimeout(() => {
+		pendingTimeouts.push(setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
 			paddle_left.classList.remove("hidden");
@@ -973,8 +976,8 @@ function startMatch() {
 			gameBall.active = true;
 			gameBall.serve();
 			enableKeyListeners();
-		}, 1000);
-	}, 1000);
+		}, 1000));
+	}, 1000));
 }
 
 //Set true or False wether a key is press among the "keys" listtwofaForm
@@ -1024,12 +1027,37 @@ function updatePaddlePositions() {
 
 requestAnimationFrame(updatePaddlePositions);
 
+let pendingTimeouts: number[] = [];
+
 export function resetGameMenu() {
+
+	pendingTimeouts.forEach(id => clearTimeout(id));
+	pendingTimeouts = [];
+
+	disableKeyListeners();
+
+	keys.w = false;
+	keys.s = false;
+	keys.ArrowUp = false;
+	keys.ArrowDown = false;
+
+	gameBall.active = false;
+	gameBall.reset();
+	gameBall.initBallPos();
+
 	if (score_left) score_left.textContent = "0";
 	if (score_right) score_right.textContent = "0";
 
-	if (players_area) players_area.classList.add("hidden");
+	hideMenu(OK_button, paddle_left, paddle_right, ready_text, go_text, playerName_container, increasePlayer_button,
+		decreasePlayer_button, ball, aiCounter, crownImage, players_area
+
+	);
+
+	enterPlayerNbr_text.classList.add("hidden");
+	playerNbr_text.classList.add("hidden");
 	playersList.innerHTML = "";
+	finalList.innerHTML = "";
+	winnerName.innerHTML = "";
 	playerNames = [];
 	nameEntered = 0;
 	isTournament = false;
@@ -1045,6 +1073,7 @@ export function resetGameMenu() {
 	pong_button.classList.remove("hidden");
 	qmatch_button.classList.add("hidden");
 	tournament_button.classList.add("hidden");
+	play_button.classList.add("hidden");
 }
 
 class Game {
