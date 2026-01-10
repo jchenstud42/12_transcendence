@@ -1,4 +1,4 @@
-import { Ball } from './ball.js';
+import { Ball } from './Ball.js';
 import { drawGrid, showGrid, hideGrid } from './grid.js';
 import { PONG_UI } from './elements.js';
 
@@ -24,7 +24,7 @@ interface PredictionBall {
     radius: number;
 }
 
-const ballAiView = new Ball(PONG_UI.aiView, PONG_UI.pongMenu, BALL_SIZE);
+const ballAiView = new Ball(PONG_UI.aiView);
 
 /* 
 	Problem to Solve:

@@ -21,7 +21,3 @@ export function toggleMenu(
 	main.classList.toggle("hidden");
 }
 
-export function hideMenu(...toHide: (HTMLElement | null | undefined)[]
-) {
-	toHide.forEach(menu => menu?.classList.add("hidden"));
-}

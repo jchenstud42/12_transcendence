@@ -8,9 +8,7 @@ const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
 export class Ball {
-	el: HTMLDivElement;
-	container: HTMLElement;
-	size: number;
+	ballUI: HTMLElement;
 	x = 0;
 	y = 0;
 	vx = 0;
@@ -20,19 +18,16 @@ export class Ball {
 	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
 
 
-	constructor(el: HTMLDivElement, container: HTMLElement, size = BALL_SIZE) {
-		this.el = el;
-		this.container = container;
-		this.size = size;
+	constructor(ballUI: HTMLElement) {
+		this.ballUI = ballUI;
 		this.initBallPos();
-
 	}
 
 	initBallPos() {
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
-		this.x = w / 2 - this.size / 2;
-		this.y = h / 2 - this.size / 2;
+		const w = PONG_UI.pongMenu.clientWidth;
+		const h = PONG_UI.pongMenu.clientHeight;
+		this.x = w / 2 - BALL_SIZE / 2;
+		this.y = h / 2 - BALL_SIZE / 2;
 		this.vx = 0;
 		this.vy = 0;
 		this.active = false;
@@ -54,9 +49,9 @@ export class Ball {
 	}
 
 	render() {
-		this.el.style.removeProperty('right');
-		this.el.style.left = `${this.x}px`;
-		this.el.style.top = `${this.y}px`
+		this.ballUI.style.removeProperty('right');
+		this.ballUI.style.left = `${this.x}px`;
+		this.ballUI.style.top = `${this.y}px`
 	}
 
 	rectsIntersect(ax: number, ay: number, aw: number, ah: number, bx: number, by: number, bw: number, bh: number) {
@@ -67,8 +62,8 @@ export class Ball {
 		if (!this.active)
 			return;
 
-		const w = this.container.clientWidth;
-		const h = this.container.clientHeight;
+		const w = PONG_UI.pongMenu.clientWidth;
+		const h = PONG_UI.pongMenu.clientHeight;
 
 		//update ball position
 		this.x += this.vx * dt;
@@ -79,16 +74,16 @@ export class Ball {
 			this.y = 0;
 			this.vy = -this.vy;
 		}
-		if (this.y + this.size >= h) {
-			this.y = h - this.size;
+		if (this.y + BALL_SIZE >= h) {
+			this.y = h - BALL_SIZE;
 			this.vy = -this.vy;
 		}
 
 		const plX = PONG_UI.leftPaddle.offsetLeft;
 		const plY = PONG_UI.leftPaddle.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
+		if (this.rectsIntersect(this.x, this.y, BALL_SIZE, BALL_SIZE, plX, plY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx < 0) {
 			const paddleCenter = plY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
+			const ballCenter = this.y + BALL_SIZE / 2;
 			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
 			const bounceAngle = relative * (75 * Math.PI / 180);
 			this.speed = Math.min(this.speed + 20, 900);
@@ -99,9 +94,9 @@ export class Ball {
 
 		const prX = PONG_UI.rightPaddle.offsetLeft;
 		const prY = PONG_UI.rightPaddle.offsetTop;
-		if (this.rectsIntersect(this.x, this.y, this.size, this.size, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
+		if (this.rectsIntersect(this.x, this.y, BALL_SIZE, BALL_SIZE, prX, prY, PADDLE_WIDTH, PADDLE_HEIGHT) && this.vx > 0) {
 			const paddleCenter = prY + PADDLE_HEIGHT / 2;
-			const ballCenter = this.y + this.size / 2;
+			const ballCenter = this.y + BALL_SIZE / 2;
 			const relative = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
 			const bounceAngle = relative * (75 * Math.PI / 180);
 			this.speed = Math.min(this.speed + 20, 900);
@@ -110,7 +105,7 @@ export class Ball {
 			this.x = prX - PADDLE_WIDTH - 0.5;
 		}
 
-		if (this.x + this.size < 0) {
+		if (this.x + BALL_SIZE < 0) {
 			console.debug('Ball out left -> right player scores');
 			if (this.onScore) this.onScore('right'); // notifier le Game
 			this.reset();
