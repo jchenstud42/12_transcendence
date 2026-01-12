@@ -1420,7 +1420,7 @@ class Game {
 
 		const champion = bracket[0];
 		if (champion) {
-			alert(`${champion.name} remporte le tournoi !`);
+			alert(`${champion.name}` + t("win_tournament"));
 		}
 
 		if (players_area) players_area.classList.add("hidden");
