@@ -130,7 +130,8 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 				let finalUsername = username;
 				const existingUser = await prisma.user.findUnique({ where: { username: finalUsername } });
 				if (existingUser) {
-					finalUsername = `${username}_${profile.id}`;
+					const randomNumber = Math.floor(Math.random() * 10000);
+					finalUsername = `${username}_${randomNumber}`;
 				}
 
 				user = await prisma.user.create({
