@@ -4,6 +4,8 @@ import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
 import { resetGameMenu } from "../main.js";
+import { startMatch } from "../main.js";
+import { enterPlayerNbr } from "../main.js";
 
 
 /*
@@ -15,6 +17,7 @@ import { resetGameMenu } from "../main.js";
 type UIEventElements = {
 	register_button?: HTMLElement | null;
 	start_button?: HTMLElement | null;
+	play_button?: HTMLElement | null;
 	login_button?: HTMLElement | null;
 	profile_button?: HTMLElement | null;
 	edit_button?: HTMLElement | null;
@@ -22,6 +25,9 @@ type UIEventElements = {
 	history_button?: HTMLElement | null;
 	language_button?: HTMLElement | null;
 	back_button?: HTMLElement | null;
+	pong_button?: HTMLElement | null;
+	qmatch_button?: HTMLElement | null;
+	tournament_button?: HTMLElement | null;
 
 	registerContainer?: HTMLElement | null;
 	loginContainer?: HTMLElement | null;
@@ -105,6 +111,26 @@ export function initUIEvents(elems: UIEventElements) {
 		)
 	);
 
+
+	elems.play_button?.addEventListener("click", () => {
+		startMatch();
+	});
+
+	document.addEventListener("keydown", (event: KeyboardEvent) => {
+		if (event.key === "Enter" && !elems.play_button?.classList.contains("hidden")) {
+			startMatch();
+		}
+		if (event.key == "Escape" && !elems.back_button?.classList.contains("hidden")) {
+			closePong(elems);
+			resetGameMenu();
+		}
+	});
+
+	elems.pong_button?.addEventListener("click", () => {
+		elems.pong_button?.classList.add("hidden");
+		elems.qmatch_button?.classList.remove("hidden");
+		elems.tournament_button?.classList.remove("hidden");
+	});
 
 	elems.back_button?.addEventListener("click", () => {
 		closePong(elems);

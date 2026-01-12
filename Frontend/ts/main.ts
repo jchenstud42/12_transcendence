@@ -69,6 +69,54 @@ let selected2FAType: string | null = null;
 let is2FAEnabled = false;
 
 
+// POOOONNNNNNNG
+const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
+const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
+const ball = document.getElementById("ball") as HTMLDivElement;
+
+const PONG_WIDTH = 800;
+const PONG_HEIGHT = 600;
+const PADDLE_WIDTH = 10;
+const PADDLE_HEIGHT = 100;
+const PADDLE_SPEED = 10;
+const BALL_SIZE = 10;
+
+const pong_button = document.getElementById("pong-button")!;
+const qmatch_button = document.getElementById("quick-match-button")!;
+const tournament_button = document.getElementById("tournament-button")!;
+
+const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
+const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
+const playerIncr_button = document.getElementById("increasePlayer-button")!;
+const playerDecr_button = document.getElementById("decreasePlayer-button")!;
+const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
+const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
+const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
+const play_button = document.getElementById("play-button") as HTMLButtonElement;
+const ready_text = document.getElementById("ready-text")!;
+const go_text = document.getElementById("go-text")!;
+
+const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
+const decreasePlayer_button = document.getElementById("decreasePlayer-button")!;
+const increasePlayer_button = document.getElementById("increasePlayer-button")!;
+const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
+const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
+const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
+const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
+const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playersList = document.getElementById("players-list")! as HTMLDivElement;
+const finalList = document.getElementById("final-list")! as HTMLDivElement;
+const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
+
+const guestPlayers = new Map<number, string>();
+let loggedUserCounter = 100;
+let guestIdCounter = 200;
+
+let isTournament = false;
+let playerNbr = 2;
+let maxPlayer = 2;
+let aiNbr = 0;
+
 initUIState(
 	{ register_button, login_button, registerContainer, loginContainer, profile_button, logout_button: document.getElementById("logout-button"), twofaForm, twofaTypeMenu },
 	{ storeToken, storeUser });
@@ -83,7 +131,7 @@ init2FA(
 
 initUIEvents(
 	{
-		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button,
+		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button, play_button, pong_button, qmatch_button, tournament_button,
 		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu, back_button, pong_overlay
 	});
 
@@ -711,48 +759,7 @@ history_button.addEventListener("click", async () => {
 
 
 
-// POOOONNNNNNNG
-const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
-const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
-const ball = document.getElementById("ball") as HTMLDivElement;
 
-const PONG_WIDTH = 800;
-const PONG_HEIGHT = 600;
-const PADDLE_WIDTH = 10;
-const PADDLE_HEIGHT = 100;
-const PADDLE_SPEED = 10;
-const BALL_SIZE = 10;
-
-const pong_button = document.getElementById("pong-button")!;
-const qmatch_button = document.getElementById("quick-match-button")!;
-const tournament_button = document.getElementById("tournament-button")!;
-
-const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
-const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
-const playerIncr_button = document.getElementById("increasePlayer-button")!;
-const playerDecr_button = document.getElementById("decreasePlayer-button")!;
-const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
-const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
-const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
-const play_button = document.getElementById("play-button") as HTMLButtonElement;
-const ready_text = document.getElementById("ready-text")!;
-const go_text = document.getElementById("go-text")!;
-
-const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
-const decreasePlayer_button = document.getElementById("decreasePlayer-button")!;
-const increasePlayer_button = document.getElementById("increasePlayer-button")!;
-const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
-const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
-const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
-const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
-const playersList = document.getElementById("players-list")! as HTMLDivElement;
-const finalList = document.getElementById("final-list")! as HTMLDivElement;
-const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
-
-const guestPlayers = new Map<number, string>();
-let loggedUserCounter = 100;
-let guestIdCounter = 200;
 
 function generateLoggedUserId(): number {
 	const id = loggedUserCounter;
@@ -933,35 +940,7 @@ const keys = {
 };
 
 //Start count down when Pong button is pressed
-function startGame() {
-	play_button.classList.add("hidden");
-	paddle_left.classList.remove("hidden");
-	paddle_right.classList.remove("hidden");
-	ready_text.classList.remove("hidden");
-
-	pendingTimeouts.push(setTimeout(() => {
-		ready_text.classList.add("hidden");
-		go_text.classList.remove("hidden");
-		pendingTimeouts.push(setTimeout(() => {
-			go_text.classList.add("hidden");
-			ball.classList.remove("hidden");
-			gameBall.serve();
-			enableKeyListeners();
-		}, 1000));
-	}, 1000));
-}
-
-play_button.addEventListener("click", () => {
-	startMatch();
-});
-
-document.addEventListener("keydown", (event: KeyboardEvent) => {
-	if (event.key === "Enter" && !play_button.classList.contains("hidden")) {
-		startMatch();
-	}
-});
-
-function startMatch() {
+export function startMatch() {
 	play_button?.classList.add("hidden");
 	ready_text.classList.remove("hidden");
 	pendingTimeouts.push(setTimeout(() => {
@@ -1459,35 +1438,7 @@ class Game {
 	}
 }
 
-pong_button.addEventListener("click", () => {
-	pong_button.classList.add("hidden");
-	qmatch_button.classList.remove("hidden");
-	tournament_button.classList.remove("hidden");
-});
-
-let isTournament = false;
-let playerNbr = 2;
-let maxPlayer = 2;
-let aiNbr = 0;
-
-qmatch_button.addEventListener("click", () => {
-	qmatch_button.classList.add("hidden");
-	tournament_button.classList.add("hidden");
-	enterPlayerNbr();
-});
-
-tournament_button.addEventListener("click", () => {
-	qmatch_button.classList.add("hidden");
-	tournament_button.classList.add("hidden");
-	isTournament = true;
-	playerNbr = 4;
-	maxPlayer = 4;
-	playerNbr_text.textContent = playerNbr.toString();
-	enterPlayerNbr();
-});
-
-
-function enterPlayerNbr() {
+export function enterPlayerNbr() {
 	enterPlayerNbr_text.classList.remove("hidden");
 	playerNbr_text.classList.remove("hidden");
 	playerIncr_button.classList.remove("hidden");
@@ -1497,46 +1448,6 @@ function enterPlayerNbr() {
 
 	OK_button.classList.remove("hidden");
 }
-
-playerIncr_button.addEventListener("click", () => {
-	if (playerNbr < maxPlayer) {
-		playerNbr++;
-		playerNbr_text.textContent = playerNbr.toString();
-
-		aiNbr--;
-		aiNbr_text.textContent = aiNbr.toString();
-	}
-})
-
-playerDecr_button.addEventListener("click", () => {
-	if (playerNbr > 0) {
-		playerNbr--;
-		playerNbr_text.textContent = playerNbr.toString();
-
-		aiNbr++;
-		aiNbr_text.textContent = aiNbr.toString();
-	}
-})
-
-OK_button.addEventListener("click", () => {
-	hidePlayerNbrMenu();
-	if (players_area) {
-		players_area.classList.remove("hidden");
-	}
-	const loggedUsername = getLoggedUsername();
-
-	if (loggedUsername) {
-		playerNames.push([loggedUsername, false]);
-		addPlayerNameLabel(loggedUsername, 0, false);
-		nameEntered = 1;
-	}
-	if (playerNbr > nameEntered) {
-		enterPlayerName();
-	} else {
-		addAiNameLabel();
-		new Game(playerNames);
-	}
-});
 
 function getLoggedUsername(): string | null {
 	const userRaw = localStorage.getItem("user");
@@ -1564,6 +1475,62 @@ function hidePlayerNbrMenu() {
 let playerNames: [string, boolean][] = [];
 const aiNames = ["Nietzche", "Aurele", "Sun Tzu", "Socrate"]
 let nameEntered = 0;
+
+qmatch_button.addEventListener("click", () => {
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+	enterPlayerNbr();
+});
+
+tournament_button.addEventListener("click", () => {
+	qmatch_button.classList.add("hidden");
+	tournament_button.classList.add("hidden");
+	isTournament = true;
+	playerNbr = 4;
+	maxPlayer = 4;
+	playerNbr_text.textContent = playerNbr.toString();
+	enterPlayerNbr();
+});
+
+playerIncr_button.addEventListener("click", () => {
+	if (playerNbr < maxPlayer) {
+		playerNbr++;
+		playerNbr_text.textContent = playerNbr.toString();
+
+		aiNbr--;
+		aiNbr_text.textContent = aiNbr.toString();
+	}
+	})
+
+playerDecr_button.addEventListener("click", () => {
+	if (playerNbr > 0) {
+		playerNbr--;
+		playerNbr_text.textContent = playerNbr.toString();
+
+		aiNbr++;
+		aiNbr_text.textContent = aiNbr.toString();
+	}
+})
+
+OK_button.addEventListener("click", () => {
+	hidePlayerNbrMenu();
+	if (players_area) {
+		players_area.classList.remove("hidden");
+	}
+
+	const loggedUsername = getLoggedUsername();
+	if (loggedUsername) {
+		playerNames.push([loggedUsername, false]);
+		addPlayerNameLabel(loggedUsername, 0, false);
+		nameEntered = 1;
+	}
+	if (playerNbr > nameEntered) {
+		enterPlayerName();
+	} else {
+		addAiNameLabel();
+		new Game(playerNames);
+	}
+});
 
 function enterPlayerName() {
 	playerName_container.classList.remove("hidden")
