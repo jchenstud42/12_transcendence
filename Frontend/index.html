@@ -197,28 +197,34 @@
 						<h2 class="text-xl font-bold mb-4" data-i18n="edit_profile">Edit Profile</h2>
 
 						<!-- USERNAME -->
-						<label class="font-semibold" data-i18n="username">Username</label>
+						<label class="font-bold" data-i18n="username">Username</label>
 						<input id="edit-username" class="border rounded w-full p-2 mb-3" type="text" data-i18n="new_username" placeholder="New username">
 
 						<!-- EMAIL -->
-						<label class="font-semibold" data-i18n="email">Email</label>
+						<label class="font-bold" data-i18n="email">Email</label>
 						<input id="edit-email" class="border rounded w-full p-2 mb-3" type="email" data-i18n="new_email" placeholder="New email">
 
 						<!-- AVATAR -->
-						<label class="font-semibold" data-i18n="avatar">Avatar</label>
+						<label class="font-bold" data-i18n="avatar">Avatar</label>
 						<button id="change-avatar-btn" class="w-full text-sm bg-gray-200 hover:bg-gray-300">
 							Changer d'avatar
 						</button>
+
+						<button id="upload-avatar-btn" class="w-full text-sm bg-gray-200 hover:bg-gray-300 mb-2">
+							⬆️
+						</button>
+
+						<input id="avatar-file-input" type="file" accept="image/png" class="hidden" />
 
 						<div id="quick-avatar-picker" class="hidden grid grid-cols-4 gap-4 mt-2 p-5">
 						</div>
 
 						<!-- PASSWORD -->
-						<label class="font-semibold" data-i18n="new_password">New Password</label>
+						<label class="font-bold" data-i18n="new_password">New Password</label>
 						<input id="edit-password" class="border rounded w-full p-2 mb-3" type="text" data-i18n="new_password" placeholder="New password">
 						<!--remplacer text par password quand ce sera fini-->
 
-						<label class="font-semibold" data-i18n="confirm_password">Confirm Password</label>
+						<label class="font-bold" data-i18n="confirm_password">Confirm Password</label>
 						<input id="edit-password-confirm" class="border rounded w-full p-2 mb-3" type="text" data-i18n="confirm_password" placeholder="Confirm password">
 						<!--remplacer text par password quand ce sera finit-->
 

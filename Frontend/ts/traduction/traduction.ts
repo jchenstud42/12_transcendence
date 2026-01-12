@@ -66,6 +66,8 @@ export const translations = {
 		two_fa_required: "2FA required",
 		enter_2fa_code: "Enter the 2FA code",
 		login_success_2fa: "Login successful with 2FA!",
+		only_png: "Only PNG images are allowed.",
+		image_too_heavy: "Image is too heavy (max 2MB).",
 
 		//Friends
 		friends: "Friends",
@@ -190,6 +192,8 @@ export const translations = {
 		two_fa_required: "2FA requise",
 		enter_2fa_code: "Entrez le code 2FA",
 		login_success_2fa: "Connexion réussie avec 2FA !",
+		only_png: "Seules les images PNG sont autorisées.",
+		image_too_heavy: "L'image est trop lourde (max 2MB).",
 
 		//Amis
 		friends: "Amis",
@@ -316,6 +320,8 @@ export const translations = {
 		twofa_not_init: "Modulo 2FA no inicializado. Llama a init2FA() primero.",
 		enter_2fa_code: "Introduce el código 2FA",
 		login_success_2fa: "¡Inicio de sesión exitoso con 2FA!",
+		only_png: "Solo se permiten imágenes PNG.",
+		image_too_heavy: "La imagen es demasiado pesada (máx 2MB).",
 
 		//Amigos
 		friends: "Amigos",

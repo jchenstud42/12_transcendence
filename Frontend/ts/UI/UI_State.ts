@@ -246,12 +246,16 @@ async function updateAvatar(url: string) {
 
 const changeAvatarBtn = document.getElementById("change-avatar-btn");
 const quickPicker = document.getElementById("quick-avatar-picker");
+const uploadAvatarBtn = document.getElementById("upload-avatar-btn");
+const avatarFileInput = document.getElementById("avatar-file-input") as HTMLInputElement | null;
+
 
 if (changeAvatarBtn && quickPicker) {
 	changeAvatarBtn.addEventListener("click", () => {
 		quickPicker.classList.toggle("hidden");
 		quickPicker.innerHTML = "";
 
+		localStorage.removeItem("selectedAvatar");
 		AVATARS.forEach((url) => {
 			const img = document.createElement("img");
 			img.src = url;
@@ -264,5 +268,38 @@ if (changeAvatarBtn && quickPicker) {
 
 			quickPicker.appendChild(img);
 		});
+	});
+}
+
+if (uploadAvatarBtn && avatarFileInput) {
+	uploadAvatarBtn.addEventListener("click", () => {
+		avatarFileInput.click();
+	});
+	localStorage.removeItem("selectedAvatar");
+	avatarFileInput.addEventListener("change", async () => {
+		const file = avatarFileInput.files?.[0];
+		if (!file)
+			return;
+
+		if (file.type !== "image/png") {
+			alert(t("only_png"));
+			return;
+		}
+
+		if (file.size > 2 * 1024 * 1024) {
+			alert(t("image_too_heavy"));
+			return;
+		}
+
+		const reader = new FileReader();
+
+		reader.onload = async () => {
+			const base64Avatar = reader.result as string;
+			await updateAvatar(base64Avatar);
+
+			localStorage.setItem("selectedAvatar", base64Avatar);
+		};
+
+		reader.readAsDataURL(file);
 	});
 }
