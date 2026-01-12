@@ -1,0 +1,5 @@
+Problem:
+-> Paddle Not resset during a tournamenet
+-> make re/make fclean: rm: cannot remove 'Backend/database/database.sqlite': Permission denied
+-> After make re I am still log in (maybe google chrome cache)
+
