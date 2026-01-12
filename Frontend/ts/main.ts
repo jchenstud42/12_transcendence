@@ -20,7 +20,7 @@ const login_button = document.getElementById("login-button")!;
 
 const oauth42Btn = document.getElementById("oauth-42-button");
 
-const start_button = document.getElementById("pong-start-button");
+const start_button = document.getElementById("pong-start-button") as HTMLButtonElement;
 
 
 // 2FA Elements
@@ -34,7 +34,7 @@ let storedUserId: number | null = null;
 
 
 //Profile
-const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement | null;
+const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement;
 const edit_menu = document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
 const friends_menu = document.getElementById("friends-menu")! as HTMLDivElement | null;
 const history_menu = document.getElementById("history-menu")! as HTMLDivElement | null;
@@ -60,6 +60,7 @@ const twofaTypeMenu = document.getElementById("2fa-type-menu")!;
 const btnEmail = document.getElementById("2fa-email")!;
 const btnSMS = document.getElementById("2fa-sms")!;
 const btnQR = document.getElementById("2fa-qr")!;
+const verify_qr = document.getElementById("verify-qr")!;
 
 const addFriendBtn = document.getElementById("btn-add-friend")!;
 const yourFriendsBtn = document.getElementById("btn-your-friends")!;
@@ -124,7 +125,7 @@ initUIState(
 init2FA(
 	{
 		twofaForm, destinationModal, destinationInput, destinationTitle, destinationCancel, destinationConfirm, twofaTypeMenu, twofaStatusText, twofaToggleBtn,
-		btnEmail, btnSMS, btnQR, twoFA_menu, twoFA_profile_button, oauth42Btn
+		btnEmail, btnSMS, btnQR, twoFA_menu, twoFA_profile_button, oauth42Btn, verify_qr, profile_menu, start_button
 	},
 	{ sanitizeInput, t, getServerErrorMessage, storeToken, storeUser, applyLoggedInState }, is2FAEnabled);
 
@@ -1205,14 +1206,14 @@ class Game {
 		// Create tournament bracket structure
 		const bracketDisplay = document.createElement("div");
 		bracketDisplay.className = "flex flex-col gap-1 w-full h-full justify-center";
-		
+
 		// Initialize bracket with all players and placeholders
 		const playersRow = document.createElement("div");
 		playersRow.className = "flex gap-2 justify-center";
-		
+
 		const semifinalsRow = document.createElement("div");
 		semifinalsRow.className = "flex gap-2 justify-center";
-		
+
 		const champRow = document.createElement("div");
 		champRow.className = "flex gap-1 justify-center";
 
@@ -1260,7 +1261,7 @@ class Game {
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
 			if (players_area) players_area.classList.remove("hidden");
 		};
-		
+
 		const saveTournamentMatch = async (player1: Player, player2: Player, score1: number, score2: number, winner: Player) => {
 			const token = localStorage.getItem("accessToken");
 			if (!token)
@@ -1500,7 +1501,7 @@ playerIncr_button.addEventListener("click", () => {
 		aiNbr--;
 		aiNbr_text.textContent = aiNbr.toString();
 	}
-	})
+})
 
 playerDecr_button.addEventListener("click", () => {
 	if (playerNbr > 0) {

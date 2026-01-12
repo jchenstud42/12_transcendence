@@ -1,5 +1,5 @@
 import { TranslationKey } from "../traduction/traduction.js";
-import { toggleMenu } from "../UI/UI_helpers.js";
+import { hideMenu, toggleMenu } from "../UI/UI_helpers.js";
 import { t } from "../traduction/i18n.js";
 import { getServerErrorMessage } from "../utils/utils.js";
 
@@ -12,6 +12,9 @@ import { getServerErrorMessage } from "../utils/utils.js";
 */
 type TwoFAElements = {
 	twofaForm: HTMLFormElement;
+	start_button: HTMLElement;
+	verify_qr: HTMLElement;
+	profile_menu: HTMLElement;
 	destinationModal: HTMLElement;
 	destinationInput: HTMLInputElement;
 	destinationTitle: HTMLElement;
@@ -76,6 +79,11 @@ function openDestinationModal(type: "email" | "sms") {
 
 	destinationModal.classList.remove("hidden");
 
+	const startButton = document.getElementById("pong-start-button");
+	startButton?.classList.add("hidden");
+	const pongScreen = document.getElementById("ecran-pong");
+	pongScreen?.classList.add("hidden");
+
 	if (type === "email") {
 		destinationTitle.textContent = t("enter_email_2fa");
 		destinationInput.placeholder = "exemple@gmail.com";
@@ -85,6 +93,28 @@ function openDestinationModal(type: "email" | "sms") {
 		destinationInput.placeholder = "+33123456789";
 		destinationInput.type = "tel";
 	}
+
+	const validateButton = document.getElementById("destination-confirm");
+	validateButton?.addEventListener("click", () => {
+		elems!.destinationModal.classList.add("hidden");
+
+		const pongScreen = document.getElementById("ecran-pong");
+		pongScreen?.classList.remove("hidden");
+		const startButton = document.getElementById("pong-start-button");
+		startButton?.classList.remove("hidden");
+	});
+
+
+	const cancelButton = document.getElementById("destination-cancel");
+	cancelButton?.addEventListener("click", () => {
+		elems!.destinationModal.classList.add("hidden");
+
+		const pongScreen = document.getElementById("ecran-pong");
+		pongScreen?.classList.remove("hidden");
+		const startButton = document.getElementById("pong-start-button");
+		startButton?.classList.remove("hidden");
+	});
+
 
 	destinationInput.value = "";
 	destinationInput.focus();
@@ -225,6 +255,9 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 	ensureInit();
 
 	const {
+		profile_menu,
+		start_button,
+		verify_qr,
 		destinationCancel,
 		destinationConfirm,
 		btnEmail,
@@ -256,6 +289,12 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			openDestinationModal("email");
 		});
 
+	if (verify_qr)
+		verify_qr.addEventListener("click", () => {
+			hideMenu(twofaForm);
+		}
+		);
+
 	if (btnSMS)
 		btnSMS.addEventListener("click", () => {
 			twofaTypeMenu.classList.add("hidden");
@@ -265,11 +304,14 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 	if (btnQR)
 		btnQR.addEventListener("click", async () => {
 			selected2FAType = "qr";
+			hideMenu(profile_menu);
 			twofaTypeMenu.classList.add("hidden");
+			twofaForm.classList.add("hidden");
 			elems!.twofaStatusText.textContent = funcs!.t("two_fa_setup_in_progress");
 			elems!.twofaToggleBtn.textContent = funcs!.t("cancel");
 
 			alert("Make sure to scan the QR code with your Google Authenticator app before refreshing or navigating away from this page.");
+			twofaTypeMenu.classList.add("hidden");
 
 			try {
 				const res = await fetch("/enable-2fa", {
@@ -314,6 +356,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 				elems!.twofaTypeMenu.classList.add("hidden");
 				elems!.twofaForm.classList.add("hidden");
 
+
 				const qrContainer = document.getElementById("qr-container");
 				if (qrContainer)
 					qrContainer.innerHTML = "";
@@ -328,6 +371,12 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 				elems!.twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
 				elems!.twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
 				elems!.twofaTypeMenu.classList.remove("hidden");
+				hideMenu(twofaForm, document.getElementById("destination-modal"));
+
+				if (document.getElementById("ecran-pong")?.classList.contains("hidden"))
+					document.getElementById("ecran-pong")?.classList.remove("hidden");
+				if (start_button.classList.contains("hidden"))
+					start_button.classList.remove("hidden")
 			} else {
 				try {
 					const res = await fetch("/disable-2fa", {
@@ -355,6 +404,10 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			if (!elems!.twoFA_menu)
 				return;
 
+			if (!twofaTypeMenu.classList.contains("hidden"))
+				hideMenu(twofaTypeMenu);
+
+
 			const isHidden = elems!.twoFA_menu.classList.contains("hidden");
 
 			if (isHidden) {
@@ -364,7 +417,6 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 					document.getElementById("friends-menu"),
 					document.getElementById("history-menu"),
 					document.getElementById("language-menu"),
-					elems!.twofaTypeMenu,
 				);
 				await update2FAStatus();
 			} else {
