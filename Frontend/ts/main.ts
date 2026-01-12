@@ -942,6 +942,9 @@ const keys = {
 
 //Start count down when Pong button is pressed
 export function startMatch() {
+	disableKeyListeners();
+	paddle_left.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+	paddle_right.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 	play_button?.classList.add("hidden");
 	ready_text.classList.remove("hidden");
 	pendingTimeouts.push(setTimeout(() => {
@@ -1036,6 +1039,7 @@ export function resetGameMenu() {
 	enterPlayerNbr_text.classList.add("hidden");
 	playerNbr_text.classList.add("hidden");
 	playersList.innerHTML = "";
+	playersList.classList.add("hidden");
 	finalList.innerHTML = "";
 	finalList.classList.add("hidden");
 	winnerName.innerHTML = "";
@@ -1055,6 +1059,7 @@ export function resetGameMenu() {
 	qmatch_button.classList.add("hidden");
 	tournament_button.classList.add("hidden");
 	play_button.classList.add("hidden");
+	playersList.classList.add("hidden");
 }
 
 class Game {
@@ -1260,6 +1265,7 @@ class Game {
 			addPlayerNameLabel(a.name, a.playerNbr, a.isAi);
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
 			if (players_area) players_area.classList.remove("hidden");
+			playersList.classList.remove("hidden");
 		};
 
 		const saveTournamentMatch = async (player1: Player, player2: Player, score1: number, score2: number, winner: Player) => {
@@ -1518,6 +1524,7 @@ OK_button.addEventListener("click", () => {
 	if (players_area) {
 		players_area.classList.remove("hidden");
 	}
+	playersList.classList.remove("hidden");
 
 	const loggedUsername = getLoggedUsername();
 	if (loggedUsername) {
