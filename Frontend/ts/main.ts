@@ -1527,6 +1527,14 @@ OK_button.addEventListener("click", () => {
 	playersList.classList.remove("hidden");
 
 	const loggedUsername = getLoggedUsername();
+	if (aiNbr === maxPlayer) {
+		nameEntered = 0;
+
+		addAiNameLabel();
+		new Game(playerNames);
+		return;
+	}
+
 	if (loggedUsername) {
 		playerNames.push([loggedUsername, false]);
 		addPlayerNameLabel(loggedUsername, 0, false);
@@ -1577,8 +1585,10 @@ function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 
 	const colorClass = playerColors[index];
 	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
+	const playerKeys: TranslationKey[] = ["player_1", "player_2", "player_3", "player_4"];
+	const key = playerKeys[index];
 	if (!isAi)
-		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">${key}</span><br>${name}`;
 	else
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 
