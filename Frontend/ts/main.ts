@@ -1,6 +1,7 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
 import { shuffleArray, storeToken, storeUser, getServerErrorMessage } from "./utils/utils.js";
 import { t } from "./traduction/i18n.js";
+import { TranslationKey } from "./traduction/traduction.js";
 import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js";
 import { initProfile } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
@@ -1240,23 +1241,29 @@ class Game {
 		const finalDiv = document.createElement("div");
 		finalDiv.id = "final-winner";
 		finalDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-		finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br>?`;
+		finalDiv.innerHTML = `<span class="text-sm text-gray-400">${t("champion")}</span><br>?`;
 		champRow.appendChild(finalDiv);
 
 		// Add semifinals placeholders
+		const semiKeys: TranslationKey[] = ["semifinal_1", "semifinal_2"];
 		for (let i = 0; i < 2; i++) {
+			const key = semiKeys[i];
 			const playerDiv = document.createElement("div");
 			playerDiv.id = `semi-${i}`;
 			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i + 1}</span><br>?`;
+			playerDiv.innerHTML = `<span class="text-sm text-gray-400">${t(key)}</span><br>?`;
 			semifinalsRow.appendChild(playerDiv);
 		}
 
+
 		// Add initial 4 players at bottom
+		const playerKeys: TranslationKey[] = ["player_1", "player_2", "player_3", "player_4"];
 		for (let i = 0; i < 4; i++) {
 			const playerDiv = document.createElement("div");
+			const key = playerKeys[i];
+			playerDiv.id = `player-${i}`;
 			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Player ${i + 1}</span><br>${bracket[i].name}`;
+			playerDiv.innerHTML = `<span class="text-sm text-gray-400">${t(key)}</span><br>${bracket[i].name}`;
 			playersRow.appendChild(playerDiv);
 		}
 
@@ -1396,17 +1403,19 @@ class Game {
 				nextRound.push(winner);
 
 				// Update the bracket display with the winner
+				const semiKeys: TranslationKey[] = ["semifinal_1", "semifinal_2"];
 				if (round === 1) {
 					const semiDiv = document.getElementById(`semi-${i / 2}`);
 					if (semiDiv) {
 						const colorClass = playerColors[winner.playerNbr];
-						semiDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i / 2 + 1}</span><br><span class="${colorClass}">${winner.name}</span>`;
+						const key = semiKeys[i / 2];
+						semiDiv.innerHTML = `<span class="text-sm text-gray-400">${t(key)}</span><br><span class="${colorClass}">${winner.name}</span>`;
 					}
 				} else if (round === 2) {
 					const finalDiv = document.getElementById("final-winner");
 					if (finalDiv) {
 						const colorClass = playerColors[winner.playerNbr];
-						finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br><span class="${colorClass}">${winner.name}</span>`;
+						finalDiv.innerHTML = `<span class="text-sm text-gray-400">${t("champion")}</span><br><span class="${colorClass}">${winner.name}</span>`;
 					}
 				}
 
