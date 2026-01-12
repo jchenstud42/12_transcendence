@@ -932,14 +932,6 @@ function gameLoop(now = performance.now()) {
 }
 requestAnimationFrame(gameLoop);
 
-//keys list
-const keys = {
-	w: false,
-	s: false,
-	ArrowUp: false,
-	ArrowDown: false
-};
-
 //Start count down when Pong button is pressed
 export function startMatch() {
 	disableKeyListeners();
@@ -950,7 +942,7 @@ export function startMatch() {
 	pendingTimeouts.push(setTimeout(() => {
 		ready_text.classList.add("hidden");
 		go_text.classList.remove("hidden");
-
+		
 		pendingTimeouts.push(setTimeout(() => {
 			go_text.classList.add("hidden");
 			ball.classList.remove("hidden");
@@ -962,6 +954,14 @@ export function startMatch() {
 		}, 1000));
 	}, 1000));
 }
+
+//keys list
+const keys = {
+	w: false,
+	s: false,
+	ArrowUp: false,
+	ArrowDown: false
+};
 
 //Set true or False wether a key is press among the "keys" listtwofaForm
 const handleKeyDown = (e: KeyboardEvent) => {
@@ -980,11 +980,20 @@ const handleKeyUp = (e: KeyboardEvent) => {
 function enableKeyListeners() {
 	document.addEventListener('keydown', handleKeyDown);
 	document.addEventListener('keyup', handleKeyUp);
+	keys['w'] = false;
+	keys['s'] = false;
+	keys['ArrowUp'] = false;
+	keys['ArrowDown'] = false;
 }
 
 function disableKeyListeners() {
 	document.removeEventListener('keydown', handleKeyDown);
 	document.removeEventListener('keyup', handleKeyUp);
+
+	keys['w'] = false;
+	keys['s'] = false;
+	keys['ArrowUp'] = false;
+	keys['ArrowDown'] = false;
 }
 
 disableKeyListeners();
