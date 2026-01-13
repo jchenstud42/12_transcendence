@@ -289,12 +289,6 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			openDestinationModal("email");
 		});
 
-	if (verify_qr)
-		verify_qr.addEventListener("click", () => {
-			hideMenu(twofaForm);
-		}
-		);
-
 	if (btnSMS)
 		btnSMS.addEventListener("click", () => {
 			twofaTypeMenu.classList.add("hidden");
