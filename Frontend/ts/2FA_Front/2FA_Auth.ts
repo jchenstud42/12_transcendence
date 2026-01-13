@@ -304,7 +304,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			elems!.twofaStatusText.textContent = funcs!.t("two_fa_setup_in_progress");
 			elems!.twofaToggleBtn.textContent = funcs!.t("cancel");
 
-			alert("Make sure to scan the QR code with your Google Authenticator app before refreshing or navigating away from this page.");
+			alert(t("scan_qr_instruction"));
 			twofaTypeMenu.classList.add("hidden");
 
 			try {
@@ -435,7 +435,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			if (!code)
 				return alert(t("enter_2fa_code"));
 			if (!/^\d{6}$/.test(code)) {
-				alert("Le code doit contenir exactement 6 chiffres.");
+				alert(t("six_numbers_requiered"));
 				return;
 			}
 
