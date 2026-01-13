@@ -101,11 +101,11 @@ export function applyLoggedInState(user: { id: number; username: string; email: 
 	if (menuUsername) menuUsername.textContent = user.username || '';
 	if (menuEmail) menuEmail.textContent = user.email || '';
 	if (profileAvatar) {
-	if (storedUser.avatar)
-		profileAvatar.src = storedUser.avatar;
-	else
-		profileAvatar.src = "../assets/default-avatar.png";
-}
+		if (storedUser.avatar)
+			profileAvatar.src = storedUser.avatar;
+		else
+			profileAvatar.src = "../assets/avatars/default-avatar.jpg";
+	}
 
 	const profileBtn = document.getElementById('profile-button');
 	if (profileBtn) profileBtn.classList.remove('hidden');
