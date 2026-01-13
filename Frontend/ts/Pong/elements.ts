@@ -18,6 +18,7 @@ export const PONG_UI = {
 	playButton: document.getElementById("play-button") as HTMLButtonElement,
 	readyText: document.getElementById("ready-text")!,
 	goText: document.getElementById("go-text")!,
+	backButton: document.getElementById("back-button")!,
 
 	//Paddle & Ball
 	leftPaddle: document.getElementById("left-paddle") as HTMLDivElement,

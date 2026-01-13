@@ -15,26 +15,10 @@ export class Player {
 
 		if (userId !== null) {
 			this.userId = userId;
-		}
-		else {
-			this.userId = generateGuestId();
-			guestPlayers.set(this.userId, name);
+		} else {
+			// Caller (Game) should assign and register guest IDs; use -1 as placeholder if missing
+			this.userId = -1;
 		}
 
 	}
-}
-
-
-function generateLoggedUserId(): number {
-	const id = loggedUserCounter;
-	loggedUserCounter++;
-	if (loggedUserCounter >= 200) loggedUserCounter = 100;
-	return id;
-}
-
-function generateGuestId(): number {
-	const id = guestIdCounter;
-	guestIdCounter++;
-	if (guestIdCounter >= 300) guestIdCounter = 200;
-	return id;
 }

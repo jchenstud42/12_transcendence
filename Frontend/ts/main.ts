@@ -1,5 +1,5 @@
 import { validateTextInput, validatePassword, sanitizeInput, validateEmail } from "./utils/inputValidFront.js";
-import { shuffleArray, storeToken, storeUser, getServerErrorMessage } from "./utils/utils.js";
+import { storeToken, storeUser, getServerErrorMessage } from "./utils/utils.js";
 import { t } from "./traduction/i18n.js";
 import { initUIState, applyLoggedInState, initAuthState } from "./UI/UI_State.js";
 import { initProfile } from "./UI/UI_events.js";
@@ -718,15 +718,11 @@ const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 10;
 const BALL_SIZE = 10;
 
-import { Ball } from './Pong/Ball.js';
-import { Ai } from './Pong/Ai.js';
-
-const guestPlayers = new Map<number, string>();
-let loggedUserCounter = 100;
-let guestIdCounter = 200;
+import { initMenuEvents } from "./Pong/menu.js";
 
 
 
+initMenuEvents();
 
 
 /* const aiPlayer = new Ai(gameBall, paddle_right, paddle_left, paddle_right, 3);
@@ -745,53 +741,3 @@ if (aiViewCheckboxInput) {
 	});
 } */
 
-//game loop to update ball position;
-let lastTime = performance.now();
-requestAnimationFrame(gameLoop);
-
-
-//Start count down when Pong button is pressed
-/* function startGame() {
-	PONG_UI.playButton.classList.add("hidden");
-	PONG_UI.leftPaddle.classList.remove("hidden");
-	PONG_UI.rightPaddle.classList.remove("hidden");
-	PONG_UI.readyText.classList.remove("hidden");
-
-	pendingTimeouts.push(setTimeout(() => {
-		PONG_UI.readyText.classList.add("hidden");
-		PONG_UI.goText.classList.remove("hidden");
-		pendingTimeouts.push(setTimeout(() => {
-			PONG_UI.goText.classList.add("hidden");
-			PONG_UI.ball.classList.remove("hidden");
-			gameBall.serve();
-			enableKeyListeners();
-		}, 1000));
-	}, 1000));
-} */
-
-
-
-//Set true or False wether a key is press among the "keys" listtwofaForm
-const handleKeyDown = (e: KeyboardEvent) => {
-	if (e.key in keys) {
-		keys[e.key as keyof typeof keys] = true;
-	}
-};
-
-const handleKeyUp = (e: KeyboardEvent) => {
-	if (e.key in keys) {
-		keys[e.key as keyof typeof keys] = false;
-	}
-};
-
-
-disableKeyListeners();
-
-
-
-requestAnimationFrame(updatePaddlePositions);
-
-let pendingTimeouts: number[] = []; //goes with function resetGameMenu()
-
-
-//Game was here

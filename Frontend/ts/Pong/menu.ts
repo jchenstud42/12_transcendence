@@ -2,22 +2,12 @@ import { PONG_UI } from './elements.js';
 //import { gameInfo } from './game.js';
 import { Game } from './Game.js';
 
-const PONG_WIDTH = 800;
 const PONG_HEIGHT = 600;
-const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 100;
-const PADDLE_SPEED = 10;
-const BALL_SIZE = 10;
-
-//Status of the keys used to move paddle
-const keys = {
-	w: false,
-	s: false,
-	ArrowUp: false,
-	ArrowDown: false
-};
 
 const game = new Game();
+import { setGameInstance } from '../UI/UI_events.js';
+setGameInstance(game);
 
 ///////////////////////////////////////////////////////////
 /////				EVENTS LISTENER					 /////
@@ -71,7 +61,7 @@ export function initMenuEvents() {
 		const loggedUsername = getLoggedUsername();
 
 		if (loggedUsername) {
-			game.playerNames.push([loggedUsername, false]);
+			game.playersName.push([loggedUsername, false]);
 			showPlayerName(loggedUsername, 0, false);
 			game.nameEntered = 1;
 		}
@@ -79,9 +69,11 @@ export function initMenuEvents() {
 		if (game.playerNbr > game.nameEntered) {
 			showPlayerNameMenu();
 		} else {
-			//Only two players and one of them is an AI
+			//Only two players and one of them is an AI => Skip Enter player name
 			showAiName();
-			//game.startQuickMatch()//HERE
+			game.createPlayers();
+			game.isQuickMatch = true;
+			game.startMatch();
 		}
 	});
 
@@ -89,13 +81,13 @@ export function initMenuEvents() {
 		if (event.key === "Enter") {
 			const playerName = PONG_UI.playerNameInput.value.trim();
 
-			const nameAlreadyUsed = game.playerNames.some(
+			const nameAlreadyUsed = game.playersName.some(
 				([name, _isAI]) => name === playerName
 			);
 
 			if (playerName !== "" && !nameAlreadyUsed) {
 				PONG_UI.playerNameInput.value = "";
-				game.playerNames.push([playerName, false]);
+				game.playersName.push([playerName, false]);
 				showPlayerName(playerName, game.nameEntered, false);
 				game.nameEntered++;
 			}
@@ -108,21 +100,24 @@ export function initMenuEvents() {
 				if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
 				showAiName();
-				//game.startQuickMatch()//HERE
+				game.createPlayers();
+				game.isQuickMatch = true;
+				game.startMatch();
+
 			}
 		}
 	})
 
-	//Here I think its the buttons between goals, So the game has already been created when arriving here
+	//Start the next points after a goal
 	PONG_UI.playButton.addEventListener("click", () => {
-		//game.startMatch();
+		game.startMatch();
 	});
 
-	document.addEventListener("keydown", (event: KeyboardEvent) => {
+/* 	document.addEventListener("keydown", (event: KeyboardEvent) => {
 		if (event.key === "Enter" && !PONG_UI.playButton.classList.contains("hidden")) {
-			//game.startMatch();
+			game.startMatch();
 		}
-	});
+	}); */
 
 
 }
@@ -131,40 +126,45 @@ export function initMenuEvents() {
 /////				SHOW/HIDE MENU					  /////
 //////////////////////////////////////////////////////////
 
+export function showPongMenu() {
+	showMenu(PONG_UI.pongButton);
+
+	hideMenu(PONG_UI.qmatchButton, PONG_UI.tournamentButton, PONG_UI.playButton);
+}
+
 function showMatchSelectionMenu() {
-	PONG_UI.pongButton.classList.add("hidden");
-	PONG_UI.qmatchButton.classList.remove("hidden");
-	PONG_UI.tournamentButton.classList.remove("hidden");
+	hideMenu(PONG_UI.pongButton);
+
+	showMenu(PONG_UI.qmatchButton, PONG_UI.tournamentButton);
 }
 
 function hideMatchSelectionMenu() {
-	PONG_UI.qmatchButton.classList.add("hidden");
-	PONG_UI.tournamentButton.classList.add("hidden");
+	hideMenu(PONG_UI.qmatchButton, PONG_UI.tournamentButton);
 }
 
 function showPlayerNbrMenu() {
-	PONG_UI.enterPlayerNbrText.classList.remove("hidden");
-	PONG_UI.playerNbrText.classList.remove("hidden");
-	PONG_UI.playerIncrButton.classList.remove("hidden");
-	PONG_UI.playerDecrButton.classList.remove("hidden");
-	PONG_UI.aiCounter.classList.remove("hidden");
-	PONG_UI.okButton.classList.remove("hidden");
+	showMenu(PONG_UI.enterPlayerNbrText,
+			PONG_UI.playerNbrText,
+			PONG_UI.playerIncrButton,
+			PONG_UI.playerDecrButton,
+			PONG_UI.aiCounter,
+			PONG_UI.okButton);
 }
 
 function hidePlayerNbrMenu() {
-	PONG_UI.enterPlayerNbrText.classList.add("hidden")
-	PONG_UI.playerNbrText.classList.add("hidden")
-	PONG_UI.aiCounter.classList.add("hidden");
-	PONG_UI.playerIncrButton.classList.add("hidden")
-	PONG_UI.playerDecrButton.classList.add("hidden")
-	PONG_UI.okButton.classList.add("hidden")
+	hideMenu(PONG_UI.enterPlayerNbrText,
+			PONG_UI.playerNbrText,
+			PONG_UI.aiCounter,
+			PONG_UI.playerIncrButton,
+			PONG_UI.playerDecrButton,
+			PONG_UI.okButton);
 }
 
 function showPlayerNameMenu() {
-	PONG_UI.playerNameContainer.classList.remove("hidden")
+	showMenu(PONG_UI.playerNameContainer);
 }
 
-function showPlayerName(name: string, index: number, isAi: boolean) {
+export function showPlayerName(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
 	const colorClass = PONG_UI.playerColors[index];
@@ -183,59 +183,46 @@ function showAiName() {
 		const aiName = game.aiNames[y]
 
 		showPlayerName(aiName, game.nameEntered + y, true);
-		game.playerNames.push([aiName, true]);
+		game.playersName.push([aiName, true]);
 	}
 }
 
-function hideMenu(...toHide: (HTMLElement | null | undefined)[]) {
+export function showMenu(...toHide: (HTMLElement | null | undefined)[]) {
+	toHide.forEach(menu => menu?.classList.remove("hidden"));
+}
+
+export function hideMenu(...toHide: (HTMLElement | null | undefined)[]) {
 	toHide.forEach(menu => menu?.classList.add("hidden"));
 }
 
 export function resetGameMenu() {
-
-	pendingTimeouts.forEach(id => clearTimeout(id));
-	pendingTimeouts = [];
-
-	disableKeyListeners();
-
-	keys.w = false;
-	keys.s = false;
-	keys.ArrowUp = false;
-	keys.ArrowDown = false;
-
-	game.ball.active = false;
-	game.ball.reset();
-	game.ball.initBallPos();
-
 	if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 	if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
-	hideMenu(PONG_UI.okButton, PONG_UI.leftPaddle, PONG_UI.rightPaddle, PONG_UI.readyText, PONG_UI.goText, PONG_UI.playerNameContainer, PONG_UI.increasePlayerButton,
-		PONG_UI.decreasePlayerButton, PONG_UI.ball, PONG_UI.aiCounter, PONG_UI.playersArea);
-
-	PONG_UI.enterPlayerNbrText.classList.add("hidden");
-	PONG_UI.playerNbrText.classList.add("hidden");
 	PONG_UI.playersList.innerHTML = "";
 	PONG_UI.finalList.innerHTML = "";
-	PONG_UI.finalList.classList.add("hidden");
 	PONG_UI.winnerName.innerHTML = "";
-	game.playerNames = [];
-	game.nameEntered = 0;
-	game.isTournament = false;
-	game.playerNbr = 2;
-	game.maxPlayer = 2;
-	game.aiNbr = 0;
 	PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 	PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+	PONG_UI.playerNbrText.textContent = "2";
+	PONG_UI.aiNbrText.textContent = "0";
 
-	PONG_UI.playerNbrText.textContent = game.playerNbr.toString();
-	PONG_UI.aiNbrText.textContent = game.aiNbr.toString();
-
-	PONG_UI.pongButton.classList.remove("hidden");
-	PONG_UI.qmatchButton.classList.add("hidden");
-	PONG_UI.tournamentButton.classList.add("hidden");
-	PONG_UI.playButton.classList.add("hidden");
-}
+	hideMenu(PONG_UI.okButton,
+			PONG_UI.leftPaddle,
+			PONG_UI.rightPaddle,
+			PONG_UI.readyText,
+			PONG_UI.goText,
+			PONG_UI.playerNameContainer,
+			PONG_UI.increasePlayerButton,
+			PONG_UI.decreasePlayerButton,
+			PONG_UI.ball,
+			PONG_UI.aiCounter,
+			PONG_UI.playersArea,
+			PONG_UI.enterPlayerNbrText,
+			PONG_UI.playerNbrText,
+			PONG_UI.finalList);
+	showPongMenu();
+}	
 
 
 ///////////////////////////////////////////////////////////
@@ -255,3 +242,4 @@ function getLoggedUsername(): string | null {
 		return (null);
 	}
 }
+

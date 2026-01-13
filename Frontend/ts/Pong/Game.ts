@@ -2,13 +2,30 @@
 import { PONG_UI } from './elements.js';
 import { Player } from './Player.js';
 import { Ball } from './Ball.js';
+import { shuffleArray } from "../utils/utils.js";
+import { resetGameMenu, showPlayerName, showPongMenu } from './menu.js';
+import { showMenu, hideMenu } from './menu.js';
+
+const PONG_HEIGHT = 600;
+const PADDLE_HEIGHT = 100;
+const PADDLE_SPEED = 10;
 
 export class Game {
+	private running = false;
+    
+	currentUser: any;
+	paddleLoopRunning = false;
+	starting = false; // true while countdown/start sequence is running
+
+	guestPlayers = new Map<number, string>();
+	loggedUserCounter = 100;
+	guestIdCounter = 200;
+
     isTournament: boolean;
     playerNbr: number;
     maxPlayer: number;
     aiNbr: number;
-    playerNames: [string, boolean][];
+    playersName: [string, boolean][];
     aiNames: string[];
     nameEntered: number;
 
@@ -18,33 +35,48 @@ export class Game {
 	pointsToWin = 2;
 	isQuickMatch = false;
 
+	last: number; //game loop to update ball position;
+
+ 	pendingTimeouts: number[] = []; //goes with function resetGame()
+
+	keys = {
+		w: false,
+		s: false,
+		ArrowUp: false,
+		ArrowDown: false
+	};
+
+	handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key in this.keys) {
+			this.keys[e.key as keyof typeof this.keys] = true;
+		}
+	};
+
+	handleKeyUp = (e: KeyboardEvent) => {
+		if (e.key in this.keys) {
+			this.keys[e.key as keyof typeof this.keys] = false;
+		}
+	};
+
 	constructor() {
     	this.isTournament = false;
     	this.playerNbr = 2;
     	this.maxPlayer = 2;
     	this.aiNbr = 0;
-    	this.playerNames = [];
+    	this.playersName = [];
     	this.aiNames = ["Nietzche", "Aurele", "Sun Tzu", "Socrate"];
     	this.nameEntered = 0;
-
 		this.ball = new Ball(PONG_UI.ball);
 
+		this.last = performance.now();
+
+		//Setup name depending on username logged
+		const currentUserRaw = localStorage.getItem("user");
+		this.currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
 
 
-/* 		const currentUserRaw = localStorage.getItem("user");
-		const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
 
-
-		this.players = playersName.map(([playerName, isAi], playerNbr) => {
-			const isCurrentUser = currentUser && !isAi && playerName === currentUser.username;
-			return new Player(playerName, isAi, playerNbr, isCurrentUser ? currentUser.id : null);
-		});
-
-		this.isQuickMatch = !this.isTournament;
-
-		this.ball.onScore = (playerSide: 'left' | 'right') => {
-			this.addPoint(playerSide);
-		};
+		/*this.isQuickMatch = !this.isTournament;
 
 		if (playersName.length > 2) {
 			PONG_UI.finalList.classList.remove("hidden");
@@ -52,6 +84,93 @@ export class Game {
 		} else {
 			PONG_UI.playButton.classList.remove("hidden");
 		} */
+	}
+
+	///////////////////////////////////////////////////////////
+	/////					SETUP						 /////
+	//////////////////////////////////////////////////////////
+
+	public createPlayers() {
+		this.players = this.playersName.map(([playerName, isAi], playerNbr) => {
+			const isCurrentUser = this.currentUser && !isAi && playerName === this.currentUser.username;
+			if (isCurrentUser) {
+				return new Player(playerName, isAi, playerNbr, this.currentUser.id);
+			} else {
+				// register guest id and store mapping
+				const guestId = this.registerGuest(playerName);
+				return new Player(playerName, isAi, playerNbr, guestId);
+			}
+		});
+	}
+
+	private registerGuest(name: string): number {
+		const id = this.guestIdCounter;
+		this.guestIdCounter++;
+		if (this.guestIdCounter >= 300) this.guestIdCounter = 200;
+		this.guestPlayers.set(id, name);
+		return id;
+	}
+
+	///////////////////////////////////////////////////////////
+	/////				GAME STATES						  /////
+	//////////////////////////////////////////////////////////
+
+	// bound game loop so `this` is preserved when passed to requestAnimationFrame
+	public gameLoop = (now = performance.now()) => {
+		//if (!this.running) return;
+
+		const dt = (now - this.last) / 1000;
+		this.last = now;
+		this.ball.update(dt); //If a point is win, ball notifies game by updating onscore and reset itself
+		requestAnimationFrame(this.gameLoop);
+	};
+
+	public startMatch() {
+		// prevent double-start if ball already active or a start is in progress
+		if (this.ball.active || this.starting) return;
+
+		this.disableKeyListeners();
+
+		this.starting = true;
+
+		// clear any previously scheduled timeouts from prior starts
+		this.pendingTimeouts.forEach(id => clearTimeout(id));
+		this.pendingTimeouts = [];
+
+		// hide play button while starting to avoid double clicks
+		hideMenu(PONG_UI.playButton);
+		
+		//Initiate ball onscore callback
+		this.ball.onScore = (playerSide: 'left' | 'right') => {
+			this.addPoint(playerSide);
+		};
+
+		//Serve + Start Game Loop
+		this.pendingTimeouts.push(setTimeout(() => {
+			showCountDown("READY");
+				this.pendingTimeouts.push(setTimeout(() => {
+				showCountDown("GO");
+				// Keep "GO" visible briefly so the player can see it, then hide it and show game elements
+				this.pendingTimeouts.push(setTimeout(() => {
+					hideCountDown();
+					showGameElements();
+					// Start the ball and the game loop only when the elements are visible so the ball appears immediately after GO
+					this.ball.active = true;
+					this.ball.serve();
+					this.last = performance.now();
+					requestAnimationFrame(this.gameLoop);
+					this.enableKeyListeners();
+					// start paddle updater loop (only once)
+					if (!this.paddleLoopRunning) {
+						this.paddleLoopRunning = true;
+						this.updatePaddlePositions();
+					}
+					// starting finished
+					this.starting = false;
+				}, 600));
+			}, 1000));
+		}, 1000));
+
 	}
 
 	public addPoint(playerSide: 'left' | 'right') {
@@ -68,31 +187,57 @@ export class Game {
 
 			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
 
-			// Check if player reached 10 points (quick match only)
+			// Check if player reached pointsToWin (quick match only)
 			if (this.isQuickMatch && this.players[pointIndex].point >= this.pointsToWin) {
-				this.endGame(this.players[pointIndex]);
+				this.endMatch(this.players[pointIndex]);
 			} else {
-				// Reset ball for next point
-				this.ball.reset();
-				PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-				PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
-				PONG_UI.ball.classList.add("hidden");
-				disableKeyListeners();
-				PONG_UI.leftPaddle.classList.add("hidden");
-				PONG_UI.rightPaddle.classList.add("hidden");
-				PONG_UI.playButton.classList.remove("hidden");
+				this.resetMatch()
 			}
 		}
 	}
 
-	private async endGame(winner: Player) {
+	public resetMatch() {
+
+		// Reset ball for next point
+		this.ball.reset();
+
+		// clear any pending timeouts from prior start attempts
+		this.pendingTimeouts.forEach(id => clearTimeout(id));
+		this.pendingTimeouts = [];
+
+		//Make sure players can't moove paddle while waiting for next match
+		this.disableKeyListeners();
+
+		//Reset Paddle Position
+		PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+		PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
+		hideMenu(PONG_UI.ball, PONG_UI.leftPaddle, PONG_UI.rightPaddle);
+		showMenu(PONG_UI.playButton);
+
+		// mark that no start is in progress
+		this.starting = false;
+
+		// ensure paddle loop flag is reset
+		this.paddleLoopRunning = false;
+
+	}
+
+	private async endMatch(winner: Player) {
 		this.winner = winner;
 		console.log(`${winner.name} wins the match!`);
 		this.ball.active = false;
+
+		// no explicit RAF cancellation here
 		PONG_UI.ball.classList.add("hidden");
 		PONG_UI.leftPaddle.classList.add("hidden");
 		PONG_UI.rightPaddle.classList.add("hidden");
 		PONG_UI.playButton.classList.add("hidden");
+
+		// mark that no start is in progress
+		this.starting = false;
+
+		// ensure paddle loop flag is reset
+		this.paddleLoopRunning = false;
 
 		alert(`${winner.name} wins with ${winner.point} points!`);
 
@@ -106,14 +251,14 @@ export class Game {
 		if (!token || !hasRealUser) {
 			console.log("No logged-in user");
 			setTimeout(() => {
-				resetGameMenu();
+				this.resetGame();
 			}, 1000);
 			return;
 		}
 
 		if (this.players.length < 2) {
 			console.warn("Not enough players");
-			resetGameMenu();
+			this.resetGame();
 			return;
 		}
 
@@ -148,11 +293,39 @@ export class Game {
 		}
 
 		setTimeout(() => {
-			resetGameMenu();
+			this.resetGame();
 		}, 1000);
 	}
 
-	public async createTournament() {
+	public resetGame() {
+
+		this.pendingTimeouts.forEach(id => clearTimeout(id));
+		this.pendingTimeouts = [];
+
+		this.disableKeyListeners();
+
+		this.keys.w = false;
+		this.keys.s = false;
+		this.keys.ArrowUp = false;
+		this.keys.ArrowDown = false;
+
+		this.ball.active = false;
+		this.ball.reset();
+		this.ball.initBallPos();
+
+		this.playersName = [];
+		this.nameEntered = 0;
+		this.isTournament = false;
+		this.playerNbr = 2;
+		this.maxPlayer = 2;
+		this.aiNbr = 0;
+
+		resetGameMenu()
+	}
+
+
+
+	/* public async createTournament() {
 		console.log("createTournament started");
 
 		const pointsToWin = 1;
@@ -289,7 +462,7 @@ export class Game {
 					PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 					PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 					PONG_UI.ball.classList.add("hidden");
-					disableKeyListeners();
+					this.disableKeyListeners();
 					PONG_UI.leftPaddle.classList.add("hidden");
 					PONG_UI.rightPaddle.classList.add("hidden");
 					PONG_UI.playButton.classList.remove("hidden");
@@ -302,7 +475,7 @@ export class Game {
 					PONG_UI.playButton.removeEventListener("click", playClickHandler);
 					document.removeEventListener("keydown", keyHandler);
 					onPlayClick(); // Appeler showPair
-					startMatch();
+					this.startMatch();
 				};
 
 				const keyHandler = (event: KeyboardEvent) => {
@@ -370,19 +543,19 @@ export class Game {
 		this.ball.onScore = null;
 
 		// Afficher le bouton retour
-		back_button.classList.remove("hidden");
+		PONG_UI.backButton.classList.remove("hidden");
 
 		// Attendre que l'utilisateur clique sur le bouton retour
 		await new Promise<void>((resolve) => {
 			const backClickHandler = () => {
-				back_button.removeEventListener("click", backClickHandler);
-				back_button.classList.add("hidden");
-				resetGameMenu();
+				PONG_UI.backButton.removeEventListener("click", backClickHandler);
+				PONG_UI.backButton.classList.add("hidden");
+				this.resetGame();
 				resolve();
 			};
-			back_button.addEventListener("click", backClickHandler);
+			PONG_UI.backButton.addEventListener("click", backClickHandler);
 		});
-	}
+	} */
 
 
 
@@ -391,67 +564,52 @@ export class Game {
 	}
 
 
-	public startMatch() {
-		pendingTimeouts.push(setTimeout(() => {
-			showCountDown("READY");
-			pendingTimeouts.push(setTimeout(() => {
-				showCountDown("GO");
-				hideCountDown();
-				showGameElements();
-				this.ball.active = true;
-				this.ball.serve();
-	/* 			//Ai Starts Playing here
-				if (PONG_UI.aiViewCheckBox)
-					PONG_UI.aiViewCheckBox.classList.remove("hidden");
-				aiPlayer.oneSecondLoop();
-				aiPlayer2.oneSecondLoop(); */
-				enableKeyListeners();
-			}, 1000));
-		}, 1000));
+
+
+	///////////////////////////////////////////////////////////
+	/////				INPUTS HANDLER					 /////
+	//////////////////////////////////////////////////////////
+
+	//Fonction pour bouger les paddles en fonction de la key press
+	public updatePaddlePositions = () => {
+		// stop the loop when the ball is inactive (between points)
+		if (!this.ball.active) {
+			this.paddleLoopRunning = false;
+			return;
+		}
+
+		if (this.keys.w && PONG_UI.leftPaddle.offsetTop > 0) {
+			PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop - PADDLE_SPEED}px`;
+		}
+		if (this.keys.s && PONG_UI.leftPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+			PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop + PADDLE_SPEED}px`;
+		}
+
+		if (this.keys.ArrowUp && PONG_UI.rightPaddle.offsetTop > 0) {
+			PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop - PADDLE_SPEED}px`;
+		}
+		if (this.keys.ArrowDown && PONG_UI.rightPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+			PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop + PADDLE_SPEED}px`;
+		}
+
+		requestAnimationFrame(this.updatePaddlePositions);
 	}
 
-	public gameLoop(now = performance.now()) {
-		const dt = (now - lastTime) / 1000;
-		lastTime = now;
-
-		this.ball.update(dt);
-	/* 	aiPlayer.updategameElapsedTime(dt);
-		aiPlayer2.updategameElapsedTime(dt); */
-
-		requestAnimationFrame(gameLoop);
-	}
-}
-
-
-// Fonctions pour activer/désactiver les event listeners
-function enableKeyListeners() {
-	document.addEventListener('keydown', handleKeyDown);
-	document.addEventListener('keyup', handleKeyUp);
-}
-
-function disableKeyListeners() {
-	document.removeEventListener('keydown', handleKeyDown);
-	document.removeEventListener('keyup', handleKeyUp);
-}
-
-//Fonction pour bouger les paddles en fonction de la key press
-function updatePaddlePositions() {
-	if (keys.w && PONG_UI.leftPaddle.offsetTop > 0) {
-		PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop - PADDLE_SPEED}px`;
-	}
-	if (keys.s && PONG_UI.leftPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
-		PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop + PADDLE_SPEED}px`;
+	// Fonctions pour activer/désactiver les event listeners
+	public enableKeyListeners() {
+		document.addEventListener('keydown', this.handleKeyDown);
+		document.addEventListener('keyup', this.handleKeyUp);
 	}
 
-	if (keys.ArrowUp && PONG_UI.rightPaddle.offsetTop > 0) {
-		PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop - PADDLE_SPEED}px`;
+	public disableKeyListeners() {
+		document.removeEventListener('keydown', this.handleKeyDown);
+		document.removeEventListener('keyup', this.handleKeyUp);
 	}
-	if (keys.ArrowDown && PONG_UI.rightPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
-		PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop + PADDLE_SPEED}px`;
-	}
+};
 
-	requestAnimationFrame(updatePaddlePositions);
-}
+
+
+
 
 ///////////////////////////////////////////////////////////
 /////			SHOW/HIDE GAME ELEMENTS			 	 /////
@@ -459,20 +617,20 @@ function updatePaddlePositions() {
 
 function showCountDown(text: string) {
 	if (text === "READY") {
-		PONG_UI.playButton?.classList.add("hidden");
-		PONG_UI.readyText.classList.remove("hidden");
+		hideMenu(PONG_UI.playButton);
+		showMenu(PONG_UI.readyText);
 	} else if (text === "GO") {
-		PONG_UI.readyText.classList.add("hidden");
-		PONG_UI.goText.classList.remove("hidden");
+		hideMenu(PONG_UI.readyText);
+		showMenu(PONG_UI.goText);
 	}
 }
 
 function hideCountDown() {
-	PONG_UI.goText.classList.add("hidden");
+	hideMenu(PONG_UI.goText);
 }
 
 function showGameElements() {
-	PONG_UI.ball.classList.remove("hidden");
-	PONG_UI.leftPaddle.classList.remove("hidden");
-	PONG_UI.rightPaddle.classList.remove("hidden");
+	showMenu(PONG_UI.ball,
+			PONG_UI.leftPaddle,
+			PONG_UI.rightPaddle);
 }

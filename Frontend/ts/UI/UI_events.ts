@@ -1,9 +1,15 @@
 import { toggleMenu } from "./UI_helpers.js";
+import type { Game } from "../Pong/Game.js";
+
+let gameRef: Game | null = null;
+
+export function setGameInstance(g: Game | null) {
+	gameRef = g;
+}
 import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
-import { resetGameMenu } from "../main.js";
 
 
 /*
@@ -108,7 +114,8 @@ export function initUIEvents(elems: UIEventElements) {
 
 	elems.back_button?.addEventListener("click", () => {
 		closePong(elems);
-		resetGameMenu();
+		// call game reset if a game instance was provided via setGameInstance
+		gameRef?.resetGame();
 	}
 	);
 
@@ -126,7 +133,8 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.loginContainer,
 			elems.profile_menu
 		);
-		resetGameMenu();
+		// call game reset if a game instance was provided via setGameInstance
+		gameRef?.resetGame();
 	});
 
 	elems.friends_button?.addEventListener("click", () =>

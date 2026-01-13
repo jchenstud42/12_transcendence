@@ -414,14 +414,14 @@ export class Ai {
 
 	// Show Prediction balls Element
 	showAiPredictions() {
-		ballAiView.el.classList.remove('hidden');
+		ballAiView.ballUI.classList.remove('hidden');
 		PONG_UI.aiViewsCanvas.classList.remove('hidden');
 		showGrid();
 	}
 	
 	// Hide Prediction balls Element
 	hideAiPredictions() {
-		ballAiView.el.classList.add('hidden');
+		ballAiView.ballUI.classList.add('hidden');
 		PONG_UI.aiViewsCanvas.classList.add('hidden');
 		hideGrid();
 	}

@@ -15,7 +15,7 @@ export class Ball {
 	vy = 0;
 	speed = 300;
 	active = false;
-	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback
+	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback to notify game when a point is win
 
 
 	constructor(ballUI: HTMLElement) {
