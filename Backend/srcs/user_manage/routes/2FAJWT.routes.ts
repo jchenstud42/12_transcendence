@@ -11,11 +11,18 @@ const twofa = new twoFAService();
 
 export default async function twofaRoutes(fastify: FastifyInstance) {
 
+	/**  La rouuute pour verifier le QR code lors de l'activation du 2FA et lors du login !
+	 *  On verifie si l'utilisateur a bien ses tokens valide pour pouvoir activer la 2FA (si il est bien co, pas expire...)
+	 *	Si tout est bon on peut verifier le code rentre par l'user avec verify2FACode, on met a jour le status de l'user dans prisma
+		(que sa 2FA est active...)
+	 * Si l'user avait deja active la 2FA et qu'on verifie lors du login, alors on lui donne ses JWT token et on lui met le status ONLINE
+	*/
 	fastify.post("/verify-totp", async (req, reply) => {
 		try {
 			const { twoFAtoken, code } = req.body as { twoFAtoken?: string; code: string };
 
-			if (!code) return reply.status(400).send({ error: "Code required" });
+			if (!code)
+				return reply.status(400).send({ error: "Code required" });
 
 			if (!/^\d{6}$/.test(code)) {
 				return reply.status(400).send({ error: "Invalid code format" });
@@ -32,7 +39,8 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 					return reply.status(401).send({ error: "Invalid or expired 2FA token" });
 				}
 				userId = payload.sub;
-			} else {
+			}
+			else {
 				try {
 					const refreshToken = req.cookies.refreshToken;
 					if (!refreshToken) {
@@ -47,8 +55,9 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 				}
 			}
 
-			const isValid = await twofa.verifyTOTP(userId, code);
-			if (!isValid) return reply.status(400).send({ error: "Invalid QR code" });
+			const isValid = await twofa.verify2FACode(userId, code);
+			if (!isValid)
+				return reply.status(400).send({ error: "Invalid QR code" });
 
 			if (isSetupMode) {
 				await prisma.user.update({
@@ -98,59 +107,19 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 	});
 
 
-	fastify.post("/enable-totp", async (req, reply) => {
-		try {
-			const refreshToken = req.cookies.refreshToken;
-			if (!refreshToken)
-				return reply.status(401).send({ error: "Unauthorized" });
-
-			const payload = verifyToken(refreshToken);
-			if (!payload || payload.tokenType !== "refresh")
-				return reply.status(401).send({ error: "Invalid token" });
-
-			const userId = payload.sub;
-			const { code } = req.body as { code: string };
-
-			if (!code)
-				return reply.status(400).send({ error: "QR code required" });
-
-			const ok = await twofa.enableTOTP(userId, code);
-
-			if (!ok)
-				return reply.status(400).send({ error: "Invalid QR code" });
-
-			await prisma.user.update({
-				where: { id: userId },
-				data: { isTwoFAEnabled: true, twoFAMethod: "qr" }
-			});
-			const twoFAToken = jwt.sign(
-				{ sub: userId, twoFA: false },
-				JWT_SECRET,
-				{ expiresIn: "5m" }
-			);
-
-			return reply.send({
-				message: "QR code enabled successfully", method: "qr",
-				twoFAToken
-			});
-		}
-		catch (err) {
-			req.log.error(err);
-			return reply.status(500).send({ error: "Internal server error" });
-		}
-	});
-
-
+	/**
+	 * La route pour desactiver la 2FA :
+	 * On verifie si l'user a bien son token de valide, si oui on peut changer la table SQL et mettre sses status 2FA a false/null
+	 * indiquant qu'il n'y a pas de 2FA active sur son compte.
+	*/
 	fastify.post("/disable-2fa", async (req, reply) => {
 		try {
 			const refreshToken = req.cookies.refreshToken;
-			req.log.info(`Refresh token: ${req.cookies.refreshToken}`);
 
 			if (!refreshToken)
 				return reply.status(401).send({ error: "Unauthorized" });
 
 			const payload = verifyToken(refreshToken);
-			req.log.info(`Token payload: ${JSON.stringify(payload)}`);
 
 			if (!payload || payload.tokenType !== "refresh")
 				return (reply.status(401).send({ error: "Invalid refresh token" }));
@@ -167,6 +136,17 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 		}
 	})
 
+
+	/**
+	 * La route pour activer la 2FA, on verifie le token voir si il est valide
+	 * Si oui on regarde quel type de 2FA a choisi l'utilisateur (sms, mail 2fa)
+	 * Si l'utilisateur a choisi le QR code alors il faut generer le QR code pour que l'utilisateur le scan une premiere fois
+	 * pour stocker le code dans son application d'authentification et puisse se connecter pour les prochaines visites.
+	 *
+	 * Si l'utilisateur a choisi sms ou email il sera demande d'entre le numero de tel ou le mail, on verifie l'input de l'utilisateur
+	 * pour des mesures de securite (attaques XSS)
+	 * si tout est bon on met a jour la ligne user et la ligne 2fa dans la database, avec le type de 2fa choisi, la destination et les boolean en true
+	*/
 	fastify.post("/enable-2fa", async (req, reply) => {
 		try {
 			const refreshToken = req.cookies.refreshToken;
@@ -250,14 +230,16 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 		}
 	});
 
+	/**
+	 * La route pour verifier le 2fa lors du login, on verifie si le twofatoken (un token temporaire creer juste le temps que lq personne finisse de se log in
+	 * via le 2FA) est valide, si oui on envoie vers la fonction complete2FA qui verifiera le code entree et signera les vrais tokens JWT.
+	*/
 	fastify.post("/verify-2fa", async (req, reply) => {
 		try {
 			const { code, twoFAtoken } = req.body as {
 				code: string;
 				twoFAtoken: string;
 			};
-
-			req.log.info({ code, twoFAtoken }, "verify-2fa hit");
 
 			if (!twoFAtoken)
 				return reply.status(400).send({ error: "Missing 2FA token" });
@@ -271,13 +253,11 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 			}
 
 			const userId = payload.userId ?? payload.sub;
-			req.log.info({ userId }, "decoded userId from token");
 
 			if (!userId)
 				return reply.status(400).send({ error: "Invalid token: no userId" });
 
 			const tokens = await twofa.complete2FA(userId, code);
-			req.log.info({ tokens }, "tokens returned");
 
 			if (!tokens)
 				return reply.status(401).send({ error: "Invalid 2FA code" });
@@ -309,6 +289,13 @@ export default async function twofaRoutes(fastify: FastifyInstance) {
 		}
 	});
 
+
+	/**
+	 * Route refreshh, ici c'est pour que le refreshtoken (qui dure 7jours si on se delog pas) puisse recreer
+	 * des accesstoken, c'est ce qui permet a l'utilisateur de rester connecter etc!
+	 *
+	 * On regarde si le refresh est valide -> si oui on signe un nouveau JWT access.
+	*/
 	fastify.post("/refresh", async (req, reply) => {
 		try {
 			const refreshToken = req.cookies.refreshToken;

@@ -2,6 +2,11 @@ import { FastifyReply, FastifyRequest, HookHandlerDoneFunction } from "fastify";
 import { verifyToken } from "./jwtUtils.js"
 
 
+
+/**
+ * Un middleware authentizer, c'est ce qui va etre rajoute a certaines routes pour les rendre "protegees"
+ * On verifie simplement si les tokens sont present, si ils ne le sont pas/pas valides alors l'acces est refuse.
+ */
 export function authentizer(twoFArequired = false) {
 	return (request: FastifyRequest, reply: FastifyReply, done: HookHandlerDoneFunction) => {
 

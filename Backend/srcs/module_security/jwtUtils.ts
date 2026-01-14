@@ -17,8 +17,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 
   bisous
 */
-
-export const JWT_SECRET = (process.env.JWT_SECRET ?? "default_secret_change_me_hihi") as string;
+export const JWT_SECRET = (process.env.JWT_SECRET ?? "default_secret_Genre_A4894X785dsaioProuthihi51.-98xxSDsaww78ssa56sa") as string;
 
 const ACCESS_EXPIRES_SEC = Number(process.env.JWT_ACCESS_EXPIRES ?? 900);
 const REFRESH_EXPIRES_SEC = Number(process.env.JWT_REFRESH_EXPIRES ?? 604800);

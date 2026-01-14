@@ -10,6 +10,9 @@ export type twoFAMethod = "email" | "sms" | "qr";
 
 export class twoFAService {
 
+	// On genere un secret unique ainsi que son URL pour le transformer en QR code grace a speakeasy,
+	// on met a jour l'user avec ce secret, puis une fois fait on le transforme en QR code grace a la librairie qrcode
+	// On return le secret, le qr et le lien URL cree par speakeasy, tout ca pour pouvoir l'utiliser dans la route enable 2fa!
 	async generateTOTPSecret(userId: number) {
 		const totpSecret = speakeasy.generateSecret({ name: "Transcendence", length: 20 });
 
@@ -41,29 +44,7 @@ export class twoFAService {
 		};
 	}
 
-	async enableTOTP(userId: number, code: string): Promise<boolean> {
-		const data = await prisma.twoFA.findUnique({ where: { userId } });
-		if (!data || data.method !== "qr" || !data.secret)
-			return false;
-
-		const ok = speakeasy.totp.verify({
-			secret: data.secret,
-			encoding: "base32",
-			token: code,
-			window: 1
-		});
-
-		if (!ok)
-			return false;
-
-		await prisma.user.update({
-			where: { id: userId },
-			data: { isTwoFAEnabled: true },
-		});
-
-		return true;
-	}
-
+	// On genere le code avec un random number, on dit que le code expire dans 5minutes, on met a jour l'user avec ces informations!
 	async generate2FA(userId: number, method: twoFAMethod, destination?: string): Promise<string> {
 
 		let secret: string | undefined = undefined;
@@ -98,6 +79,20 @@ export class twoFAService {
 		return secret ?? code!;
 	}
 
+	/*
+	Ici on regarde le type de 2FA utilise par l'user (sms, mail, qr), et on envoie le code selon le type de methode choisi.
+
+	Si mail on utilise la librairie nodemailer : ca nous permet d'envoyer des mails de maniere secure et sans dependences requises,
+	Premierement on creer le transporter (l'email qui envoie), donc notre mail et on a besoin du password de l'app
+	(un token genere par gmail ici, pas le vrai mdp du mail), on rempli le mail avec le sujet le body etc et on l'envoie!
+
+	Si sms on simule l'envoi car les services pour envoyer de vrais sms sont payants, donc on verifie juste avec la console si le sms est envoye
+	au bon numero (destination), on pourrait facilement implementer twilio, un service d'envoi de sms qui genere egalement un numero de telephone
+	pour ne pas avoir a envoyer les sms via son telephone perso, il s'implement assez facilement de ce que j'ai vu a la maniere de nodemailer
+
+	Si qr code choisi on refait un URL pour qrcode grace a speakeasy, et on creer le qrcode grace a cet URL, on retourne le QR
+	apres bah l'user a juste a scan et ca lui affiche son code sur son appli d'authentification
+	*/
 	async send2FACode(userId: number): Promise<string | void> {
 		const data = await prisma.twoFA.findUnique({ where: { userId } });
 		if (!data)
@@ -138,7 +133,7 @@ export class twoFAService {
 
 				await client.messages.create({
 					to: data.destination ?? "",
-					from: process.env.TWILIO_PHONE, // numéro Twilio
+					from: process.env.TWILIO_PHONE,
 					body: `Your Transcendence 2FA code is: ${data.code}.`
 				});
 
@@ -158,6 +153,11 @@ export class twoFAService {
 		}
 	}
 
+	/**
+	 * Fonction juste pour verifier si le code rentre est le bon code.
+	 * - On cherche l'user avec son Id, si qr code on verifie avec la fonction speakeasy verify si le secret est bien le meme
+	 * - Pour sms et mail on check si c'est strictement le meme code et si il n'a pas expire
+	 */
 	async verify2FACode(userId: number, code: string): Promise<boolean> {
 		const data = await prisma.twoFA.findUnique({ where: { userId } });
 		if (!data)
@@ -179,6 +179,11 @@ export class twoFAService {
 		return false;
 	}
 
+	/**
+	 * Une fois le code rentre et qu'il est bien verifie comme etant le meme, on peut signer les tokens JWT pour cet user.
+	 * On supprime les infos du twofa pour cet user (le code, le secret etc car ca sera pas le meme au prochain login)
+	 * On return les tokens pour que l'user puisse se connecter
+	 */
 	async complete2FA(userId: number, code: string) {
 		const verified = await this.verify2FACode(userId, code);
 		if (!verified)
@@ -190,17 +195,5 @@ export class twoFAService {
 		await prisma.twoFA.delete({ where: { userId } });
 
 		return { accessToken, refreshToken };
-	}
-
-	async verifyTOTP(userId: number, code: string): Promise<boolean> {
-		const data = await prisma.twoFA.findUnique({ where: { userId } });
-		if (!data || data.method !== "qr" || !data.secret) return false;
-
-		return speakeasy.totp.verify({
-			secret: data.secret,
-			encoding: "base32",
-			token: code,
-			window: 1,
-		});
 	}
 }

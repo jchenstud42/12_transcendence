@@ -2,11 +2,11 @@ import { FastifyInstance } from "fastify";
 import prisma from "../user_manage/prisma/client.js";
 import { signAccessToken, signRefreshToken } from "../module_security/jwtUtils.js";
 import { twoFAService } from "../module_security/2FA.js";
-import { hashPassword } from "../security/passHash.js"; // plus utilisé mais je ne retire pas l'import si tu veux l'utiliser ailleurs
 import crypto from "crypto";
 
 const twofa = new twoFAService();
 
+// Les url de l'intra 42 necessaires pour le login (page d'authorisation, page pour recevoir le token, page pour avoir les infos user)
 const INTRA_AUTHORIZE = "https://api.intra.42.fr/oauth/authorize";
 const INTRA_TOKEN = "https://api.intra.42.fr/oauth/token";
 const INTRA_ME = "https://api.intra.42.fr/v2/me";
@@ -14,17 +14,22 @@ const INTRA_ME = "https://api.intra.42.fr/v2/me";
 export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 	const clientId = process.env.INTRA_CLIENT_ID || "";
 	const clientSecret = process.env.INTRA_CLIENT_SECRET || "";
-
 	const redirectUri = process.env.INTRA_REDIRECT_URI || "https://localhost:8443/oauth/42/callback";
-
 	const frontendUrl = process.env.FRONTEND_URL || "https://localhost:8443";
 
 	if (!clientId || !clientSecret) {
 		fastify.log.warn("INTRA_CLIENT_ID or INTRA_CLIENT_SECRET not set. OAuth will fail until configured.");
 	}
 
+	/**
+	 * Creer un token state aleatoire grace a crypto.randomBytes pour se proteger contre les attaques CSRF
+	 * Stocke ce state dans un cookie HTTP-only de courte durée
+	 * Construit l'URL d'autorisation OAuth 42 avec les paramètres requis
+	 * Redirige l'utilisateur vers la page de login 42
+	 */
 	fastify.get("/oauth/42", async (req, reply) => {
-		if (!clientId) return reply.status(500).send({ error: "OAuth not configured (INTRA_CLIENT_ID missing)" });
+		if (!clientId)
+			return reply.status(500).send({ error: "OAuth not configured (INTRA_CLIENT_ID missing)" });
 
 		const state = crypto.randomBytes(24).toString("hex");
 
@@ -43,8 +48,6 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 		params.set("scope", "public");
 		params.set("state", state);
 
-		fastify.log.info("redirecting to 42 authorize (state=%s)", state);
-
 		return reply.redirect(INTRA_AUTHORIZE + "?" + params.toString());
 	});
 
@@ -53,10 +56,10 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 		const returnedState = (req.query as any).state as string | undefined;
 		const cookieState = (req.cookies as any)?.oauth_state as string | undefined;
 
-		if (!code) return reply.status(400).send({ error: "Missing code" });
+		if (!code)
+			return reply.status(400).send({ error: "Missing code" });
 
 		if (!returnedState || !cookieState || returnedState !== cookieState) {
-			fastify.log.warn("OAuth state mismatch. returned=%s cookie=%s", returnedState, cookieState);
 			return reply.status(403).send({ error: "Invalid OAuth state" });
 		}
 
@@ -96,7 +99,9 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 
 			const tokenJson = await tokenRes.json();
 			const access_token = tokenJson.access_token as string | undefined;
-			if (!access_token) return reply.status(502).send({ error: "No access token" });
+
+			if (!access_token)
+				return reply.status(502).send({ error: "No access token" });
 
 			const profileRes = await fetch(INTRA_ME, {
 				headers: { Authorization: "Bearer " + access_token },
@@ -116,7 +121,8 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 				(profile.usual_full_name as string) ||
 				"intra_" + profile.id;
 
-			if (!email) return reply.status(400).send({ error: "No email from provider" });
+			if (!email)
+				return reply.status(400).send({ error: "No email from provider" });
 
 			let user = await prisma.user.findUnique({
 				where: { oauth42Id: profile.id.toString() },
