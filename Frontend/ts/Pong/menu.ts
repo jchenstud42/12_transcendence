@@ -1,13 +1,29 @@
 import { PONG_UI } from './elements.js';
 //import { gameInfo } from './game.js';
 import { Game } from './Game.js';
+import { setGameInstance } from '../UI/UI_events.js';
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
 
-const game = new Game();
-import { setGameInstance } from '../UI/UI_events.js';
-setGameInstance(game);
+let game: Game;
+
+///////////////////////////////////////////////////////////
+/////				HELPER FUNCTION					 /////
+//////////////////////////////////////////////////////////
+
+/**
+ 	1 - Initialize or get the game instance
+ 	2 - Ensures game is always available
+*/
+function getGame(): Game {
+	if (!game) {
+		game = new Game();
+		setGameInstance(game);
+	}
+	return game;
+}
+
 
 ///////////////////////////////////////////////////////////
 /////				EVENTS LISTENER					 /////
@@ -16,6 +32,7 @@ setGameInstance(game);
 export function initMenuEvents() {
 
 	PONG_UI.pongButton.addEventListener("click", () => {
+		getGame();  // Ensure game is initialized
 		showMatchSelectionMenu();
 	});
 
@@ -99,26 +116,23 @@ export function initMenuEvents() {
 				if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 				if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
-				showAiName();
 				game.createPlayers();
-				game.isQuickMatch = true;
-				game.startMatch();
-
+				if (game.playerNbr > 2) {
+					game.isQuickMatch = false;
+					game.createTournament();
+				} else {
+					game.isQuickMatch = true;
+					showAiName();
+					game.startMatch();
+				}
 			}
 		}
 	})
 
-	//Start the next points after a goal
+	//Start the next match after a point
 	PONG_UI.playButton.addEventListener("click", () => {
 		game.startMatch();
 	});
-
-/* 	document.addEventListener("keydown", (event: KeyboardEvent) => {
-		if (event.key === "Enter" && !PONG_UI.playButton.classList.contains("hidden")) {
-			game.startMatch();
-		}
-	}); */
-
 
 }
 
@@ -221,6 +235,8 @@ export function resetGameMenu() {
 			PONG_UI.enterPlayerNbrText,
 			PONG_UI.playerNbrText,
 			PONG_UI.finalList);
+
+	//Go back to the first Pong button
 	showPongMenu();
 }	
 

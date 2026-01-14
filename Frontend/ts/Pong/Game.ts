@@ -12,6 +12,8 @@ const PADDLE_SPEED = 10;
 
 export class Game {
 	private running = false;
+	private ballLoopRafId: number | null = null;
+	private paddleLoopRafId: number | null = null;
     
 	currentUser: any;
 	paddleLoopRunning = false;
@@ -73,17 +75,6 @@ export class Game {
 		//Setup name depending on username logged
 		const currentUserRaw = localStorage.getItem("user");
 		this.currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
-
-
-
-		/*this.isQuickMatch = !this.isTournament;
-
-		if (playersName.length > 2) {
-			PONG_UI.finalList.classList.remove("hidden");
-			this.createTournament();
-		} else {
-			PONG_UI.playButton.classList.remove("hidden");
-		} */
 	}
 
 	///////////////////////////////////////////////////////////
@@ -115,14 +106,16 @@ export class Game {
 	/////				GAME STATES						  /////
 	//////////////////////////////////////////////////////////
 
-	// bound game loop so `this` is preserved when passed to requestAnimationFrame
-	public gameLoop = (now = performance.now()) => {
-		//if (!this.running) return;
+	public ballLoop = (now = performance.now()) => {
+		if (!this.ball.active) {
+			this.ballLoopRafId = null;
+			return;
+		}
 
 		const dt = (now - this.last) / 1000;
 		this.last = now;
 		this.ball.update(dt); //If a point is win, ball notifies game by updating onscore and reset itself
-		requestAnimationFrame(this.gameLoop);
+		this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
 	};
 
 	public startMatch() {
@@ -145,28 +138,33 @@ export class Game {
 			this.addPoint(playerSide);
 		};
 
-		//Serve + Start Game Loop
+		//Serve + Start Loops
 		this.pendingTimeouts.push(setTimeout(() => {
 			showCountDown("READY");
+
 				this.pendingTimeouts.push(setTimeout(() => {
 				showCountDown("GO");
-				// Keep "GO" visible briefly so the player can see it, then hide it and show game elements
+
 				this.pendingTimeouts.push(setTimeout(() => {
 					hideCountDown();
 					showGameElements();
-					// Start the ball and the game loop only when the elements are visible so the ball appears immediately after GO
+
+					//Start ball Loop
 					this.ball.active = true;
 					this.ball.serve();
 					this.last = performance.now();
-					requestAnimationFrame(this.gameLoop);
-					this.enableKeyListeners();
-					// start paddle updater loop (only once)
+					this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
+
+					//Start Paddle loop (only once)
 					if (!this.paddleLoopRunning) {
 						this.paddleLoopRunning = true;
-						this.updatePaddlePositions();
+						this.paddleLoopRafId = this.updatePaddlePositions();
 					}
-					// starting finished
+
+					//Enable Paddle Movements
+					this.enableKeyListeners();
 					this.starting = false;
+
 				}, 600));
 			}, 1000));
 		}, 1000));
@@ -187,7 +185,7 @@ export class Game {
 
 			console.log(`${this.players[pointIndex].name} scores! Points: ${this.players[pointIndex].point}`);
 
-			// Check if player reached pointsToWin (quick match only)
+			// End the match if player reached pointsToWin (quick match only)
 			if (this.isQuickMatch && this.players[pointIndex].point >= this.pointsToWin) {
 				this.endMatch(this.players[pointIndex]);
 			} else {
@@ -196,30 +194,28 @@ export class Game {
 		}
 	}
 
+	//Reset used between Points
 	public resetMatch() {
+		// Stop animation loops
+		this.stopAllLoops();
 
-		// Reset ball for next point
+		//Make sure players can't moove paddle while waiting for next match
+		this.disableKeyListeners();
+
+		this.starting = false;
+		this.paddleLoopRunning = false;
+
+
 		this.ball.reset();
 
 		// clear any pending timeouts from prior start attempts
 		this.pendingTimeouts.forEach(id => clearTimeout(id));
 		this.pendingTimeouts = [];
 
-		//Make sure players can't moove paddle while waiting for next match
-		this.disableKeyListeners();
-
-		//Reset Paddle Position
 		PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 		PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 		hideMenu(PONG_UI.ball, PONG_UI.leftPaddle, PONG_UI.rightPaddle);
 		showMenu(PONG_UI.playButton);
-
-		// mark that no start is in progress
-		this.starting = false;
-
-		// ensure paddle loop flag is reset
-		this.paddleLoopRunning = false;
-
 	}
 
 	private async endMatch(winner: Player) {
@@ -228,10 +224,10 @@ export class Game {
 		this.ball.active = false;
 
 		// no explicit RAF cancellation here
-		PONG_UI.ball.classList.add("hidden");
-		PONG_UI.leftPaddle.classList.add("hidden");
-		PONG_UI.rightPaddle.classList.add("hidden");
-		PONG_UI.playButton.classList.add("hidden");
+		hideMenu(PONG_UI.ball,
+				PONG_UI.leftPaddle,
+				PONG_UI.rightPaddle,
+				PONG_UI.playButton);
 
 		// mark that no start is in progress
 		this.starting = false;
@@ -298,6 +294,8 @@ export class Game {
 	}
 
 	public resetGame() {
+		// Stop all animation loops first
+		this.stopAllLoops();
 
 		this.pendingTimeouts.forEach(id => clearTimeout(id));
 		this.pendingTimeouts = [];
@@ -312,114 +310,94 @@ export class Game {
 		this.ball.active = false;
 		this.ball.reset();
 		this.ball.initBallPos();
+		this.ball.onScore = null; // Clear the callback
 
+		// Clear players array
+		this.players = [];
 		this.playersName = [];
+		this.guestPlayers.clear();
+		this.winner = null;
+
+		// Reset match state
 		this.nameEntered = 0;
 		this.isTournament = false;
 		this.playerNbr = 2;
 		this.maxPlayer = 2;
 		this.aiNbr = 0;
+		this.isQuickMatch = false;
+
+		// Reset loop flags
+		this.starting = false;
+		this.paddleLoopRunning = false;
 
 		resetGameMenu()
 	}
 
 
 
-	/* public async createTournament() {
+	///////////////////////////////////////////////////////////
+	/////				TOURNAMENT						  /////
+	//////////////////////////////////////////////////////////
+
+	/**
+	 * Save a tournament match result to the backend
+	 * Posts match data including scores and winner
+	 */
+	private async saveTournamentMatch(
+		player1: Player,
+		player2: Player,
+		score1: number,
+		score2: number,
+		winner: Player
+	): Promise<void> {
+		const token = localStorage.getItem("accessToken");
+		if (!token) return;
+
+		const payload = {
+			player1Id: player1.userId,
+			player2Id: player2.userId,
+			score1,
+			score2,
+			winnerId: winner.userId,
+			player1Name: player1.userId >= 100 ? player1.name : undefined,
+			player2Name: player2.userId >= 100 ? player2.name : undefined,
+		};
+
+		try {
+			const res = await fetch("/match", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					"Authorization": `Bearer ${token}`
+				},
+				body: JSON.stringify(payload)
+			});
+
+			if (!res.ok) console.error("Tournament match save failed:", await res.text());
+		} catch (err) {
+			console.error("Error saving tournament match:", err);
+		}
+	}
+
+	public async createTournament() {
 		console.log("createTournament started");
 
 		const pointsToWin = 1;
+		
 		let bracket: Player[] = shuffleArray(this.players.slice());
 
-		PONG_UI.playersList.innerHTML = "";
-		PONG_UI.finalList.innerHTML = "";
-		PONG_UI.winnerName.innerHTML = "";
+		const BRACKETS_UI = {
+			bracketDisplay: null,
+			playersRow: null,
+			semifinalsRow: null,
+			champRow: null,
+			finalDiv: null
+		};
 
-		// Create tournament bracket structure
-		const bracketDisplay = document.createElement("div");
-		bracketDisplay.className = "flex flex-col gap-1 w-full h-full justify-center";
+		this.initBracketsUI(BRACKETS_UI);	
 		
-		// Initialize bracket with all players and placeholders
-		const playersRow = document.createElement("div");
-		playersRow.className = "flex gap-2 justify-center";
-		
-		const semifinalsRow = document.createElement("div");
-		semifinalsRow.className = "flex gap-2 justify-center";
-		
-		const champRow = document.createElement("div");
-		champRow.className = "flex gap-1 justify-center";
-
-		// Add final placeholder (Champion at top)
-		const finalDiv = document.createElement("div");
-		finalDiv.id = "final-winner";
-		finalDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-		finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br>?`;
-		champRow.appendChild(finalDiv);
-
-		// Add semifinals placeholders
-		for (let i = 0; i < 2; i++) {
-			const playerDiv = document.createElement("div");
-			playerDiv.id = `semi-${i}`;
-			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i + 1}</span><br>?`;
-			semifinalsRow.appendChild(playerDiv);
-		}
-
-		// Add initial 4 players at bottom
-		for (let i = 0; i < 4; i++) {
-			const playerDiv = document.createElement("div");
-			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Player ${i + 1}</span><br>${bracket[i].name}`;
-			playersRow.appendChild(playerDiv);
-		}
-
-		bracketDisplay.appendChild(champRow);
-		bracketDisplay.appendChild(semifinalsRow);
-		bracketDisplay.appendChild(playersRow);
-
-		PONG_UI.finalList.appendChild(bracketDisplay);
 		PONG_UI.finalList.classList.remove("hidden");
-
-		const showPair = (a: Player, b: Player) => {
-			console.log("Showing pair:", a.name, "vs", b.name);
-			PONG_UI.playersList.innerHTML = "";
-			showPlayerName(a.name, a.playerNbr, a.isAi);
-			showPlayerName(b.name, b.playerNbr, b.isAi);
-			if (PONG_UI.playersArea) PONG_UI.playersArea.classList.remove("hidden");
-		};
-		
-		//TO CHECK FOR PLAYER INFOS
-		const saveTournamentMatch = async (player1: Player, player2: Player, score1: number, score2: number, winner: Player) => {
-			const token = localStorage.getItem("accessToken");
-			if (!token)
-				return;
-
-			const payload = {
-				player1Id: player1.userId,
-				player2Id: player2.userId,
-				score1,
-				score2,
-				winnerId: winner.userId,
-				player1Name: player1.userId >= 100 ? player1.name : undefined,
-				player2Name: player2.userId >= 100 ? player2.name : undefined,
-			};
-
-			try {
-				const res = await fetch("/match", {
-					method: "POST",
-					credentials: "include",
-					headers: {
-						"Content-Type": "application/json",
-						"Authorization": `Bearer ${token}`
-					},
-					body: JSON.stringify(payload)
-				});
-
-				if (!res.ok) console.error("Tournament match save failed:", await res.text());
-			} catch (err) {
-				console.error("Error saving tournament match:", err);
-			}
-		};
 
 		const runMatch = (left: Player, right: Player, onPlayClick: () => void): Promise<Player> => {
 			return new Promise((resolve) => {
@@ -454,7 +432,7 @@ export class Game {
 
 						const winner = leftScore > rightScore ? left : right;
 						console.log("Match winner:", winner.name);
-						saveTournamentMatch(left, right, leftScore, rightScore, winner);
+					this.saveTournamentMatch(left, right, leftScore, rightScore, winner);
 						setTimeout(() => resolve(winner), 300);
 						return;
 					}
@@ -474,7 +452,7 @@ export class Game {
 				const playClickHandler = () => {
 					PONG_UI.playButton.removeEventListener("click", playClickHandler);
 					document.removeEventListener("keydown", keyHandler);
-					onPlayClick(); // Appeler showPair
+					onPlayClick(); // Appeler showPlayerPair
 					this.startMatch();
 				};
 
@@ -494,6 +472,7 @@ export class Game {
 			});
 		};
 
+		//TOURNAMENT LOGIC STARTS HERE
 		let round = 1;
 		while (bracket.length > 1) {
 			console.log(`Round ${round} started with ${bracket.length} players`);
@@ -505,26 +484,11 @@ export class Game {
 
 				PONG_UI.playButton.classList.remove("hidden");
 
-				const winner = await runMatch(p1, p2, () => showPair(p1, p2));
+				const winner = await runMatch(p1, p2, () => this.showPlayerPair(p1, p2));
 
 				nextRound.push(winner);
 
-				// Update the bracket display with the winner
-				if (round === 1) {
-					const semiDiv = document.getElementById(`semi-${i / 2}`);
-					if (semiDiv) {
-						const colorClass = PONG_UI.playerColors[winner.playerNbr];
-						semiDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i / 2 + 1}</span><br><span class="${colorClass}">${winner.name}</span>`;
-					}
-				} else if (round === 2) {
-					const finalDiv = document.getElementById("final-winner");
-					if (finalDiv) {
-						const colorClass = PONG_UI.playerColors[winner.playerNbr];
-						finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br><span class="${colorClass}">${winner.name}</span>`;
-					}
-				}
-
-				// play_button.classList.remove("hidden");
+				this.updateBracketsUI(winner, round, i);
 			}
 
 			bracket = nextRound;
@@ -555,7 +519,7 @@ export class Game {
 			};
 			PONG_UI.backButton.addEventListener("click", backClickHandler);
 		});
-	} */
+	}
 
 
 
@@ -571,11 +535,12 @@ export class Game {
 	//////////////////////////////////////////////////////////
 
 	//Fonction pour bouger les paddles en fonction de la key press
-	public updatePaddlePositions = () => {
+	public updatePaddlePositions = (): number => {
 		// stop the loop when the ball is inactive (between points)
-		if (!this.ball.active) {
+		if (!this.ball.active || !this.paddleLoopRunning) {
 			this.paddleLoopRunning = false;
-			return;
+			this.paddleLoopRafId = null;
+			return 0;
 		}
 
 		if (this.keys.w && PONG_UI.leftPaddle.offsetTop > 0) {
@@ -592,7 +557,8 @@ export class Game {
 			PONG_UI.rightPaddle.style.top = `${PONG_UI.rightPaddle.offsetTop + PADDLE_SPEED}px`;
 		}
 
-		requestAnimationFrame(this.updatePaddlePositions);
+		this.paddleLoopRafId = requestAnimationFrame(this.updatePaddlePositions);
+		return this.paddleLoopRafId;
 	}
 
 	// Fonctions pour activer/désactiver les event listeners
@@ -605,6 +571,123 @@ export class Game {
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
 	}
+
+	public stopAllLoops() {
+		if (this.ballLoopRafId !== null) {
+			cancelAnimationFrame(this.ballLoopRafId);
+			this.ballLoopRafId = null;
+		}
+		if (this.paddleLoopRafId !== null) {
+			cancelAnimationFrame(this.paddleLoopRafId);
+			this.paddleLoopRafId = null;
+		}
+	}
+
+	/**
+	 * Complete cleanup and destruction of game instance
+	 * Call this when the game is no longer needed (e.g., on page unload or before creating a new instance)
+	 */
+	public destroy() {
+		// Stop all animation loops
+		this.stopAllLoops();
+
+		// Clear all timeouts
+		this.pendingTimeouts.forEach(id => clearTimeout(id));
+		this.pendingTimeouts = [];
+
+		// Remove event listeners
+		this.disableKeyListeners();
+
+		// Clear all collections
+		this.players = [];
+		this.playersName = [];
+		this.guestPlayers.clear();
+
+		// Clear ball callbacks
+		this.ball.onScore = null;
+
+		// Reset references
+		this.winner = null;
+		this.currentUser = null;
+	}
+
+	private initBracketsUI(BRACKETS_UI: any) {
+		PONG_UI.playersList.innerHTML = "";
+		PONG_UI.finalList.innerHTML = "";
+		PONG_UI.winnerName.innerHTML = "";
+
+		// Create tournament bracket structure
+		BRACKETS_UI.bracketDisplay = document.createElement("div");
+		BRACKETS_UI.bracketDisplay.className = "flex flex-col gap-1 w-full h-full justify-center";
+		
+		// Initialize bracket with all players and placeholders
+		BRACKETS_UI.playersRow = document.createElement("div");
+		BRACKETS_UI.playersRow.className = "flex gap-2 justify-center";
+		
+		BRACKETS_UI.semifinalsRow = document.createElement("div");
+		BRACKETS_UI.semifinalsRow.className = "flex gap-2 justify-center";
+		
+		BRACKETS_UI.champRow = document.createElement("div");
+		BRACKETS_UI.champRow.className = "flex gap-1 justify-center";
+
+		// Add final placeholder (Champion at top)
+		BRACKETS_UI.finalDiv = document.createElement("div");
+		BRACKETS_UI.finalDiv.id = "final-winner";
+		BRACKETS_UI.finalDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+		BRACKETS_UI.finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br>?`;
+		BRACKETS_UI.champRow.appendChild(BRACKETS_UI.finalDiv);
+
+		// Add semifinals placeholders
+		for (let i = 0; i < 2; i++) {
+			const playerDiv = document.createElement("div");
+			playerDiv.id = `semi-${i}`;
+			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i + 1}</span><br>?`;
+			BRACKETS_UI.semifinalsRow.appendChild(playerDiv);
+		}
+
+		// Add initial 4 players at bottom
+		for (let i = 0; i < 4; i++) {
+			const playerDiv = document.createElement("div");
+			playerDiv.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
+			playerDiv.innerHTML = `<span class="text-sm text-gray-400">Player ${i + 1}</span><br>${BRACKETS_UI.bracket[i].name}`;
+			BRACKETS_UI.playersRow.appendChild(playerDiv);
+		}
+
+		BRACKETS_UI.bracketDisplay.appendChild(BRACKETS_UI.champRow);
+		BRACKETS_UI.bracketDisplay.appendChild(BRACKETS_UI.semifinalsRow);
+		BRACKETS_UI.bracketDisplay.appendChild(BRACKETS_UI.playersRow);
+
+		PONG_UI.finalList.appendChild(BRACKETS_UI.bracketDisplay);
+
+	}
+
+	private updateBracketsUI(winner: Player, round: number, i: number) {
+		// Update the bracket display with the winner
+		if (round === 1) {
+			const semiDiv = document.getElementById(`semi-${i / 2}`);
+			if (semiDiv) {
+				const colorClass = PONG_UI.playerColors[winner.playerNbr];
+				semiDiv.innerHTML = `<span class="text-sm text-gray-400">Semifinal ${i / 2 + 1}</span><br><span class="${colorClass}">${winner.name}</span>`;
+			}
+		} else if (round === 2) {
+			const finalDiv = document.getElementById("final-winner");
+			if (finalDiv) {
+				const colorClass = PONG_UI.playerColors[winner.playerNbr];
+				finalDiv.innerHTML = `<span class="text-sm text-gray-400">Champion</span><br><span class="${colorClass}">${winner.name}</span>`;
+			}
+		}
+	}
+
+	//This was as const in the tournament function
+	private showPlayerPair = (a: Player, b: Player) => {
+		console.log("Showing pair:", a.name, "vs", b.name);
+		PONG_UI.playersList.innerHTML = "";
+		showPlayerName(a.name, a.playerNbr, a.isAi);
+		showPlayerName(b.name, b.playerNbr, b.isAi);
+		if (PONG_UI.playersArea) PONG_UI.playersArea.classList.remove("hidden");
+	};
+		
 };
 
 
