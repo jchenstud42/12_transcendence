@@ -76,9 +76,9 @@ export const translations = {
 		//Friends
 		friends: "Friends",
 		friend_list: "Friend list",
-		add_friend: "Add friend",
-		your_friends: "Your friends",
-		pending_friends: "Pending friends",
+		add_friend: "•︎ Add friend",
+		your_friends: "•︎ Your friends",
+		pending_friends: "•︎ Pending friends",
 		remove_friend: "Remove friend",
 		ask_username: "Enter the username of the friend to add:",
 		friend_request_sent: "Friend request sent!",
