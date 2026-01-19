@@ -172,295 +172,284 @@
 
 			<!-- !!!!!! NOTES POUR JSP KI : pourquoi name="name" a chaque fois????? -->
 			<div id="register-form" class="hidden absolute left-1/2 -translate-x-1/2 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
-				<div id="register-form" class="hidden absolute left-1/2 -translate-x-1/2 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
-					<form id="register_form" class="shadow-md rounded p-6">
-						<label for="name" data-i18n="username">Username</label>
-						<input type="text" name="name" id="username" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-						<label for="username" data-i18n="username">Username</label>
-						<input type="text" name="username" id="username" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+				<form id="register_form" class="shadow-md rounded p-6">
+					<label for="username" data-i18n="username">Username</label>
+					<input type="text" name="username" id="username" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-						<label for="name" data-i18n="email">Email</label>
-						<input type="text" name="name" id="email" data-i18n="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-						<label for="email" data-i18n="email">Email</label>
-						<input type="text" name="email" id="email" data-i18n="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+					<label for="email" data-i18n="email">Email</label>
+					<input type="text" name="email" id="email" data-i18n="email" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-						<label for="name" data-i18n="password">Password</label>
-						<input type="text" name="name" id="password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-						<label for="password" data-i18n="password">Password</label>
-						<input type="password" name="password" id="password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+					<label for="password" data-i18n="password">Password</label>
+					<input type="password" name="password" id="password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-						<label for="name" data-i18n="confirm_password">Confirm Password</label>
-						<input type="text" name="name" id="confirm-password" data-i18n="confirm_password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-						<label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
-						<input type="password" name="confirm_password" id="confirm-password" data-i18n="confirm_password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+					<label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
+					<input type="password" name="confirm_password" id="confirm-password" data-i18n="confirm_password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-						<div class="flex justify-center">
-							<button class="relative inline-block p-px font-bold text-[#dc3cf0] mt-2 border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent w-full text-center" type="submit" data-i18n="register">Register</button>
+					<div class="flex justify-center">
+						<button class="relative inline-block p-px font-bold text-[#dc3cf0] mt-2 border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent w-full text-center" type="submit" data-i18n="register">Register</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Login button & menu -->
+		<div class="relative">
+			<button id="login-button" type="button" data-i18n="login" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+				<div class="flex items-center justify-center ">
+					<span class="transition-colors duration-500 group-hover:text-white">Login</span>
+				</div>
+			</button>
+
+			<!-- !!!!!! NOTES POUR JSP KI : pareil ici ??? pourquoi name="name" a chaque fois????? -->
+			<div id="login-form" class="hidden absolute right-0 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
+				<form id="login_form" class="shadow-md rounded p-6">
+
+					<label for="login-id" data-i18n="username">Username</label>
+					<input type="text" name="username" id="login-id" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+
+					<label for="login-password" data-i18n="password">Password</label>
+					<input type="password" name="password" id="login-password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+
+					<div class="flex flex-col justify-center gap-2 ">
+						<button type="submit" class="relative inline-block p-px font-bold text-[#dc3cf0] mt-2 border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent w-full text-center" data-i18n="login">Login</button>
+						<button id="oauth-42-button" type="button" class="relative inline-block p-px font-bold text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden w-full text-center" data-i18n="oauth42">Login with 42</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!--Profile button & menu-->
+		<div id="profile-container" class="relative">
+			<button id="profile-button" class="relative hidden focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+				<img id="profile-avatar" src="./assets/avatars/default-avatar.jpg" alt="Avatar" class="w-16 h-16 rounded-full">
+			</button>
+
+			<div id="profile-menu" class="hidden absolute right-0 mt-2 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 p-4">
+				<div class="p-4">
+					<p class="font-bold text-lg" id="menu-username">Username</p>
+					<p class="text-sm text-gray-500" id="menu-email">Email</p>
+				</div>
+				<hr>
+
+				<div class="p-4 space-y-2">
+					<!--Edit button & menu-->
+					<div class="relative">
+						<button id="edit-profile-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="edit">Edit</button>
+
+						<div id="edit-profile-menu" class="hidden absolute top-0 -mt-10 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
+							<h2 class="text-xl font-bold mb-6" data-i18n="edit_profile">Edit Profile</h2>
+
+							<label data-i18n="username">Username</label>
+							<input id="edit-username" class="text-gray-700 border rounded w-full p-2 mb-4" type="text" data-i18n="new_username">
+
+							<label data-i18n="email">Email</label>
+							<input id="edit-email" class="border text-gray-700 rounded w-full p-2 mb-4" type="email" data-i18n="new_email">
+
+							<label data-i18n="avatar">Avatar</label>
+							<button id="change-avatar-btn" class="relative w-full p-px text-sm text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden" data-i18n="change_avatar">
+								Change avatar
+							</button>
+							<div id="quick-avatar-picker" class="hidden grid grid-cols-4 gap-4 p-5">
+							</div>
+
+							<button id="upload-avatar-btn" class="relative w-full p-px text-sm text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden mt-2 mb-4" data-i18n="upload_avatar">
+								Upload avatar
+							</button>
+							<input id="avatar-file-input" type="file" accept="image/png" class="hidden">
+
+							<!-- !!! Y'avait ecrit de remplacer text par password, donc c'est ce que j'ai fais -->
+							<label data-i18n="new_password">New Password</label>
+							<input id="edit-password" class="text-gray-700 border rounded w-full p-2 mb-4" type="password" data-i18n="new_password">
+
+							<!-- La meme chose ici, bisous -->
+							<label data-i18n="confirm_password">Confirm Password</label>
+							<input id="edit-password-confirm" class="text-gray-700 border rounded w-full p-2 mb-4" type="password" data-i18n="confirm_password">
+
+							<button id="btn-save-profile" class="relative w-full p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent mt-3" data-i18n="save_changes">
+								Save changes
+							</button>
 						</div>
-					</form>
+					</div>
+
+					<!-- Friend button & menu -->
+					<div class="relative">
+						<button id="friends-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="friends">Friends</button>
+
+						<div id="friends-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
+							<h2 class="text-xl font-bold mb-3" data-i18n="friend_list">Friend list</h2>
+
+							<div class="py-1 mb-2">
+								<button id="btn-add-friend" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="add_friend">Add friends</button>
+								<button id="btn-your-friends" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="your_friends">Your friends</button>
+								<button id="btn-pending-friends" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="pending_friends">Pending friends</button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Match history button & menu -->
+					<div class="relative">
+						<button id="history-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="match_history">Match History</button>
+
+						<div id="history-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
+							<h2 class="text-xl font-bold mb-5" data-i18n="match_history">Match History</h2>
+							<div id="history-list" class="space-y-2"></div>
+						</div>
+					</div>
+
+					<!-- 2FA button & menu -->
+					<div class="relative">
+						<button id="2FA-button" class="w-full text-left hover:text-[#dc3cf0] px-2">
+							2FA</button>
+
+						<div id="2fa-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
+							<h2 class="text-xl font-bold mb-5" data-i18n="two_factor_authentication">2FA</h2>
+							<p id="2fa-status-text" class="text-white mb-1" data-i18n="disable_2fa">2FA disabled</p>
+
+							<button id="2fa-toggle-btn" class="inline-block w-full p-px font-bold text-white rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden bg-transparent" data-i18n="enable_2fa">Enable</button>
+						</div>
+
+						<div id="2fa-type-menu" class="hidden absolute top-[150px] right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
+							<div class="flex flex-col gap-2 justify-center">
+								<button id="2fa-email" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+									Email</button>
+								<button id="2fa-sms" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+									SMS</button>
+								<button id="2fa-qr" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+									QR Code (Google Authenticator)</button>
+							</div>
+						</div>
+					</div>
+
+					<button id="logout-button" data-i18n="logout_btn" class="w-full text-left hover:font-bold px-2 pt-4 pb-1 rounded text-red-500">Logout</button>
 				</div>
 			</div>
 
-			<!-- Login button & menu -->
-			<div class="relative">
-				<button id="login-button" type="button" data-i18n="login" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-					<div class="flex items-center justify-center ">
-						<span class="transition-colors duration-500 group-hover:text-white">Login</span>
-					</div>
-				</button>
+			<!-- Module destination 2FA -->
+			<div id="destination-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center">
+				<div class="bg-gray-900 text-white border-2 border-[#dc3cf0] p-6 rounded shadow-lg w-80">
+					<h2 id="destination-title" class="text-xl font-bold mb-4"></h2>
 
-				<!-- !!!!!! NOTES POUR JSP KI : pareil ici ??? pourquoi name="name" a chaque fois????? -->
-				<div id="login-form" class="hidden absolute right-0 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
-					<div id="login-form" class="hidden absolute right-0 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
-						<form id="login_form" class="shadow-md rounded p-6">
-							<label for="name" data-i18n="username">Username</label>
-							<input type="text" name="name" id="login-id" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-							<label for="login-id" data-i18n="username">Username</label>
-							<input type="text" name="username" id="login-id" data-i18n="username" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
+					<input id="destination-input" type="text" class=" text-gray-700 w-full border px-3 py-2 rounded mb-4">
 
-							<label for="name" data-i18n="password">Password</label>
-							<input type="text" name="name" id="login-password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-							<label for="login-password" data-i18n="password">Password</label>
-							<input type="password" name="password" id="login-password" data-i18n="password" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
-
-							<div class="flex flex-col justify-center gap-2 ">
-								<button type="submit" class="relative inline-block p-px font-bold text-[#dc3cf0] mt-2 border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent w-full text-center" data-i18n="login">Login</button>
-								<button id="oauth-42-button" type="button" class="relative inline-block p-px font-bold text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden w-full text-center" data-i18n="oauth42">Login with 42</button>
-							</div>
-						</form>
+					<div class="flex justify-end gap-2">
+						<button id="destination-cancel" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+							Annuler</button>
+						<button id="destination-confirm" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
+							Valider</button>
 					</div>
 				</div>
-
-				<!--Profile button & menu-->
-				<div id="profile-container" class="relative">
-					<button id="profile-button" class="relative hidden focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-						<img id="profile-avatar" src="./assets/avatars/default-avatar.jpg" alt="Avatar" class="w-16 h-16 rounded-full">
-					</button>
-
-					<div id="profile-menu" class="hidden absolute right-0 mt-2 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 p-4">
-						<div class="p-4">
-							<p class="font-bold text-lg" id="menu-username">Username</p>
-							<p class="text-sm text-gray-500" id="menu-email">Email</p>
-						</div>
-						<hr>
-
-						<div class="p-4 space-y-2">
-							<!--Edit button & menu-->
-							<div class="relative">
-								<button id="edit-profile-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="edit">Edit</button>
-
-								<div id="edit-profile-menu" class="hidden absolute top-0 -mt-10 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-									<h2 class="text-xl font-bold mb-6" data-i18n="edit_profile">Edit Profile</h2>
-
-									<label data-i18n="username">Username</label>
-									<input id="edit-username" class="text-gray-700 border rounded w-full p-2 mb-4" type="text" data-i18n="new_username">
-
-									<label data-i18n="email">Email</label>
-									<input id="edit-email" class="border text-gray-700 rounded w-full p-2 mb-4" type="email" data-i18n="new_email">
-
-									<label data-i18n="avatar">Avatar</label>
-									<button id="change-avatar-btn" class="relative w-full p-px text-sm text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden" data-i18n="change_avatar">
-										Change avatar
-									</button>
-									<div id="quick-avatar-picker" class="hidden grid grid-cols-4 gap-4 p-5">
-									</div>
-
-									<button id="upload-avatar-btn" class="relative w-full p-px text-sm text-white bg-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden mt-2 mb-4" data-i18n="upload_avatar">
-										Upload avatar
-									</button>
-									<input id="avatar-file-input" type="file" accept="image/png" class="hidden">
-
-									<label data-i18n="new_password">New Password</label>
-									<input id="edit-password" class="text-gray-700 border rounded w-full p-2 mb-4" type="password" data-i18n="new_password">
-
-									<label data-i18n="confirm_password">Confirm Password</label>
-									<input id="edit-password-confirm" class="text-gray-700 border rounded w-full p-2 mb-4" type="password" data-i18n="confirm_password">
-
-									<button id="btn-save-profile" class="relative w-full p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent mt-3" data-i18n="save_changes">
-										Save changes
-									</button>
-								</div>
-							</div>
-
-							<!-- Friend button & menu -->
-							<div class="relative">
-								<button id="friends-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="friends">Friends</button>
-
-								<div id="friends-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-									<h2 class="text-xl font-bold mb-3" data-i18n="friend_list">Friend list</h2>
-
-									<div class="py-1 mb-2">
-										<button id="btn-add-friend" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="add_friend">Add friends</button>
-										<button id="btn-your-friends" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="your_friends">Your friends</button>
-										<button id="btn-pending-friends" class="menu-item block hover:text-[#dc3cf0] px-4 py-1 text-m w-full text-left" data-i18n="pending_friends">Pending friends</button>
-									</div>
-								</div>
-							</div>
-
-							<!-- Match history button & menu -->
-							<div class="relative">
-								<button id="history-button" class="w-full text-left hover:text-[#dc3cf0] px-2" data-i18n="match_history">Match History</button>
-
-								<div id="history-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-									<h2 class="text-xl font-bold mb-5" data-i18n="match_history">Match History</h2>
-									<div id="history-list" class="space-y-2"></div>
-								</div>
-							</div>
-
-							<!-- 2FA button & menu -->
-							<div class="relative">
-								<button id="2FA-button" class="w-full text-left hover:text-[#dc3cf0] px-2">
-									2FA</button>
-
-								<div id="2fa-menu" class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-									<h2 class="text-xl font-bold mb-5" data-i18n="two_factor_authentication">2FA</h2>
-									<p id="2fa-status-text" class="text-white mb-1" data-i18n="disable_2fa">2FA disabled</p>
-
-									<button id="2fa-toggle-btn" class="inline-block w-full p-px font-bold text-white rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 overflow-hidden bg-transparent" data-i18n="enable_2fa">Enable</button>
-								</div>
-
-								<div id="2fa-type-menu" class="hidden absolute top-[150px] right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-									<div class="flex flex-col gap-2 justify-center">
-										<button id="2fa-email" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-											Email</button>
-										<button id="2fa-sms" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-											SMS</button>
-										<button id="2fa-qr" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-											QR Code (Google Authenticator)</button>
-									</div>
-								</div>
-							</div>
-
-							<button id="logout-button" data-i18n="logout_btn" class="w-full text-left hover:font-bold px-2 pt-4 pb-1 rounded text-red-500">Logout</button>
-						</div>
-					</div>
-
-					<!-- Module destination 2FA -->
-					<div id="destination-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-40 flex items-center justify-center">
-						<div class="bg-gray-900 text-white border-2 border-[#dc3cf0] p-6 rounded shadow-lg w-80">
-							<h2 id="destination-title" class="text-xl font-bold mb-4"></h2>
-
-							<input id="destination-input" type="text" class=" text-gray-700 w-full border px-3 py-2 rounded mb-4">
-
-							<div class="flex justify-end gap-2">
-								<button id="destination-cancel" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-									Annuler</button>
-								<button id="destination-confirm" class="relative inline-block p-px font-bold text-[#dc3cf0] border-2 border-[#dc3cf0] rounded py-2 px-4 focus:outline-none focus:shadow-outline transition-all duration-300 ease-in-out hover:scale-105 active:scale-95 hover:text-white overflow-hidden bg-transparent">
-									Valider</button>
-							</div>
-						</div>
-					</div>
-				</div>
+			</div>
+		</div>
 
 
-				<!-- ================== PONG WINDOW ================== -->
-				<div id="ecran-pong" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-hidden" style="width: var(--game-width); height: var(--game-height);">
+		<!-- ================== PONG WINDOW ================== -->
+		<div id="ecran-pong" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-hidden" style="width: var(--game-width); height: var(--game-height);">
 
-					<button id="pong-start-button" class="text-2xl text-[#e4dd33] tracking-[0.45em] font-karnivore text-glow animate-pulse" style="position: fixed; top: 67%; left: 50%; transform: translate(-50%, -50%);" type="submit">START</button>
-				</div>
+			<button id="pong-start-button" class="text-2xl text-[#e4dd33] tracking-[0.45em] font-karnivore text-glow animate-pulse" style="position: fixed; top: 67%; left: 50%; transform: translate(-50%, -50%);" type="submit">START</button>
+		</div>
 
-				<!-- Pong background overlay -->
-				<div id="pong-overlay" class="fixed inset-0 bg-black bg-opacity-65 backdrop-blur-sm
+		<!-- Pong background overlay -->
+		<div id="pong-overlay" class="fixed inset-0 bg-black bg-opacity-65 backdrop-blur-sm
 			opacity-0 pointer-events-none transition-opacity duration-300 ease-out z-10"></div>
 
-				<!-- Pong back button -->
-				<button id="back-button" class="hidden fixed z-30 text-white text-4xl font-bold rounded-lg shadow-md
+		<!-- Pong back button -->
+		<button id="back-button" class="hidden fixed z-30 text-white text-4xl font-bold rounded-lg shadow-md
 			transition-opacity duration-300 ease-out top-[calc(50%-300px+10px)] left-[calc(50%-400px-45px)]">
-					↩ </button>
+			↩ </button>
 
-				<!-- Tournament Bracket -->
-				<div id="final-list" class="fixed top-1/2 -translate-y-1/2 flex flex-col gap-1 text-white z-50 hidden" style="left: calc(50% + 660px); width: 50px; font-size: 10px;">
+		<!-- Tournament Bracket -->
+		<div id="final-list" class="fixed top-1/2 -translate-y-1/2 flex flex-col gap-1 text-white z-50 hidden" style="left: calc(50% + 660px); width: 50px; font-size: 10px;">
+		</div>
+
+		<!-- Pong menu button-->
+		<div id="pong-menu" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black hidden overflow-hidden border-4 border-white z-20" style="width: var(--game-width); height: var(--game-height);">
+
+			<!-- Play Buttons + Choose the type of match (Quick or Tournament Button)-->
+			<button id="pong-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				PONG
+			</button>
+
+			<button id="quick-match-button" class="quick-match-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 33%; transform: translate(-50%, -50%);" data-i18n="quick_match">
+				QUICK MATCH
+			</button>
+
+			<button id="tournament-button" class="tournament-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 66%; transform: translate(-50%, -50%);" data-i18n="tournament">
+				TOURNAMENT
+			</button>
+
+			<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
+			<h1 id="enterPlayerNbr-text" class="absolute text-center text-white text-2xl font-bold tracking-widest hidden" style="top: 30%; left: 50%; transform: translate(-50%, -50%);" data-i18n="how_many_players">How many
+				Player(s):</h1>
+
+			<h2 id="playerNbr-text" class="absolute text-white text-6xl font-bold tracking-widest hidden" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
+
+
+			<div id="ai-counter" class="absolute text-center text-white font-bold tracking-widest hidden" style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
+
+				<div class="text-xs">AI</div>
+				<div id="aiNbr-text" class="text-xl">0</div>
+			</div>
+
+			<div id="decreasePlayer-button" class="triangle-left absolute shadow-md hidden" style="right: 60%; top: 47%">
+			</div>
+
+			<div id="increasePlayer-button" class="triangle-right absolute shadow-md hidden" style="right: 36%; top: 47%">
+			</div>
+
+			<button id="OK-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
+				OK
+			</button>
+
+			<!-- Enter Player Names: Label + Input + Button -->
+			<div id="playerName-container" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
+
+				<label for="player-name-input" class="text-white text-xl font-bold" data-i18n="enter_player_name">
+					Enter player name:
+				</label>
+				<input id="playerName-input" type="text" maxlength="8" class="text-center text-gray-700 text-xl font-bold px-3 py-2 rounded bg-white w-48">
+			</div>
+
+			<div id="players-area" class="absolute left-1/2 -translate-x-1/2 w-full h-full flex flex-col items-center justify-between hidden pointer-events-none" style="padding-top: 20px; padding-bottom: 20px;">
+				<div id="scores" class="flex flex-row items-center gap-8 text-white text-2xl opacity-80 select-none pointer-events-none">
+					<div id="score-left" class="min-w-[2ch] text-center">
+						0
+					</div>
+
+					<div id="score-right" class="min-w-[2ch] text-center">
+						0
+					</div>
 				</div>
 
-				<!-- Pong menu button-->
-				<div id="pong-menu" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black hidden overflow-hidden border-4 border-white z-20" style="width: var(--game-width); height: var(--game-height);">
-
-					<!-- Play Buttons + Choose the type of match (Quick or Tournament Button)-->
-					<button id="pong-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						PONG
-					</button>
-
-					<button id="quick-match-button" class="quick-match-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 33%; transform: translate(-50%, -50%);" data-i18n="quick_match">
-						QUICK MATCH
-					</button>
-
-					<button id="tournament-button" class="tournament-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 66%; transform: translate(-50%, -50%);" data-i18n="tournament">
-						TOURNAMENT
-					</button>
-
-					<!-- Select Number of Player: Counter Player + two triangle button + OK button-->
-					<h1 id="enterPlayerNbr-text" class="absolute text-center text-white text-2xl font-bold tracking-widest hidden" style="top: 30%; left: 50%; transform: translate(-50%, -50%);" data-i18n="how_many_players">How many
-						Player(s):</h1>
-
-					<h2 id="playerNbr-text" class="absolute text-white text-6xl font-bold tracking-widest hidden" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">2</h2>
-
-
-					<div id="ai-counter" class="absolute text-center text-white font-bold tracking-widest hidden" style="top: 50%; left: 75%; transform: translate(-50%, -50%);">
-
-						<div class="text-xs">AI</div>
-						<div id="aiNbr-text" class="text-xl">0</div>
-					</div>
-
-					<div id="decreasePlayer-button" class="triangle-left absolute shadow-md hidden" style="right: 60%; top: 47%">
-					</div>
-
-					<div id="increasePlayer-button" class="triangle-right absolute shadow-md hidden" style="right: 36%; top: 47%">
-					</div>
-
-					<button id="OK-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, -50%);">
-						OK
-					</button>
-
-					<!-- Enter Player Names: Label + Input + Button -->
-					<div id="playerName-container" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-4 hidden">
-
-						<label for="player-name-input" class="text-white text-xl font-bold" data-i18n="enter_player_name">
-							Enter player name:
-						</label>
-						<input id="playerName-input" type="text" maxlength="8" class="text-center text-gray-700 text-xl font-bold px-3 py-2 rounded bg-white w-48">
-					</div>
-
-					<div id="players-area" class="absolute left-1/2 -translate-x-1/2 w-full h-full flex flex-col items-center justify-between hidden pointer-events-none" style="padding-top: 20px; padding-bottom: 20px;">
-						<div id="scores" class="flex flex-row items-center gap-8 text-white text-2xl opacity-80 select-none pointer-events-none">
-							<div id="score-left" class="min-w-[2ch] text-center">
-								0
-							</div>
-
-							<div id="score-right" class="min-w-[2ch] text-center">
-								0
-							</div>
-						</div>
-
-						<div id="players-list" class="flex flex-row gap-2 text-white text-sm hidden">
-						</div>
-					</div>
-
-					<div id="winner-name" class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
-					</div>
-
-					<button id="play-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" data-i18n="play">
-						PLAY
-					</button>
-
-					<div id="ready-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" data-i18n="ready">
-						READY ?
-					</div>
-
-					<div id="go-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-						GOOOO !!!
-					</div>
-
-					<!-- Pong Elements (Paddle, ball...)-->
-					<div id="left-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); left: 5%; top: 40%;">
-					</div>
-
-					<div id="right-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); right: 5%; top: 40%">
-					</div>
-
-					<div id="ball" class="absolute bg-white rounded hidden" style="width: var(--ball-size); height: var(--ball-size); left: 50%; top:50%">
-					</div>
+				<div id="players-list" class="flex flex-row gap-2 text-white text-sm hidden">
 				</div>
 			</div>
+
+			<div id="winner-name" class="absolute top-1/4 left-1/2 -translate-x-1/2 flex flex-row gap-4 text-white text-lg hidden">
+			</div>
+
+			<button id="play-button" class="play-btn bg-white text-black font-bold rounded-lg shadow-md hover:bg-gray-200 hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" data-i18n="play">
+				PLAY
+			</button>
+
+			<div id="ready-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" data-i18n="ready">
+				READY ?
+			</div>
+
+			<div id="go-text" class="absolute text-white font-bold text-lg text-6xl hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+				GOOOO !!!
+			</div>
+
+			<!-- Pong Elements (Paddle, ball...)-->
+			<div id="left-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); left: 5%; top: 40%;">
+			</div>
+
+			<div id="right-paddle" class="absolute bg-white hidden" style="width: var(--paddle-width); height: var(--paddle-height); right: 5%; top: 40%">
+			</div>
+
+			<div id="ball" class="absolute bg-white rounded hidden" style="width: var(--ball-size); height: var(--ball-size); left: 50%; top:50%">
+			</div>
+		</div>
+	</div>
 </body>
 
 <script type="module" src="/js/main.js"></script>
