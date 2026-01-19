@@ -1260,7 +1260,6 @@ class Game {
 		finalList.classList.remove("hidden");
 
 		const showPair = (a: Player, b: Player) => {
-			console.log("Showing pair:", a.name, "vs", b.name);
 			playersList.innerHTML = "";
 			addPlayerNameLabel(a.name, a.playerNbr, a.isAi);
 			addPlayerNameLabel(b.name, b.playerNbr, b.isAi);
@@ -1303,6 +1302,9 @@ class Game {
 		const runMatch = (left: Player, right: Player, onPlayClick: () => void): Promise<Player> => {
 			return new Promise((resolve) => {
 				console.log("runMatch called for", left.name, "vs", right.name);
+
+				// Display the players immediately
+				onPlayClick();
 
 				let leftScore = 0;
 				let rightScore = 0;
@@ -1353,7 +1355,6 @@ class Game {
 				const playClickHandler = () => {
 					play_button.removeEventListener("click", playClickHandler);
 					document.removeEventListener("keydown", keyHandler);
-					onPlayClick(); // Appeler showPair
 					startMatch();
 				};
 
