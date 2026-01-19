@@ -1,12 +1,13 @@
 import { PONG_UI } from './elements.js';
-//import { gameInfo } from './game.js';
-import { Game } from './Game.js';
+import { Tournament} from './Tournament.js';
 import { setGameInstance } from '../UI/UI_events.js';
+import { GameInfo } from './GameInfo.js';
+import { Match } from './Match.js';
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
 
-let game: Game;
+let game: GameInfo;
 
 ///////////////////////////////////////////////////////////
 /////				HELPER FUNCTION					 /////
@@ -16,9 +17,10 @@ let game: Game;
  	1 - Initialize or get the game instance
  	2 - Ensures game is always available
 */
-function getGame(): Game {
+
+function getGameInfo(): GameInfo {
 	if (!game) {
-		game = new Game();
+		game = new GameInfo();
 		setGameInstance(game);
 	}
 	return game;
@@ -32,7 +34,7 @@ function getGame(): Game {
 export function initMenuEvents() {
 
 	PONG_UI.pongButton.addEventListener("click", () => {
-		getGame();  // Ensure game is initialized
+		getGameInfo();
 		showMatchSelectionMenu();
 	});
 
@@ -87,10 +89,12 @@ export function initMenuEvents() {
 			showPlayerNameMenu();
 		} else {
 			//Only two players and one of them is an AI => Skip Enter player name
-			showAiName();
+			//showAiName();
 			game.createPlayers();
-			game.isQuickMatch = true;
-			game.startMatch();
+			const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
+			match.playMatch();
+			game.resetGameInfo();
+			//const tournament = new Tournament(game.playersName, game.players);
 		}
 	});
 
@@ -118,21 +122,24 @@ export function initMenuEvents() {
 
 				game.createPlayers();
 				if (game.playerNbr > 2) {
-					game.isQuickMatch = false;
-					game.createTournament();
+					game.isTournament = true;
+					const tournament = new Tournament(game.playersName, game.players);
+					tournament.startTournament();
+					game.resetGameInfo();
 				} else {
-					game.isQuickMatch = true;
-					showAiName();
-					game.startMatch();
+					game.isTournament = false;
+					const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
+					match.playMatch();
+					game.resetGameInfo();
 				}
 			}
 		}
 	})
 
 	//Start the next match after a point
-	PONG_UI.playButton.addEventListener("click", () => {
-		game.startMatch();
-	});
+/* 	PONG_UI.playButton.addEventListener("click", () => {
+		.playPoint();
+	}); */
 
 }
 
@@ -190,15 +197,6 @@ export function showPlayerName(name: string, index: number, isAi: boolean) {
 
 	PONG_UI.playersList.appendChild(label);
 
-}
-
-function showAiName() {
-	for (let y = 0; y < game.aiNbr; y++) {
-		const aiName = game.aiNames[y]
-
-		showPlayerName(aiName, game.nameEntered + y, true);
-		game.playersName.push([aiName, true]);
-	}
 }
 
 export function showMenu(...toHide: (HTMLElement | null | undefined)[]) {

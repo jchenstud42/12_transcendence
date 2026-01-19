@@ -1,0 +1,20 @@
+matchPlayer: [Player1, Player2]
+
+playPoint()
+-> Show Player
+-> Count Down
+-> Game Loop
+
+addPoint
+-> Proc when ball goal
+-> add Point and update UI
+-> Check if match is ending or need to be reset
+
+
+nextPointReset
+
+endMatch:
+-> If quick match:
+
+-> If Tournament:
+	-> 
