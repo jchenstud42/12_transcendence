@@ -23,8 +23,8 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 
 	/**
 	 * Creer un token state aleatoire grace a crypto.randomBytes pour se proteger contre les attaques CSRF
-	 * Stocke ce state dans un cookie HTTP-only de courte durée
-	 * Construit l'URL d'autorisation OAuth 42 avec les paramètres requis
+	 * Stocke ce state dans un cookie HTTP-only de courte duree
+	 * Construit l'URL d'autorisation OAuth 42 avec les parametres requis
 	 * Redirige l'utilisateur vers la page de login 42
 	 */
 	fastify.get("/oauth/42", async (req, reply) => {
@@ -51,6 +51,18 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 		return reply.redirect(INTRA_AUTHORIZE + "?" + params.toString());
 	});
 
+	/**
+	 * La route callback qui sert a recevoir le code d'autorisation de 42
+	 * On verifie le state pour se proteger contre les attaques CSRF (comment ca fonctionne ? : on compare le state
+	 * recu en query param avec celui stocke dans le cookie http)
+	 * on creer tokenParams avec les parametres necessaires pour echanger le code, les headers pour la requete
+	 * on fait la requete POST pour echanger le code contre un token d'acces
+	 * si ca marche pas on renvoie une erreur 502
+	 * On utilise le token pour recuperer les infos de l'utilisateur depuis l'API 42
+	 * On cree ou met a jour l'utilisateur dans la db
+	 * On genere les tokens JWT (access et refresh) car l'user est authentifie et login
+	 * voilou
+	*/
 	fastify.get("/oauth/42/callback", async (req, reply) => {
 		const code = (req.query as any).code as string | undefined;
 		const returnedState = (req.query as any).state as string | undefined;
