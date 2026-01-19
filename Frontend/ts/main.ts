@@ -233,7 +233,7 @@ else {
 					alert(t("register_ok"));
 					register_form.reset();
 				} else {
-					alert(t("server_error_prefix") + " " + (data?.error || res.statusText));
+					alert(t("server_error_prefix") + " " + getServerErrorMessage(data?.error));
 				}
 			} catch (err) {
 				console.error("Register fetch error:", err);
@@ -325,7 +325,7 @@ else {
 					}
 				}
 				else
-					alert("Server error: " + (data?.error || res.statusText));
+					alert("Server error: " + getServerErrorMessage(data?.error));
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
@@ -408,7 +408,7 @@ if (logoutButton) {
 				}
 
 				const err = serverBody || { error: res.statusText };
-				alert(t("logout_error") + " " + (err?.error || err?.message || res.statusText));
+				alert(t("logout_error") + " " + getServerErrorMessage(err?.error || err?.data));
 			}
 		} catch (err) {
 			console.error(err);
@@ -557,7 +557,7 @@ function renderFriends(friends: any[]) {
 				renderFriends(friends);
 			}
 			catch (err: any) {
-				alert(err.message);
+				alert(getServerErrorMessage(err.message));
 			}
 		});
 	});
@@ -579,7 +579,7 @@ yourFriendsBtn.addEventListener("click", async () => {
 		renderFriends(friends);
 	} catch (err: any) {
 		console.error("Error:", err);
-		alert(err.message);
+		alert(getServerErrorMessage(err.message));
 	}
 });
 
@@ -605,7 +605,7 @@ pendingFriendsBtn.addEventListener("click", async () => {
 		renderPendingRequests(requests, userId);
 	} catch (err: any) {
 		console.error(err);
-		alert(err.message);
+		alert(getServerErrorMessage(err.message));
 	}
 });
 
@@ -753,7 +753,7 @@ history_button.addEventListener("click", async () => {
 		renderMatchHistory(matches);
 	} catch (err: any) {
 		console.error("Error:", err);
-		alert(err.message);
+		alert(getServerErrorMessage(err.message));
 	}
 });
 
