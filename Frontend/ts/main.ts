@@ -476,7 +476,6 @@ function getAuthHeaders(): HeadersInit {
 	};
 }
 
-
 // Le listener pour envoyer une requete d'ami, on recup l'userId du LocalStorage et on demande a l'user le username de l'ami qu'il souhaite ajouter
 // On fetch sur la route backend avec le bond body (senderId = userId du localStorage, receiverId = userId de l'ami qu'on veut ajouter)
 // et les bons headers (token car route protegee par le preHandler authentizer)
@@ -515,7 +514,6 @@ addFriendBtn.addEventListener("click", async () => {
 		alert(getServerErrorMessage(err.message));
 	}
 });
-
 
 const friendsMenuList = document.createElement("div");
 friendsMenuList.id = "friends-list";
@@ -758,10 +756,6 @@ history_button.addEventListener("click", async () => {
 });
 
 
-
-
-
-
 function generateLoggedUserId(): number {
 	const id = loggedUserCounter;
 	loggedUserCounter++;
@@ -906,12 +900,12 @@ class Ball {
 
 		if (this.x + this.size < 0) {
 			console.debug('Ball out left -> right player scores');
-			if (this.onScore) this.onScore('right'); // notifier le Game
+			if (this.onScore) this.onScore('right'); // point scored
 			this.reset();
 		}
 		if (this.x > w) {
 			console.debug('Ball out right -> left player scores');
-			if (this.onScore) this.onScore('left'); // notifier le Game
+			if (this.onScore) this.onScore('left'); // point scored
 			this.reset();
 		}
 		this.render();
@@ -1604,39 +1598,4 @@ function addAiNameLabel() {
 		addPlayerNameLabel(aiName, nameEntered + y, true);
 		playerNames.push([aiName, true]);
 	}
-}
-
-function showTournamentMatch() {
-	//Create/show Final Boxex (holder of the results of the first match)
-	for (let i = 0; i < 2; i++) {
-		const label = document.createElement("div");
-
-		label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
-
-		finalList.appendChild(label);
-	}
-	finalList.classList.remove("hidden");
-
-	//Create/show Winner Box (holder of the results of the second match)
-	const label = document.createElement("div");
-
-	label.className = `player-name-item text-center font-bold text-gray-50 min-w-[120px]`;
-	label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player x</span><br>?`;
-
-	winnerName.appendChild(label);
-	winnerName.classList.remove("hidden");
-}
-
-function addFinalNameLabel(name: string, index: number, isAi: boolean) {
-	const label = document.createElement("div");
-
-	const colorClass = playerColors[index];
-	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
-	if (!isAi)
-		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
-	else
-		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
-
-	playersList.appendChild(label);
 }
