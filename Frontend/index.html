@@ -181,24 +181,23 @@
 				</div>
 			</button>
 
-			<!-- !!!!!! NOTES POUR JSP KI : pourquoi name="name" a chaque fois????? -->
 			<div id="register-form"
 				class="hidden absolute left-1/2 -translate-x-1/2 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
 				<form id="register_form" class="shadow-md rounded p-6">
-					<label for="name" data-i18n="username">Username</label>
-					<input type="text" name="name" id="username" data-i18n="username" required
+					<label for="username" data-i18n="username">Username</label>
+					<input type="text" name="username" id="username" data-i18n="username" required
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-					<label for="name" data-i18n="email">Email</label>
-					<input type="text" name="name" id="email" data-i18n="email" required
+					<label for="email" data-i18n="email">Email</label>
+					<input type="text" name="email" id="email" data-i18n="email" required
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-					<label for="name" data-i18n="password">Password</label>
-					<input type="text" name="name" id="password" data-i18n="password" required
+					<label for="password" data-i18n="password">Password</label>
+					<input type="password" name="password" id="password" data-i18n="password" required
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-					<label for="name" data-i18n="confirm_password">Confirm Password</label>
-					<input type="text" name="name" id="confirm-password" data-i18n="confirm_password" required
+					<label for="confirm-password" data-i18n="confirm_password">Confirm Password</label>
+					<input type="password" name="confirm_password" id="confirm-password" data-i18n="confirm_password" required
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
 					<div class="flex justify-center">
@@ -219,16 +218,15 @@
 				</div>
 			</button>
 
-			<!-- !!!!!! NOTES POUR JSP KI : pareil ici ??? pourquoi name="name" a chaque fois????? -->
 			<div id="login-form"
 				class="hidden absolute right-0 mt-3 w-64 bg-gray-900 text-white border-2 border-[#dc3cf0] rounded-lg shadow-lg z-50 flex flex-col p-2 space-y-2">
 				<form id="login_form" class="shadow-md rounded p-6">
-					<label for="name" data-i18n="username">Username</label>
-					<input type="text" name="name" id="login-id" data-i18n="username" required
+					<label for="login-id" data-i18n="username">Username</label>
+					<input type="text" name="username" id="login-id" data-i18n="username" required
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
-					<label for="name" data-i18n="password">Password</label>
-					<input type="text" name="name" id="login-password" data-i18n="password" required
+					<label for="login-password" data-i18n="password">Password</label>
+					<input type="password" name="password" id="login-password" data-i18n="password" required	
 						class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5">
 
 					<div class="flex flex-col justify-center gap-2 ">
@@ -293,12 +291,10 @@
 							</button>
 							<input id="avatar-file-input" type="file" accept="image/png" class="hidden">
 
-							<!-- !!! Y'avait ecrit de remplacer text par password, donc c'est ce que j'ai fais -->
 							<label data-i18n="new_password">New Password</label>
 							<input id="edit-password" class="text-gray-700 border rounded w-full p-2 mb-4"
 								type="password" data-i18n="new_password">
 
-							<!-- La meme chose ici, bisous -->
 							<label data-i18n="confirm_password">Confirm Password</label>
 							<input id="edit-password-confirm" class="text-gray-700 border rounded w-full p-2 mb-4"
 								type="password" data-i18n="confirm_password">

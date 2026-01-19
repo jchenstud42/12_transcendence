@@ -135,6 +135,7 @@ export const translations = {
 		logout_error: "Error logging out:",
 		error_404_title: "Page not found",
 		error_404_text: "The page you are looking for does not exist.",
+		user_no_password: "User has no password (OAuth account)"
 	},
 
 	fr: {
@@ -274,6 +275,7 @@ export const translations = {
 		logout_error: "Erreur lors de la déconnexion :",
 		error_404_title: "Page introuvable",
 		error_404_text: "La page que vous recherchez n'existe pas.",
+		user_no_password: "L'utilisateur n'a pas de mot de passe (compte OAuth)"
 	},
 
 
@@ -413,6 +415,7 @@ export const translations = {
 		logout_error: "Error al cerrar sesión:",
 		error_404_title: "Página no encontrada",
 		error_404_text: "La página que buscas no existe.",
+		user_no_password: "El usuario no tiene contraseña (cuenta OAuth)"
 	},
 } as const;
 

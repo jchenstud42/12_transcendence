@@ -33,6 +33,7 @@ const serverErrorTranslations: Record<string, string> = {
 	"Not Found": "profile_not_found",
 	"Invalid credentials": "invalid_user_or_password",
 	"User already exists": "username_or_email_taken",
+	"User has no password (OAuth account)": "user_no_password",
 };
 
 
