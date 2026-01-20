@@ -276,7 +276,7 @@ export function initProfile(profileElems: {
 			errors.push(t("passwords_do_not_match"));
 
 		if (errors.length > 0) {
-			alert(t("errors_prefix") + "\n" + errors.join("\n"));
+			alert(t("error_prefix") + "\n" + errors.join("\n"));
 			return;
 		}
 
