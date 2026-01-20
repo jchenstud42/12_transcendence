@@ -198,7 +198,7 @@ else {
 		if (password !== confirmPassword)
 			errors.push(t("passwords_do_not_match"));
 		if (errors.length > 0) {
-			alert(t("errors_prefix") + "\n" + errors.join("\n"));
+			alert(t("error_prefix") + "\n" + getServerErrorMessage(errors.join("\n") as TranslationKey));
 			return;
 		}
 
@@ -274,10 +274,8 @@ else {
 			err.push(t("invalid_user_or_email"));
 		if (!validatePassword(loginPass))
 			err.push(t("invalid_password"));
-
 		if (err.length > 0) {
-			const translatedErrors = err.map(key => t(key as any));
-			alert(t("errors_prefix") + "\n" + translatedErrors.join("\n"));
+			alert(t("error_prefix") + getServerErrorMessage(err.join("\n")));
 			return;
 		}
 
@@ -698,7 +696,6 @@ async function fetchMatchHistory(userId: number) {
 		});
 
 		const text = await res.text();
-		console.log("Match history raw:", text);
 
 		if (!res.ok) throw new Error(text);
 

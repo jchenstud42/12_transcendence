@@ -34,8 +34,10 @@ const serverErrorTranslations: Record<string, string> = {
 	"Invalid credentials": "invalid_user_or_password",
 	"User already exists": "username_or_email_taken",
 	"User has no password (OAuth account)": "user_no_password",
+	"You cannot send a request to yourself": "cannot_send_request_to_yourself",
+	"Friend request already exists": "friend_request_already_exists",
+	"Already friends": "already_friends"
 };
-
 
 export function storeToken(accessToken: string) {
 	localStorage.setItem("accessToken", accessToken);
