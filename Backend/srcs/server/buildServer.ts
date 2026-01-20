@@ -43,7 +43,6 @@ export async function buildServer() {
 
 
 	// Routes ----------------------------------------------------------------------------------
-	// LAISSER CETTE ROUTE AVANT LES AUTRES PITIE
 	await fastify.register(fastifyCors, {
 		origin: "http://localhost:8443",
 		credentials: true,

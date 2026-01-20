@@ -6,7 +6,7 @@
 /*   By: mjameau <mjameau@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 14:27:47 by mjameau           #+#    #+#             */
-/*   Updated: 2025/12/19 10:56:39 by mjameau          ###   ########.fr       */
+/*   Updated: 2026/01/19 18:11:12 by mjameau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,8 @@ export function sanitizeInput(input: string): string {
 
 // ON VERIFIE L'EMAIL SI Y A BIEN TOUT DE DEMANDE (@, . ETC)
 export function validateEmail(email: string): boolean {
-	return (/^\S+@\S+\.\S+$/.test(email));
+	return (/^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/
+		.test(email));
 }
 
 /* ON VERIFIE LE MDP :
@@ -32,7 +33,7 @@ export function validateEmail(email: string): boolean {
 	- Au moins 8 caracteres
 */
 export function validatePassword(password: string): boolean {
-	return (/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password));
+	return (/^(?=.*[A-Z])(?=.*\d)\S{8,}$/.test(password));
 }
 
 /* CHECK L'INPUT DE L'UTILISATEUR

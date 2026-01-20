@@ -98,8 +98,11 @@ export function applyLoggedInState(user: { id: number; username: string; email: 
 	const menuEmail = document.getElementById('menu-email');
 	const profileAvatar = document.getElementById('profile-avatar') as HTMLImageElement | null;
 	const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-	if (menuUsername) menuUsername.textContent = user.username || '';
-	if (menuEmail) menuEmail.textContent = user.email || '';
+
+	if (menuUsername)
+		menuUsername.textContent = user.username || '';
+	if (menuEmail)
+		menuEmail.textContent = user.email || '';
 	if (profileAvatar) {
 		if (storedUser.avatar)
 			profileAvatar.src = storedUser.avatar;
@@ -108,7 +111,8 @@ export function applyLoggedInState(user: { id: number; username: string; email: 
 	}
 
 	const profileBtn = document.getElementById('profile-button');
-	if (profileBtn) profileBtn.classList.remove('hidden');
+	if (profileBtn)
+		profileBtn.classList.remove('hidden');
 
 	try {
 		if (elems!.registerContainer)
@@ -193,6 +197,12 @@ export async function initAuthState() {
 		}
 
 		const data = await res.json();
+
+		if (!data.user) {
+			applyLoggedOutState();
+			return;
+		}
+
 		funcs!.storeToken(data.accessToken);
 		funcs!.storeUser(data.user);
 

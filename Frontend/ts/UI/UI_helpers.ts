@@ -5,10 +5,7 @@
  - main = menu a afficher
  - toHide = menus a cacher
  - On parcourt la liste des menus a cacher et on leur met hidden
- - On toggle le menu principale (si il steakhache on l'affiche si il est affiche on le cache)
-
-
-  la blague du steak etait nulle deso jassume pas, bisous quand meme
+ - On toggle le menu principale
 */
 export function toggleMenu(
 	main?: HTMLElement | null,

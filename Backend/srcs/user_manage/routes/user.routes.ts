@@ -15,8 +15,7 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		try {
 			const refreshToken = req.cookies.refreshToken;
 			if (!refreshToken)
-				return reply.status(401).send({ error: "Not authenticated" });
-
+				return reply.send({ user: null });
 			const payload = verifyToken(refreshToken);
 			if (!payload || payload.tokenType !== "refresh")
 				return reply.status(401).send({ error: "Invalid token" });

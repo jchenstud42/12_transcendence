@@ -6,7 +6,7 @@
 /*   By: mjameau <mjameau@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 12:04:50 by mjameau           #+#    #+#             */
-/*   Updated: 2025/12/10 11:22:17 by mjameau          ###   ########.fr       */
+/*   Updated: 2026/01/19 17:58:47 by mjameau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ export function validateEmail(email: string): boolean {
 	bisous - Mathis
 */
 export function validatePassword(password: string): boolean {
-	return (/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(password));
+	return (/^(?=.*[A-Z])(?=.*\d)\S{8,}$/.test(password));
 }
 
 /* CHECK L'INPUT DE L'UTILISATEUR

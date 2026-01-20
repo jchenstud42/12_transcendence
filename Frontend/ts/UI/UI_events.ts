@@ -212,9 +212,6 @@ export const AVATARS = [
 
   love you <3
 */
-
-
-
 export function initProfile(profileElems: {
 	saveProfileBtn: HTMLElement;
 	usernameInput: HTMLInputElement;
