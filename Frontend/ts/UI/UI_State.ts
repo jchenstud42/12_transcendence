@@ -144,7 +144,8 @@ export function applyLoggedOutState() {
 	if (profileBtn) profileBtn.classList.add('hidden');
 
 	const logoutBtn = document.getElementById('logout-button');
-	if (logoutBtn) logoutBtn.classList.add('hidden');
+	if (logoutBtn)
+		 logoutBtn.classList.add('hidden');
 
 	storedUserId = null;
 }

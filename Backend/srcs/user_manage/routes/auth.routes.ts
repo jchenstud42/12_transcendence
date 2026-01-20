@@ -79,7 +79,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			return reply.send({ user, accessToken });
 		}
 		catch (err: any) {
-			return (reply.status(400).send({ error: err.message }));
+			return (reply.status(404).send({ error: err.message }));
 		}
 	});
 

@@ -380,6 +380,7 @@ if (logoutButton) {
 				localStorage.removeItem("accessToken");
 				localStorage.removeItem("user");
 				sessionStorage.removeItem("twoFAtoken");
+				sessionStorage.removeItem("2fa-setup-mode");
 				selected2FAType = null;
 				try {
 					await fetch("/logout", {
