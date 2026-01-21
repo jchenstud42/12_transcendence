@@ -1,10 +1,14 @@
 {
 	"name": "frontend-ts",
 	"version": "1.0.0",
+	"type": "module",
 	"scripts": {
-		"build": "tsc"
+		"build:ts": "tsc",
+		"build:css": "npx tailwindcss -i ./styles/input.css -o ./stylesDist/output.css",
+		"build": "npm run build:ts && npm run build:css"
 	},
 	"devDependencies": {
+		"tailwindcss": "^3.4.19",
 		"typescript": "^5.9.3"
 	}
 }

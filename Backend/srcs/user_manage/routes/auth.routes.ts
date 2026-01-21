@@ -110,4 +110,22 @@ export default async function authRoutes(fastify: FastifyInstance) {
 			return (reply.status(400).send({ error: err.message }));
 		}
 	});
+
+	// Simple logout route that just clears the cookie (for auto-logout after invalid token)
+	fastify.post("/logout-silent", async (req, reply) => {
+		reply.clearCookie("refreshToken", {
+			httpOnly: true,
+			secure: false,
+			sameSite: "lax",
+			path: "/",
+		});
+		reply.setCookie("refreshToken", "", {
+			httpOnly: true,
+			secure: false,
+			sameSite: "lax",
+			expires: new Date(0),
+			path: "/",
+		});
+		return reply.send({ message: "Cookie cleared" });
+	});
 }

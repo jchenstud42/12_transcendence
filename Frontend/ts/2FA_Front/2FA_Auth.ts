@@ -212,8 +212,11 @@ export async function update2FAStatus() {
 	ensureInit();
 
 	try {
-		const res = await fetch("/user/me", { credentials: "include" });
-		if (!res.ok)
+		const res = await fetch("/user/me", { credentials: "include" }).catch(() => {
+			// Silently handle network errors
+			return null as any;
+		});
+		if (!res || !res.ok)
 			return;
 
 		const data = await res.json();
@@ -223,14 +226,12 @@ export async function update2FAStatus() {
 			is2FAEnabled = true;
 			elems!.twofaStatusText.textContent = `${funcs!.t("two_fa_is_enabled")} (${user.twoFAMethod || "qr"})`;
 			elems!.twofaToggleBtn.textContent = funcs!.t("disable");
-			elems!.twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-			elems!.twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+			(elems!.twofaToggleBtn as HTMLElement).style.backgroundColor = "#ef4444";
 		} else {
 			is2FAEnabled = false;
 			elems!.twofaStatusText.textContent = funcs!.t("two_fa_is_disabled");
 			elems!.twofaToggleBtn.textContent = funcs!.t("enable");
-			elems!.twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-			elems!.twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+			(elems!.twofaToggleBtn as HTMLElement).style.backgroundColor = "#3b82f6";
 		}
 	} catch (err) {
 		console.error("Failed to fetch 2FA status:", err);
@@ -345,8 +346,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			if (isInSetupMode && !is2FAEnabled) {
 				elems!.twofaStatusText.textContent = funcs!.t("two_fa_is_disabled");
 				elems!.twofaToggleBtn.textContent = funcs!.t("enable");
-				elems!.twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-				elems!.twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+				(elems!.twofaToggleBtn as HTMLElement).style.backgroundColor = "#3b82f6";
 				elems!.twofaTypeMenu.classList.add("hidden");
 				elems!.twofaForm.classList.add("hidden");
 
@@ -362,8 +362,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			if (!is2FAEnabled) {
 				elems!.twofaStatusText.textContent = funcs!.t("two_fa_setup_in_progress");
 				elems!.twofaToggleBtn.textContent = funcs!.t("cancel");
-				elems!.twofaToggleBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
-				elems!.twofaToggleBtn.classList.add("bg-red-500", "hover:bg-red-600");
+				(elems!.twofaToggleBtn as HTMLElement).style.backgroundColor = "#ef4444";
 				elems!.twofaTypeMenu.classList.remove("hidden");
 				hideMenu(twofaForm, document.getElementById("destination-modal"));
 
@@ -382,8 +381,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 						is2FAEnabled = false;
 						elems!.twofaStatusText.textContent = funcs!.t("two_fa_is_disabled");
 						elems!.twofaToggleBtn.textContent = funcs!.t("enable");
-						elems!.twofaToggleBtn.classList.remove("bg-red-500", "hover:bg-red-600");
-						elems!.twofaToggleBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+						(elems!.twofaToggleBtn as HTMLElement).style.backgroundColor = "#3b82f6";
 						elems!.twofaTypeMenu.classList.add("hidden");
 						alert(t("two_fa_is_disabled"));
 					}

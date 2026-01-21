@@ -7,116 +7,18 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Transcendence</title>
 	<link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-	<script src="https://cdn.tailwindcss.com"></script>
 
-	<style>
-		/* ============= GLOBAL SETTING ============= */
-		:root {
-			--game-width: 800px;
-			--game-height: 600px;
-			--paddle-width: 10px;
-			--paddle-height: 100px;
-			--ball-size: 10px;
-		}
+	<link rel="preload" href="/stylesDist/output.css" as="style">
+	<link rel="stylesheet" href="/stylesDist/output.css">
 
-		/* ================= FONTS ================== */
-		@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
-
-		@font-face {
-			font-family: "Karnivore-Tecca";
-			src: url("assets/fonts/karnivore-tecca.woff2") format("woff2");
-			font-weight: 400;
-			font-style: normal;
-		}
-
-		.font-karnivore {
-			font-family: "Karnivore-Tecca", sans-serif;
-		}
-
-		/* =================== BASE ================== */
-		@layer base {
-			body {
-				font-family: "Lexend", sans-serif;
-				margin: 0;
-				padding: 0;
-			}
-		}
-
-		/* ================ COMPONENTS =============== */
-		.play-btn {
-			width: calc(var(--game-width) * 0.25);
-			height: calc(var(--game-height) * 0.1);
-		}
-
-		.quick-match-btn {
-			width: calc(var(--game-width) * 0.25);
-			height: calc(var(--game-height) * 0.1);
-		}
-
-		.tournament-btn {
-			width: calc(var(--game-width) * 0.25);
-			height: calc(var(--game-height) * 0.1);
-		}
-
-		.triangle-right {
-			width: 0;
-			height: 0;
-			border-top: calc(var(--game-height) * 0.05) solid transparent;
-			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-			border-left: calc(var(--game-width) * 0.05) solid white;
-		}
-
-		.triangle-left {
-			width: 0;
-			height: 0;
-			border-top: calc(var(--game-height) * 0.05) solid transparent;
-			border-bottom: calc(var(--game-height) * 0.05) solid transparent;
-			border-right: calc(var(--game-width) * 0.05) solid white;
-		}
-
-		.player-name-item {
-			background-color: #374151;
-			color: #ff4d4d;
-			font-size: 15px;
-			font-weight: 700;
-			font-family: "Courier New", monospace;
-			padding: 4px 12px;
-			border-radius: 8px;
-			width: calc(var(--game-width) * 0.2);
-		}
-
-		/* ================ UTILITIES =============== */
-		@layer utilities {
-			.text-glow {
-				text-shadow:
-					0 0 5px #bebe1d,
-					0 0 20px #8f8f18,
-					0 0 50px #94941c;
-			}
-		}
-	</style>
-
+	<!-- Block rendering until CSS is loaded -->
 	<script>
-		tailwind.config = {
-			theme: {
-				extend: {
-					keyframes: {
-						flicker: {
-							'0%, 70%, 100%': { opacity: '1' },
-
-							'72%': { opacity: '0.4' },
-							'74%': { opacity: '1' },
-							'76%': { opacity: '0.2' },
-							'78%': { opacity: '1' },
-						},
-					},
-					animation: {
-						flicker: 'flicker 5s infinite',
-					},
-				},
-			},
-		}
+		document.documentElement.style.visibility = 'hidden';
+		window.addEventListener('load', () => {
+			document.documentElement.style.visibility = 'visible';
+		});
 	</script>
+
 </head>
 
 
@@ -142,9 +44,9 @@
 
 	<!-- ================= BACKGROUND ================= -->
 	<div
-		class="absolute inset-0 bg-[url('./assets/light.png')] bg-cover bg-center z-10 animate-flicker pointer-events-none">
+		class="absolute inset-0 bg-[url('/assets/light.png')] bg-cover bg-center z-10 animate-flicker pointer-events-none">
 	</div>
-	<div class="absolute inset-0 bg-[url('./assets/background.png')] bg-cover bg-center z-0 pointer-events-none"></div>
+	<div class="absolute inset-0 bg-[url('/assets/background.png')] bg-cover bg-center z-0 pointer-events-none"></div>
 
 	<!-- ================== UI MENU  ================== -->
 	<div class="absolute top-4 right-4 z-50 flex items-center gap-3">
@@ -254,10 +156,9 @@
 					<p class="font-bold text-lg" id="menu-username">Username</p>
 					<p class="text-sm text-gray-500" id="menu-email">Email</p>
 				</div>
-				<hr>
+				<div class="border-t border-white"></div>
 
 				<div class="p-4 space-y-2">
-					<!--Edit button & menu-->
 					<div class="relative">
 						<button id="edit-profile-button" class="w-full text-left hover:text-[#dc3cf0] px-2"
 							data-i18n="edit">Edit</button>

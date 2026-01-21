@@ -16,6 +16,7 @@ export default async function userRoutes(fastify: FastifyInstance) {
 			const refreshToken = req.cookies.refreshToken;
 			if (!refreshToken)
 				return reply.send({ user: null });
+
 			const payload = verifyToken(refreshToken);
 			if (!payload || payload.tokenType !== "refresh")
 				return reply.status(401).send({ error: "Invalid token" });
@@ -31,7 +32,8 @@ export default async function userRoutes(fastify: FastifyInstance) {
 
 			return reply.send({ user, accessToken });
 
-		} catch {
+		} catch (err) {
+			fastify.log.error(err);
 			return reply.status(500).send({ error: "Server error" });
 		}
 	});

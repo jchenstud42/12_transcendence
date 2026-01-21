@@ -8,10 +8,9 @@ import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
 import { toggleMenu, hideMenu } from "./UI/UI_helpers.js";
 
-// CA C LE DIV DANS LE HTML
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
 const loginContainer = document.getElementById("login-form") as HTMLDivElement | null;
-// CA C LE <FORM> DANS LE HTML, FAITES LA DIFFERENCE A CHAQUE FOIS MERCI
+
 const register_form = document.getElementById("register_form") as HTMLFormElement | null;
 const login_form = document.getElementById("login_form") as HTMLFormElement | null;
 
@@ -47,8 +46,6 @@ const pong_menu = document.getElementById("pong-menu") as HTMLDivElement;
 const pong_overlay = document.getElementById("pong-overlay") as HTMLDivElement;
 const back_button = document.getElementById("back-button")!;
 
-// const add_friend_button = document.getElementById("btn-add-friend")!;
-// const your_friends_button = document.getElementById("btn-your-friends")!;
 const language_button = document.getElementById("language-button")!;
 const language_menu = document.getElementById("language-menu")!;
 
@@ -1002,7 +999,7 @@ function updatePaddlePositions() {
 
 requestAnimationFrame(updatePaddlePositions);
 
-let pendingTimeouts: number[] = [];
+let pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
 
 export function resetGameMenu() {
 

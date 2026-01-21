@@ -145,9 +145,16 @@ export function applyLoggedOutState() {
 
 	const logoutBtn = document.getElementById('logout-button');
 	if (logoutBtn)
-		 logoutBtn.classList.add('hidden');
+		logoutBtn.classList.add('hidden');
 
 	storedUserId = null;
+
+	localStorage.removeItem('user');
+	localStorage.removeItem('accessToken');
+	sessionStorage.clear();
+
+	// pour clear le cookie si make re en etant log
+	fetch("/logout-silent", { method: "POST", credentials: "include" }).catch(() => { });
 }
 
 /**
@@ -190,9 +197,12 @@ export async function initAuthState() {
 		}
 
 
-		const res = await fetch("/user/me", { credentials: "include" });
+		const res = await fetch("/user/me", { credentials: "include" }).catch(() => {
+			applyLoggedOutState();
+			return null;
+		});
 
-		if (!res.ok) {
+		if (!res || !res.ok) {
 			applyLoggedOutState();
 			return;
 		}
