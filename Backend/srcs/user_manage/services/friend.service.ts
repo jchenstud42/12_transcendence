@@ -144,10 +144,11 @@ export class FriendService {
 		if (request.receiverById !== userId)
 			throw new Error("Not authorized");
 
-		return await prisma.friendRequest.update({
+		await prisma.friendRequest.delete({
 			where: { id: requestId },
-			data: { status: "rejected" }
 		});
+
+		return ({ message: "Friend request rejected" });
 	}
 }
 
