@@ -4,6 +4,7 @@ import { PONG_UI } from "./elements.js";
 import { Ball } from "./Ball.js";
 import { showPlayerName, showMenu, hideMenu, resetGameMenu } from './menu.js';
 import { Ai } from "./Ai.js";
+import { saveTournamentMatch } from "./Tournament.js"
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
@@ -301,13 +302,13 @@ export class Match {
 		PONG_UI.scoreLeft!.textContent = "0";
 		PONG_UI.scoreRight!.textContent = "0";
 
-/* 		this.saveTournamentMatch(
+		saveTournamentMatch(
 			this.matchPlayer![0],
 			this.matchPlayer![1],
 			this.matchPlayer![0].point,
 			this.matchPlayer![1].point,
 			winner
-		); */
+		);
 
 		this.matchPlayer = null;
 
