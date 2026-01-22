@@ -101,7 +101,12 @@ const score_left = document.getElementById("score-left")! as HTMLDivElement | nu
 const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
 const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
 const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
-const playerColors = ["text-red-400", "text-blue-400", "text-green-400", "text-yellow-400"];
+const playerColors = [
+	"text-red-400/90",
+	"text-blue-400/90",
+	"text-green-400/90",
+	"text-yellow-400/90",
+];
 const playersList = document.getElementById("players-list")! as HTMLDivElement;
 const finalList = document.getElementById("final-list")! as HTMLDivElement;
 const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
@@ -923,6 +928,8 @@ requestAnimationFrame(gameLoop);
 
 //keys list
 const keys = {
+	W: false,
+	S: false,
 	w: false,
 	s: false,
 	ArrowUp: false,
@@ -980,10 +987,10 @@ disableKeyListeners();
 
 //Fonction pour bouger les paddles en fonction de la key press
 function updatePaddlePositions() {
-	if (keys.w && paddle_left.offsetTop > 0) {
+	if ((keys.w || keys.W) && paddle_left.offsetTop > 0) {
 		paddle_left.style.top = `${paddle_left.offsetTop - PADDLE_SPEED}px`;
 	}
-	if (keys.s && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+	if ((keys.s || keys.S) && paddle_left.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
 		paddle_left.style.top = `${paddle_left.offsetTop + PADDLE_SPEED}px`;
 	}
 
@@ -1378,7 +1385,6 @@ class Game {
 
 				nextRound.push(winner);
 
-				// Update the bracket display with the winner
 				const semiKeys: TranslationKey[] = ["semifinal_1", "semifinal_2"];
 				if (round === 1) {
 					const semiDiv = document.getElementById(`semi-${i / 2}`);
@@ -1573,8 +1579,8 @@ playerName_input.addEventListener("keydown", (event: KeyboardEvent) => {
 function addPlayerNameLabel(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
-	const colorClass = playerColors[index];
-	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
+	const colorClass = playerColors[index % playerColors.length];
+	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
 	const playerKeys: TranslationKey[] = ["player_1", "player_2", "player_3", "player_4"];
 	const key = playerKeys[index];
 	if (!isAi)
