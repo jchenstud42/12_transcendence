@@ -41,11 +41,16 @@ RUN openssl req -x509 -nodes -days 365 \
     -subj "/CN=localhost"
 
 COPY index.html ./
-
 COPY --from=build /app/srcs/js ./js
 COPY --from=build /app/srcs/assets ./assets
 COPY --from=build /app/srcs/stylesDist ./stylesDist
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Copie du script pour attendre le backend
+COPY wait-for-backend.sh /usr/local/bin/wait-for-backend.sh
+RUN chmod +x /usr/local/bin/wait-for-backend.sh
+
 EXPOSE 80 8443
+
+CMD ["/usr/local/bin/wait-for-backend.sh"]

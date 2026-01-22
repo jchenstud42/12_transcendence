@@ -154,7 +154,7 @@ export function applyLoggedOutState() {
 	sessionStorage.clear();
 
 	// pour clear le cookie si make re en etant log
-	// fetch("/logout-silent", { method: "POST", credentials: "include" }).catch(() => { });
+	fetch("/logout-silent", { method: "POST", credentials: "include" }).catch(() => { });
 }
 
 /**

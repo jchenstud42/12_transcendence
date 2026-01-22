@@ -28,6 +28,7 @@ export default async function userRoutes(fastify: FastifyInstance) {
 			if (!user)
 				return reply.status(404).send({ error: "User not found" });
 
+
 			const accessToken = signAccessToken(user.id, true);
 
 			return reply.send({ user, accessToken });

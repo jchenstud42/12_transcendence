@@ -27,6 +27,7 @@ up:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ⌚​​​" $(RESET)"
 	@docker compose up -d
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"a"$(CYAN)"r"$(BLUE)"t"$(MAGENTA)"e"$(RED)"d" "🥳​​​​" $(RESET)"
+	@echo " Wait a few seconds before accessing the application... "
 
 down:
 	@echo "$(RED)"S"$(YELLOW)"t"$(GREEN)"o"$(CYAN)"p"$(BLUE)"p"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " ✋🛑​​​" $(RESET)"
