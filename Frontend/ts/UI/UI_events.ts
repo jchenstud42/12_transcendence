@@ -3,9 +3,7 @@ import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
-import { resetGameMenu } from "../main.js";
-import { startMatch } from "../main.js";
-import { enterPlayerNbr } from "../main.js";
+import { resetGameMenu } from "../Pong/menu.js"; 
 
 
 /*
@@ -112,14 +110,7 @@ export function initUIEvents(elems: UIEventElements) {
 	);
 
 
-	elems.play_button?.addEventListener("click", () => {
-		startMatch();
-	});
-
 	document.addEventListener("keydown", (event: KeyboardEvent) => {
-		if (event.key === "Enter" && !elems.play_button?.classList.contains("hidden")) {
-			startMatch();
-		}
 		if (event.key == "Escape" && !elems.back_button?.classList.contains("hidden")) {
 			closePong(elems);
 			resetGameMenu();

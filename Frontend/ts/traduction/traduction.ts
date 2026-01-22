@@ -35,6 +35,8 @@ export const translations = {
 		victories: "Victories",
 		defeats: "Defeats",
 		win_tournament: " won the tournament!",
+		win_this: " win this ",
+		point: " point!",
 
 		//2FA + Message
 		logout_btn: "Logout",
@@ -177,6 +179,8 @@ export const translations = {
 		victories: "Victoires",
 		defeats: "Défaites",
 		win_tournament: " remporte le tournoi !",
+		win_this: " gagne avec ",
+		point: " point(s)!",
 
 		//2FA + Messages
 		logout_btn: "Deconnexion",
@@ -322,6 +326,8 @@ export const translations = {
 		victories: "Victorias",
 		defeats: "Derrotas",
 		win_tournament: " ganó el torneo!",
+		win_this: " ganar con",
+		point: " punto(s)!",
 
 		//2FA + Mensajes
 		draw: "Empate",
