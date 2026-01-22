@@ -3,6 +3,7 @@ import { Player } from "./Player";
 import { PONG_UI } from "./elements.js";
 import { Ball } from "./Ball.js";
 import { showPlayerName, showMenu, hideMenu, resetGameMenu } from './menu.js';
+import { Ai } from "./Ai.js";
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
@@ -22,6 +23,9 @@ export class Match {
 	paddleLoopRunning: boolean;
 	isMatchOver: boolean = false;
 	isPointOver: boolean = false;
+	aiLeft: Ai | null = null;
+	aiRight: Ai | null = null;	
+
 
 	// Resolver and promise for the current point
 	private pointEndResolver: ((winner: Player | null) => void) | null = null;
@@ -57,6 +61,10 @@ export class Match {
 		this.starting = false;
 		this.paddleLoopRunning = false;
 		this.ballLoopRafId = null;
+		if (this.matchPlayer && this.matchPlayer[0].isAi)
+			this.aiLeft = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.leftPaddle, 1);
+		if (this.matchPlayer && this.matchPlayer[1].isAi)
+			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle, 1);	
 	}
 
 	public ballLoop = (now = performance.now()) => {
@@ -194,6 +202,8 @@ export class Match {
 						//Start ball Loop
 						this.ball.active = true;
 						this.ball.serve();
+						if (this.aiLeft) this.aiLeft.oneSecondLoop();
+						if (this.aiRight) this.aiRight.oneSecondLoop();
 						this.last = performance.now();
 						this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
 
@@ -214,6 +224,8 @@ export class Match {
 	}
 
 	public addPoint(playerSide: 'left' | 'right') {
+		if (this.aiLeft) this.aiLeft.reset();
+		if (this.aiRight) this.aiRight.reset();
 		if (!this.matchPlayer) return;
 
 		const pointIndex = playerSide === 'left' ? 0 : 1;
@@ -317,6 +329,8 @@ export class Match {
 
 	public quitMatch() {
 		this.partialReset();
+		if (this.aiLeft) this.aiLeft.reset();
+		if (this.aiRight) this.aiRight.reset();
 
 		this.ball.active = false;
 

@@ -64,6 +64,8 @@ export class Ai {
 	gameElapsedTime: number = 1
 	nbrSecondsPredicted: number = 0;
 
+	animationFrameId: number | null = null;
+
 	constructor(ball: Ball, paddleRight: HTMLDivElement, paddleLeft: HTMLDivElement, AIpaddle: HTMLDivElement, AILevel: number) {
 		if (!ball) {
 			throw new Error("Ball or paddle is null");
@@ -104,6 +106,7 @@ export class Ai {
 	oneSecondLoop(firstRun = true) {
 		// Update ball position every second
 		if (this.canCheckBallPos() || firstRun) {
+			this.updatePaddleCenter();
 			this.updateBallPos();
 
 			if (this.isBallMovingTowardsAI())
@@ -133,7 +136,7 @@ export class Ai {
 			this.pressPaddleDown(false);
 		}
 
-		requestAnimationFrame(() => this.oneSecondLoop(false));
+		this.animationFrameId = requestAnimationFrame(() => this.oneSecondLoop(false));
 	}
 
 	///////////////////////////////////////////////////////////////
@@ -573,5 +576,45 @@ export class Ai {
 
 	isDeltaZero(): boolean {
 		return this.prevBallDelta.x === 0 && this.prevBallDelta.y === 0;
+	}
+
+	///////////////////////////////////////////////////////////////
+	////               RESET AND CLEANUP                       ////
+	///////////////////////////////////////////////////////////////
+
+	reset() {
+		// Cancel animation loop
+		if (this.animationFrameId !== null) {
+			cancelAnimationFrame(this.animationFrameId);
+			this.animationFrameId = null;
+		}
+
+		// Release all keyboard presses
+		this.pressPaddleUp(false);
+		this.pressPaddleDown(false);
+
+		// Hide prediction visuals
+		this.hideAiPredictions();
+		this.hideAllPredictionsBalls();
+
+		// Clear canvas
+		ctx.clearRect(0, 0, PONG_UI.aiViewsCanvas.width, PONG_UI.aiViewsCanvas.height);
+
+		// Reset ball position states
+		this.ballPos = { x: PONG_WIDTH / 2 - BALL_SIZE / 2, y: PONG_HEIGHT / 2 - BALL_SIZE / 2 };
+		this.ballPrevPos = { x: PONG_WIDTH / 2 - BALL_SIZE / 2, y: PONG_HEIGHT / 2 - BALL_SIZE / 2 };
+		this.ballPrevPred = { x: PONG_WIDTH / 2 - BALL_SIZE / 2, y: PONG_HEIGHT / 2 - BALL_SIZE / 2 };
+		this.ballNextPred = { x: PONG_WIDTH / 2 - BALL_SIZE / 2, y: PONG_HEIGHT / 2 - BALL_SIZE / 2 };
+		this.prevBallDelta = { x: 0, y: 0 };
+		this.wallBouncePred = false;
+
+		// Reset AI state
+		this.AIstate = 'MOVE';
+		this.lastTime = performance.now();
+		this.gameElapsedTime = 1;
+		this.nbrSecondsPredicted = 0;
+
+		// Reset paddle center
+		this.paddleCenter = { x: 0, y: 0 };
 	}
 }

@@ -79,22 +79,30 @@ export function initMenuEvents() {
 
 		const loggedUsername = getLoggedUsername();
 
-		if (loggedUsername) {
+		if (loggedUsername && game.maxPlayer > game.aiNbr) {
 			game.playersName.push([loggedUsername, false]);
 			showPlayerName(loggedUsername, 0, false);
 			game.nameEntered = 1;
 		}
 
-		if (game.playerNbr > game.nameEntered) {
+		if (game.nameEntered < game.playerNbr) {
+			console.log("1 - Show player name menu");
 			showPlayerNameMenu();
 		} else {
-			//Only two players and one of them is an AI => Skip Enter player name
-			//showAiName();
+			//Start match or tournament directly (no need to enter player names)
+			console.log("2 - Start match directly");
+			game.createAiName();
 			game.createPlayers();
-			const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
-			match.playMatch();
+			if (game.maxPlayer > 2) {
+				game.isTournament = true;
+				const tournament = new Tournament(game.playersName, game.players);
+				tournament.startTournament();
+
+			} else {
+				const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
+				match.playMatch();
+			}
 			game.resetGameInfo();
-			//const tournament = new Tournament(game.playersName, game.players);
 		}
 	});
 
@@ -120,18 +128,19 @@ export function initMenuEvents() {
 				if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 				if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
+				//Fill the rest of the players with AI names
+				game.createAiName();
 				game.createPlayers();
-				if (game.playerNbr > 2) {
+				if (game.maxPlayer > 2) {
 					game.isTournament = true;
 					const tournament = new Tournament(game.playersName, game.players);
 					tournament.startTournament();
-					game.resetGameInfo();
 				} else {
 					game.isTournament = false;
 					const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
 					match.playMatch();
-					game.resetGameInfo();
 				}
+					game.resetGameInfo();
 			}
 		}
 	})

@@ -1,4 +1,5 @@
 import { Player } from './Player.js';
+import { showPlayerName } from './menu.js';
 
 
 export class GameInfo {
@@ -46,6 +47,15 @@ export class GameInfo {
 				return new Player(playerName, isAi, playerNbr, guestId);
 			}
 		});
+	}
+
+	createAiName() {
+		for (let i = 0; i < this.aiNbr; i++) {
+			const aiName = this.aiNames[i];
+			this.playersName.push([aiName, true]);
+			showPlayerName(aiName, this.nameEntered, true);
+			this.nameEntered++;
+		}
 	}
 
 	private registerGuest(name: string): number {

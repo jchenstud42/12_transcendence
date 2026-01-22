@@ -172,8 +172,8 @@ export class Tournament {
 		}
 
 		// Cleanup tournament-level back handler if still attached
-		PONG_UI.backButton.removeEventListener("click", tournamentBackHandler);
-		PONG_UI.backButton.classList.add("hidden");
+		//PONG_UI.backButton.removeEventListener("click", tournamentBackHandler);
+		//PONG_UI.backButton.classList.add("hidden");
 
 		// Only show completion message if tournament wasn't aborted
 		if (!tournamentAborted) {
