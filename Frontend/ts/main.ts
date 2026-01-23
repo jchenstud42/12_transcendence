@@ -7,6 +7,7 @@ import { initProfile } from "./UI/UI_events.js";
 import { initUIEvents } from "./UI/UI_events.js";
 import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth.js";
 import { toggleMenu, hideMenu } from "./UI/UI_helpers.js";
+import { resetTwoFAForm } from "./UI/UI_events.js";
 
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
 const loginContainer = document.getElementById("login-form") as HTMLDivElement | null;

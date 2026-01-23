@@ -86,13 +86,16 @@ function closePong(elems: UIEventElements) {
  */
 export function initUIEvents(elems: UIEventElements) {
 
-	elems.register_button?.addEventListener("click", () =>
-		toggleMenu(elems.registerContainer, elems.loginContainer, elems.language_menu)
-	);
+	elems.register_button?.addEventListener("click", () => {
+		resetRegisterForm();
+		toggleMenu(elems.registerContainer, elems.loginContainer, elems.language_menu);
+	});
 
-	elems.login_button?.addEventListener("click", () =>
+
+	elems.login_button?.addEventListener("click", () =>	{
+		resetLoginForm();
 		toggleMenu(elems.loginContainer, elems.registerContainer, elems.language_menu)
-	);
+	});
 
 	elems.profile_button?.addEventListener("click", () =>
 		toggleMenu(elems.profile_menu, elems.language_menu)
@@ -343,4 +346,30 @@ function resetProfileForm() {
 	if (emailInput) emailInput.value = "";
 	if (passwordInput) passwordInput.value = "";
 	if (confirmPasswordInput) confirmPasswordInput.value = "";
+}
+
+function resetLoginForm() {
+	const loginUsernameInput = document.getElementById("login-id") as HTMLInputElement | null;
+	const loginPasswordInput = document.getElementById("login-password") as HTMLInputElement | null;
+
+	if (loginUsernameInput) loginUsernameInput.value = "";
+	if (loginPasswordInput) loginPasswordInput.value = "";
+}
+
+function resetRegisterForm() {
+	const registerUsernameInput = document.getElementById("register-id") as HTMLInputElement | null;
+	const registerEmailInput = document.getElementById("register-email") as HTMLInputElement | null;
+	const registerPasswordInput = document.getElementById("register-password") as HTMLInputElement | null;
+	const registerConfirmPasswordInput = document.getElementById("register-confirm-password") as HTMLInputElement | null;
+
+	if (registerUsernameInput) registerUsernameInput.value = "";
+	if (registerEmailInput) registerEmailInput.value = "";
+	if (registerPasswordInput) registerPasswordInput.value = "";
+	if (registerConfirmPasswordInput) registerConfirmPasswordInput.value = "";
+}
+
+export function resetTwoFAForm() {
+	const twoFAInput = document.getElementById("enter_2fa") as HTMLInputElement | null;
+
+	if (twoFAInput) twoFAInput.value = "";
 }
