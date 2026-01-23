@@ -2,6 +2,7 @@ import { PONG_UI } from './elements.js';
 import { Tournament} from './Tournament.js';
 import { GameInfo } from './GameInfo.js';
 import { Match } from './Match.js';
+import { t } from '../traduction/i18n.js';
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
@@ -198,7 +199,7 @@ export function showPlayerName(name: string, index: number, isAi: boolean) {
 	const colorClass = PONG_UI.playerColors[index];
 	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
 	if (!isAi)
-		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">Player ${index + 1}</span><br>${name}`;
+		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowrap">${t("player")} ${index + 1}</span><br>${name}`;
 	else
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowarp">AI ${index + 1}</span><br>${name}`;
 

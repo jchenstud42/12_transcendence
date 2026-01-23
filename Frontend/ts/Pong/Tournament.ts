@@ -5,6 +5,7 @@ import { Ball } from './Ball.js';
 import { shuffleArray } from "../utils/utils.js";
 import { resetGameMenu } from './menu.js';
 import { Match } from './Match.js';
+import { t } from '../traduction/i18n.js';
 
 
 export class Tournament {
@@ -142,7 +143,7 @@ export class Tournament {
 		if (!tournamentAborted) {
 			const champion = bracket[0];
 			if (champion) {
-				alert(`${champion.name} remporte le tournoi !`);
+				alert(`${champion.name}` + t(`win_tournament`));
 				resetGameMenu();
 			}
 		}

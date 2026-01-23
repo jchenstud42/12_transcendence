@@ -5,6 +5,7 @@ import { Ball } from "./Ball.js";
 import { showPlayerName, showMenu, hideMenu, resetGameMenu } from './menu.js';
 import { Ai } from "./Ai.js";
 import { saveTournamentMatch } from "./Tournament.js"
+import { t } from '../traduction/i18n.js';
 
 const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
@@ -294,7 +295,7 @@ export class Match {
 
 		this.ball.active = false;
 
-		alert(`${winner.name} wins with ${winner.point} points!`);
+		alert(`${winner.name}` + t(`win_with`) + `${winner.point}` + t(`point`));
 
 		this.matchPlayer![0].point = 0;
 		this.matchPlayer![1].point = 0;

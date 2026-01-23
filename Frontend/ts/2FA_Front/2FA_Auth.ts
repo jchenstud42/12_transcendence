@@ -504,7 +504,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 				selected2FAType = null;
 			} catch (err: any) {
 				console.error("2FA verification error:", err);
-				alert(err.message);
+				alert(getServerErrorMessage(err.message));
 			}
 		});
 	}

@@ -98,7 +98,8 @@ export function initUIEvents(elems: UIEventElements) {
 		toggleMenu(elems.profile_menu, elems.language_menu)
 	);
 
-	elems.edit_button?.addEventListener("click", () =>
+	elems.edit_button?.addEventListener("click", () => {
+		resetProfileForm();
 		toggleMenu(
 			elems.edit_menu,
 			elems.twoFA_menu,
@@ -106,8 +107,8 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.history_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu
-		)
-	);
+		);
+	});
 
 
 	document.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -330,4 +331,16 @@ export function initProfile(profileElems: {
 			alert(t("network_error"));
 		}
 	});
+}
+
+function resetProfileForm() {
+	const usernameInput = document.getElementById("edit-username") as HTMLInputElement | null;
+	const emailInput = document.getElementById("edit-email") as HTMLInputElement | null;
+	const passwordInput = document.getElementById("edit-password") as HTMLInputElement | null;
+	const confirmPasswordInput = document.getElementById("edit-password-confirm") as HTMLInputElement | null;
+
+	if (usernameInput) usernameInput.value = "";
+	if (emailInput) emailInput.value = "";
+	if (passwordInput) passwordInput.value = "";
+	if (confirmPasswordInput) confirmPasswordInput.value = "";
 }

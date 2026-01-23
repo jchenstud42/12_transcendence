@@ -325,7 +325,7 @@ else {
 					}
 				}
 				else
-					alert("Server error: " + getServerErrorMessage(data?.error));
+					alert(t("server_error_prefix") + getServerErrorMessage(data?.error));
 			}
 			catch (err) {
 				console.error("Fetch error:", err);
