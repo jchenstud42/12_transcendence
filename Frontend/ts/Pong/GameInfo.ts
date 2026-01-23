@@ -65,4 +65,8 @@ export class GameInfo {
 		this.guestPlayers.set(id, name);
 		return id;
 	}
+
+	public setCurrentUser(user: any) {
+    	this.currentUser = user;
+	}
 };

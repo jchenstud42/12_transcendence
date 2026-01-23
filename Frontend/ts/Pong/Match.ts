@@ -38,6 +38,8 @@ export class Match {
 	keys = {
 		w: false,
 		s: false,
+		W: false,
+		S: false,
 		ArrowUp: false,
 		ArrowDown: false
 	};
@@ -265,6 +267,8 @@ export class Match {
 		// Ensure no key state is left "stuck" when listeners are removed
 		this.keys.w = false;
 		this.keys.s = false;
+		this.keys.S = false;
+		this.keys.W = false;
 		this.keys.ArrowUp = false;
 		this.keys.ArrowDown = false;
 
@@ -290,6 +294,14 @@ export class Match {
 
 	private endMatch(winner: Player) {
 		console.log(`${winner.name} wins the match!`);
+		
+		saveTournamentMatch(
+			this.matchPlayer![0],
+			this.matchPlayer![1],
+			this.matchPlayer![0].point,
+			this.matchPlayer![1].point,
+			winner
+		);
 
 		this.partialReset();
 
@@ -302,14 +314,6 @@ export class Match {
 
 		PONG_UI.scoreLeft!.textContent = "0";
 		PONG_UI.scoreRight!.textContent = "0";
-
-		saveTournamentMatch(
-			this.matchPlayer![0],
-			this.matchPlayer![1],
-			this.matchPlayer![0].point,
-			this.matchPlayer![1].point,
-			winner
-		);
 
 		this.matchPlayer = null;
 
@@ -377,10 +381,10 @@ export class Match {
 			return 0;
 		}
 
-		if (this.keys.w && PONG_UI.leftPaddle.offsetTop > 0) {
+		if ((this.keys.w || this.keys.W) && PONG_UI.leftPaddle.offsetTop > 0) {
 			PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop - PADDLE_SPEED}px`;
 		}
-		if (this.keys.s && PONG_UI.leftPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
+		if ((this.keys.s || this.keys.S) && PONG_UI.leftPaddle.offsetTop < PONG_HEIGHT - PADDLE_HEIGHT) {
 			PONG_UI.leftPaddle.style.top = `${PONG_UI.leftPaddle.offsetTop + PADDLE_SPEED}px`;
 		}
 

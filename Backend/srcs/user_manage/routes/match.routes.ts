@@ -27,9 +27,9 @@ export default async function matchRoutes(fastify: FastifyInstance) {
 	fastify.post("/", { preHandler: [authentizer()] }, async (req, reply) => {
 		const { player1Id, player2Id, score1, score2, winnerId, player1Name, player2Name } = req.body as MatchBody;
 
-		const dbPlayer1Id = ((player1Id >= 100 && player1Id < 200) || (player1Id >= 200 && player1Id < 300)) ? null : player1Id;
-		const dbPlayer2Id = (player2Id >= 200 && player2Id < 300) ? null : player2Id;
-		const dbWinnerId = ((winnerId >= 100 && winnerId < 200) || (winnerId >= 200 && winnerId < 300)) ? null : winnerId;
+		const dbPlayer1Id = (player1Id >= 100 && player1Id < 300) ? null : player1Id;
+		const dbPlayer2Id = (player2Id >= 100 && player2Id < 300) ? null : player2Id;
+		const dbWinnerId = (winnerId >= 100 && winnerId < 300) ? null : winnerId;
 		
 		const match = await matchService.addMatch(
 			dbPlayer1Id, 

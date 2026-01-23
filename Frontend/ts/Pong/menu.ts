@@ -91,6 +91,7 @@ export function initMenuEvents() {
 			//Start match or tournament directly (no need to enter player names)
 			console.log("2 - Start match directly");
 			game.createAiName();
+			game.setCurrentUser(getLoggedUser());
 			game.createPlayers();
 			if (game.maxPlayer > 2) {
 				game.isTournament = true;
@@ -129,6 +130,7 @@ export function initMenuEvents() {
 
 				//Fill the rest of the players with AI names
 				game.createAiName();
+				game.setCurrentUser(getLoggedUser());
 				game.createPlayers();
 				if (game.maxPlayer > 2) {
 					game.isTournament = true;
@@ -266,3 +268,14 @@ function getLoggedUsername(): string | null {
 	}
 }
 
+function getLoggedUser(): any {
+	const userRaw = localStorage.getItem("user");
+	if (!userRaw)
+		return (null);
+	try {
+		return JSON.parse(userRaw);
+	}
+	catch {
+		return (null);
+	}
+}
