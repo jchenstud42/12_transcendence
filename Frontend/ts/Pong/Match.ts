@@ -11,6 +11,12 @@ const PONG_HEIGHT = 600;
 const PADDLE_HEIGHT = 100;
 const PADDLE_SPEED = 10;
 
+interface matchStat {
+	nbrOfBallHit: number;
+	nbrOfBallMissed: number;
+	matchTime: number; 
+}
+
 export class Match {
 	private last: number = performance.now();
 	private ballLoopRafId: number | null = null;
@@ -27,6 +33,7 @@ export class Match {
 	isPointOver: boolean = false;
 	aiLeft: Ai | null = null;
 	aiRight: Ai | null = null;
+	matchStat: matchStat;
 
 
 	// Resolver and promise for the current point
@@ -69,6 +76,12 @@ export class Match {
 			this.aiLeft = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.leftPaddle, 1);
 		if (this.matchPlayer && this.matchPlayer[1].isAi)
 			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle, 1);
+
+		this.matchStat = { 
+			nbrOfBallHit: 0,
+			nbrOfBallMissed: 0,
+			matchTime: performance.now()
+		};
 	}
 
 	public ballLoop = (now = performance.now()) => {
@@ -236,13 +249,13 @@ export class Match {
 		if (this.matchPlayer[pointIndex]) {
 			this.matchPlayer[pointIndex].point++;
 
+			this.updateMatchStat();
 			// Update score display
 			if (playerSide === 'left' && PONG_UI.scoreLeft) {
 				PONG_UI.scoreLeft.textContent = this.matchPlayer[pointIndex].point.toString();
 			} else if (playerSide === 'right' && PONG_UI.scoreRight) {
 				PONG_UI.scoreRight.textContent = this.matchPlayer[pointIndex].point.toString();
 			}
-
 
 			// End the match if player reached pointsToWin (quick match only)
 			if (this.matchPlayer[pointIndex].point >= this.pointsToWin) {
@@ -294,6 +307,8 @@ export class Match {
 
 	private endMatch(winner: Player) {
 		console.log(`${winner.name} wins the match!`);
+		
+		this.matchStat.matchTime = performance.now() - this.matchStat.matchTime;
 		
 		saveTournamentMatch(
 			this.matchPlayer![0],
@@ -367,6 +382,17 @@ export class Match {
 		showPlayerName(this.matchPlayer[1].name, this.matchPlayer[1].playerNbr, this.matchPlayer[1].isAi);
 		if (PONG_UI.playersArea) PONG_UI.playersArea.classList.remove("hidden");
 	};
+
+	
+	private updateMatchStat() {
+		if (this.matchPlayer && this.matchPlayer[0].isConnected ) {
+			this.matchStat.nbrOfBallHit += this.ball.ballPaddleHitL;
+			this.matchStat.nbrOfBallMissed = this.matchPlayer[1].point;
+		} else if( this.matchPlayer && this.matchPlayer[1].isConnected) {
+			this.matchStat.nbrOfBallHit += this.ball.ballPaddleHitR;
+			this.matchStat.nbrOfBallMissed = this.matchPlayer[0].point;
+		}
+	}
 
 	///////////////////////////////////////////////////////////
 	/////				INPUTS HANDLER					 /////

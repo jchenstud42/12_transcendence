@@ -271,5 +271,8 @@ export async function saveTournamentMatch(
 	}
 }
 
+export async function saveMatchStat() {
+	
+}
 
 

@@ -7,6 +7,7 @@ export class Player {
 	gameWon: number = 0;
 	isAi: boolean = false;
 	userId: number;
+	isConnected: boolean = false;
 
 	constructor(name: string, isAi: boolean, playerNbr: number, userId: number | null = null) {
 		this.name = name;
@@ -19,6 +20,9 @@ export class Player {
 			// Caller (Game) should assign and register guest IDs; use -1 as placeholder if missing
 			this.userId = -1;
 		}
-
+		
+		if (this.userId <= 100)
+			this.isConnected = true;
+		
 	}
 }

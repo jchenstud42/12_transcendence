@@ -16,11 +16,15 @@ export class Ball {
 	speed = 300;
 	active = false;
 	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback to notify game when a point is win
+	ballPaddleHitR: number;
+	ballPaddleHitL: number;
 
 
 	constructor(ballUI: HTMLElement) {
 		this.ballUI = ballUI;
 		this.initBallPos();
+		this.ballPaddleHitL = 0;
+		this.ballPaddleHitR = 0;
 	}
 
 	initBallPos() {
@@ -90,6 +94,7 @@ export class Ball {
 			this.vx = Math.abs(this.speed * Math.cos(bounceAngle));
 			this.vy = this.speed * Math.sin(bounceAngle);
 			this.x = plX + PADDLE_WIDTH + 0.5;
+			this.ballPaddleHitL += 1;
 		}
 
 		const prX = PONG_UI.rightPaddle.offsetLeft;
@@ -103,6 +108,7 @@ export class Ball {
 			this.vx = -Math.abs(this.speed * Math.cos(bounceAngle));
 			this.vy = this.speed * Math.sin(bounceAngle);
 			this.x = prX - PADDLE_WIDTH - 0.5;
+			this.ballPaddleHitR += 1;
 		}
 
 		if (this.x + BALL_SIZE < 0) {
