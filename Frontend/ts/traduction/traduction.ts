@@ -94,6 +94,8 @@ export const translations = {
 		no_pending_requests: "No pending requests",
 		friends_request_accepted: "Friend request accepted!",
 		friends_request_rejected: "Friend request rejected!",
+		status_online: "Online",
+		status_offline: "Offline",
 
 		//Languages
 		english: "English",
@@ -237,6 +239,8 @@ export const translations = {
 		no_pending_requests: "Aucune demande en attente",
 		friends_request_accepted: "Demande d'ami acceptée !",
 		friends_request_rejected: "Demande d'ami rejetée !",
+		status_online: "En ligne",
+		status_offline: "Hors ligne",
 
 		save_changes: "Enregistrer les modifications",
 
@@ -384,6 +388,8 @@ export const translations = {
 		save_changes: "Guardar cambios",
 		friends_request_accepted: "¡Solicitud de amigo aceptada!",
 		friends_request_rejected: "¡Solicitud de amigo rechazada!",
+		status_online: "En línea",
+		status_offline: "Fuera de línea",
 
 		//Idiomas
 		english: "Inglés",

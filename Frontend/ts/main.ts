@@ -536,9 +536,13 @@ function renderFriends(friends: any[]) {
 	}
 	friends.forEach(f => {
 		const div = document.createElement("div");
+		if (f.status === "OFFLINE")
+			f.status = "🔴";
+		else
+			f.status = "🟢";
 		div.className = "friend-item";
 		div.innerHTML = `
-						<span>${f.username} (${f.status})</span>
+						<span>${f.status} ${f.username} </span>
 						<button class="remove-friend-btn" data-friend-id="${f.id}">✕</button>
 				`;
 		friendsMenuList.appendChild(div);

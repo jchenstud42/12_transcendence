@@ -304,6 +304,9 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 			twofaForm.classList.add("hidden");
 			elems!.twofaStatusText.textContent = funcs!.t("two_fa_setup_in_progress");
 			elems!.twofaToggleBtn.textContent = funcs!.t("cancel");
+			const codeInput = document.getElementById("twofa-code") as HTMLInputElement;
+			codeInput.value = "";
+
 
 			alert(t("scan_qr_instruction"));
 			twofaTypeMenu.classList.add("hidden");
