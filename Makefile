@@ -46,7 +46,7 @@ clean:
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g" $(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 🧹​​​" $(RESET)"
 	@docker compose down
 	@rm -rf $(BACKEND_DIR)/dist
-	@rm -rf $(FRONT_DIR)/js
+	@rm -rf $(FRONT_DIR)/js $(FRONT_DIR)/stylesDist
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 fclean:
@@ -54,7 +54,7 @@ fclean:
 	@docker compose down --volumes --rmi all
 	@rm -rf $(BACKEND_DIR)/database/* || true
 	@rm -rf $(BACKEND_DIR)/dist
-	@rm -rf $(FRONT_DIR)/js
+	@rm -rf $(FRONT_DIR)/js $(FRONT_DIR)/stylesDist
 	@echo "$(RED)"C"$(YELLOW)"l"$(GREEN)"e"$(CYAN)"a"$(BLUE)"n"$(MAGENTA)"!" "🥳​​​​" $(RESET)"
 
 re: fclean build up
