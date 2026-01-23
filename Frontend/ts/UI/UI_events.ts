@@ -357,10 +357,10 @@ function resetLoginForm() {
 }
 
 function resetRegisterForm() {
-	const registerUsernameInput = document.getElementById("register-id") as HTMLInputElement | null;
-	const registerEmailInput = document.getElementById("register-email") as HTMLInputElement | null;
-	const registerPasswordInput = document.getElementById("register-password") as HTMLInputElement | null;
-	const registerConfirmPasswordInput = document.getElementById("register-confirm-password") as HTMLInputElement | null;
+	const registerUsernameInput = document.getElementById("username") as HTMLInputElement | null;
+	const registerEmailInput = document.getElementById("email") as HTMLInputElement | null;
+	const registerPasswordInput = document.getElementById("password") as HTMLInputElement | null;
+	const registerConfirmPasswordInput = document.getElementById("confirm-password") as HTMLInputElement | null;
 
 	if (registerUsernameInput) registerUsernameInput.value = "";
 	if (registerEmailInput) registerEmailInput.value = "";
