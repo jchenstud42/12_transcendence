@@ -9,19 +9,19 @@ import { t } from '../traduction/i18n.js';
 
 
 export class Tournament {
-    
+
 	currentUser: any;
 	paddleLoopRunning = false;
 	starting = false; // true while countdown/start sequence is running
 
-    playersName: [string, boolean][];
+	playersName: [string, boolean][];
 
 	players: Player[] = []; //Should add a boolean to knwo if its ai or not
-	matchPlayer: [p1: Player, p2 : Player] | null = null;
+	matchPlayer: [p1: Player, p2: Player] | null = null;
 	winner: Player | null | void = null;
 
 	constructor(playersName: [string, boolean][], players: Player[]) {
-    	this.playersName = playersName;
+		this.playersName = playersName;
 		this.players = players;
 
 		//Setup name depending on username logged
@@ -70,11 +70,11 @@ export class Tournament {
 			finalDiv: null
 		};
 
-		this.initBracketsUI(BRACKETS_UI, bracket);	
-		
+		this.initBracketsUI(BRACKETS_UI, bracket);
+
 		PONG_UI.finalList.classList.remove("hidden");
 
-        //TOURNAMENT LOGIC STARTS HERE
+		//TOURNAMENT LOGIC STARTS HERE
 		let round = 1;
 
 		// Allow aborting the whole tournament via back button at any time
@@ -92,14 +92,14 @@ export class Tournament {
 		};
 		PONG_UI.backButton.classList.remove("hidden");
 		PONG_UI.backButton.addEventListener("click", tournamentBackHandler);
-		
+
 		while (bracket.length > 1 && !tournamentAborted) {
 			console.log(`Round ${round} started with ${bracket.length} players`);
 			const nextRound: Player[] = [];
 
 			for (let i = 0; i < bracket.length; i += 2) {
 				if (tournamentAborted) break;
-				
+
 				this.matchPlayer = [bracket[i], bracket[i + 1]];
 				this.winner = null;
 
@@ -170,14 +170,14 @@ export class Tournament {
 		// Create tournament bracket structure
 		BRACKETS_UI.bracketDisplay = document.createElement("div");
 		BRACKETS_UI.bracketDisplay.className = "flex flex-col gap-1 w-full h-full justify-center";
-		
+
 		// Initialize bracket with all players and placeholders
 		BRACKETS_UI.playersRow = document.createElement("div");
 		BRACKETS_UI.playersRow.className = "flex gap-2 justify-center";
-		
+
 		BRACKETS_UI.semifinalsRow = document.createElement("div");
 		BRACKETS_UI.semifinalsRow.className = "flex gap-2 justify-center";
-		
+
 		BRACKETS_UI.champRow = document.createElement("div");
 		BRACKETS_UI.champRow.className = "flex gap-1 justify-center";
 
@@ -229,47 +229,47 @@ export class Tournament {
 			}
 		}
 	}
-		
+
 };
 
 
 
 export async function saveTournamentMatch(
-		player1: Player,
-		player2: Player,
-		score1: number,
-		score2: number,
-		winner: Player
-	): Promise<void> {
-		const token = localStorage.getItem("accessToken");
-		if (!token) return;
+	player1: Player,
+	player2: Player,
+	score1: number,
+	score2: number,
+	winner: Player
+): Promise<void> {
+	const token = localStorage.getItem("accessToken");
+	if (!token) return;
 
-		const payload = {
-			player1Id: player1.userId,
-			player2Id: player2.userId,
-			score1,
-			score2,
-			winnerId: winner.userId,
-			player1Name: player1.userId >= 100 ? player1.name : undefined,
-			player2Name: player2.userId >= 100 ? player2.name : undefined,
-		};
+	const payload = {
+		player1Id: player1.userId,
+		player2Id: player2.userId,
+		score1,
+		score2,
+		winnerId: winner.userId,
+		player1Name: player1.userId >= 100 ? player1.name : undefined,
+		player2Name: player2.userId >= 100 ? player2.name : undefined,
+	};
 
-		try {
-			const res = await fetch("/match", {
-				method: "POST",
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json",
-					"Authorization": `Bearer ${token}`
-				},
-				body: JSON.stringify(payload)
-			});
+	try {
+		const res = await fetch("/match", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+			body: JSON.stringify(payload)
+		});
 
-			if (!res.ok) console.error("Tournament match save failed:", await res.text());
-		} catch (err) {
-			console.error("Error saving tournament match:", err);
-		}
+		if (!res.ok) console.error("Tournament match save failed:", await res.text());
+	} catch (err) {
+		console.error("Error saving tournament match:", err);
 	}
+}
 
 
 

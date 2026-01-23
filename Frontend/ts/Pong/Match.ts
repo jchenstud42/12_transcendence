@@ -26,14 +26,14 @@ export class Match {
 	isMatchOver: boolean = false;
 	isPointOver: boolean = false;
 	aiLeft: Ai | null = null;
-	aiRight: Ai | null = null;	
+	aiRight: Ai | null = null;
 
 
 	// Resolver and promise for the current point
 	private pointEndResolver: ((winner: Player | null) => void) | null = null;
 	private pointPromise: Promise<Player | null> | null = null;
 
-	pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+	static pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
 
 	keys = {
 		w: false,
@@ -66,7 +66,7 @@ export class Match {
 		if (this.matchPlayer && this.matchPlayer[0].isAi)
 			this.aiLeft = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.leftPaddle, 1);
 		if (this.matchPlayer && this.matchPlayer[1].isAi)
-			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle, 1);	
+			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle, 1);
 	}
 
 	public ballLoop = (now = performance.now()) => {
@@ -82,7 +82,7 @@ export class Match {
 	};
 
 	public async playMatch(): Promise<Player | null> {
-		
+
 		// Allow the user to quit mid-match via the back button.
 		let backClicked = false;
 		const preBackClickHandler = () => {
@@ -95,7 +95,7 @@ export class Match {
 			}
 			this.quitMatch();
 		};
-		
+
 		// Only show/manage back button if not in tournament mode
 		if (!this.isTournament) {
 			PONG_UI.backButton.classList.remove("hidden");
@@ -109,7 +109,7 @@ export class Match {
 				this.nextPointReset();
 				this.isPointOver = false;
 			}
-		
+
 		}
 
 		// Remove the pre-handler if still attached
@@ -131,7 +131,7 @@ export class Match {
 		return this.winner;
 	}
 
-	public playPoint()  {
+	public playPoint() {
 		this.showPlayerPair();
 
 		// prevent double-start if ball already active or a start is in progress
@@ -146,82 +146,82 @@ export class Match {
 		});
 		this.pointPromise = promise;
 
-			this.disableKeyListeners();
+		this.disableKeyListeners();
 
-			this.starting = true;
+		this.starting = true;
 
-			// clear any previously scheduled timeouts from prior starts
-			this.pendingTimeouts.forEach(id => clearTimeout(id));
-			this.pendingTimeouts = [];
+		// clear any previously scheduled timeouts from prior starts
+		Match.pendingTimeouts.forEach(id => clearTimeout(id));
+		Match.pendingTimeouts = [];
 
-			// hide play button while starting to avoid double clicks
-			hideMenu(PONG_UI.playButton);
-			
-			//Initiate ball onscore callback
-			this.ball.onScore = (playerSide: 'left' | 'right') => {
-				this.addPoint(playerSide);
+		// hide play button while starting to avoid double clicks
+		hideMenu(PONG_UI.playButton);
 
-				if (this.isMatchOver) {
-					// resolve point promise with the winner, if waiting
-					if (this.pointEndResolver) {
-						this.pointEndResolver(this.winner);
-						this.pointEndResolver = null;
-						this.pointPromise = null;
-					}
-					// clear the score handler to avoid duplicates
-					this.ball.onScore = null;
-					// finalize match
-					this.endMatch(this.winner!);
-					if (!this.isTournament) resetGameMenu();
-					return;
+		//Initiate ball onscore callback
+		this.ball.onScore = (playerSide: 'left' | 'right') => {
+			this.addPoint(playerSide);
+
+			if (this.isMatchOver) {
+				// resolve point promise with the winner, if waiting
+				if (this.pointEndResolver) {
+					this.pointEndResolver(this.winner);
+					this.pointEndResolver = null;
+					this.pointPromise = null;
 				}
+				// clear the score handler to avoid duplicates
+				this.ball.onScore = null;
+				// finalize match
+				this.endMatch(this.winner!);
+				if (!this.isTournament) resetGameMenu();
+				return;
+			}
 
-				if (this.isPointOver) {
-					// resolve point promise to indicate point end (no winner yet)
-					if (this.pointEndResolver) {
-						this.pointEndResolver(null);
-						this.pointEndResolver = null;
-						this.pointPromise = null;
-					}
-					// clear handler so next point re-attaches a fresh one
-					this.ball.onScore = null;
-					return;
+			if (this.isPointOver) {
+				// resolve point promise to indicate point end (no winner yet)
+				if (this.pointEndResolver) {
+					this.pointEndResolver(null);
+					this.pointEndResolver = null;
+					this.pointPromise = null;
 				}
-			};
+				// clear handler so next point re-attaches a fresh one
+				this.ball.onScore = null;
+				return;
+			}
+		};
 
 
-			//Serve + Start Loops
-			this.pendingTimeouts.push(setTimeout(() => {
-				showCountDown("READY");
+		//Serve + Start Loops
+		Match.pendingTimeouts.push(setTimeout(() => {
+			showCountDown("READY");
 
-					this.pendingTimeouts.push(setTimeout(() => {
-					showCountDown("GO");
+			Match.pendingTimeouts.push(setTimeout(() => {
+				showCountDown("GO");
 
-					this.pendingTimeouts.push(setTimeout(() => {
-						hideCountDown();
-						showGameElements();
+				Match.pendingTimeouts.push(setTimeout(() => {
+					hideCountDown();
+					showGameElements();
 
-						//Start ball Loop
-						this.ball.active = true;
-						this.ball.serve();
-						if (this.aiLeft) this.aiLeft.oneSecondLoop();
-						if (this.aiRight) this.aiRight.oneSecondLoop();
-						this.last = performance.now();
-						this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
+					//Start ball Loop
+					this.ball.active = true;
+					this.ball.serve();
+					if (this.aiLeft) this.aiLeft.oneSecondLoop();
+					if (this.aiRight) this.aiRight.oneSecondLoop();
+					this.last = performance.now();
+					this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
 
-						//Start Paddle loop (only once)
-						if (!this.paddleLoopRunning) {
-							this.paddleLoopRunning = true;
-							this.paddleLoopRafId = this.updatePaddlePositions();
-						}
+					//Start Paddle loop (only once)
+					if (!this.paddleLoopRunning) {
+						this.paddleLoopRunning = true;
+						this.paddleLoopRafId = this.updatePaddlePositions();
+					}
 
-						//Enable Paddle Movements
-						this.enableKeyListeners();
-						this.starting = false;
+					//Enable Paddle Movements
+					this.enableKeyListeners();
+					this.starting = false;
 
-					}, 600));
-				}, 1000));
+				}, 600));
 			}, 1000));
+		}, 1000));
 		return promise;
 	}
 
@@ -274,8 +274,8 @@ export class Match {
 		this.ball.reset();
 
 		// clear any pending timeouts from prior start attempts
-		this.pendingTimeouts.forEach(id => clearTimeout(id));
-		this.pendingTimeouts = [];
+		Match.pendingTimeouts.forEach(id => clearTimeout(id));
+		Match.pendingTimeouts = [];
 
 		PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
 		PONG_UI.rightPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
@@ -321,11 +321,11 @@ export class Match {
 		}
 
 		// Reset game after short delay	if it's a quickmatch
-/* 		if (!this.isTournament) {
-			setTimeout(() => {
-				this.resetGame();
-			}, 1000);
-		} */
+		/* 		if (!this.isTournament) {
+					setTimeout(() => {
+						this.resetGame();
+					}, 1000);
+				} */
 		return this.winner;
 	}
 
@@ -438,6 +438,6 @@ function hideCountDown() {
 
 function showGameElements() {
 	showMenu(PONG_UI.ball,
-			PONG_UI.leftPaddle,
-			PONG_UI.rightPaddle);
+		PONG_UI.leftPaddle,
+		PONG_UI.rightPaddle);
 }

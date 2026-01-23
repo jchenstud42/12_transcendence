@@ -1,5 +1,5 @@
 import { PONG_UI } from './elements.js';
-import { Tournament} from './Tournament.js';
+import { Tournament } from './Tournament.js';
 import { GameInfo } from './GameInfo.js';
 import { Match } from './Match.js';
 import { t } from '../traduction/i18n.js';
@@ -14,8 +14,8 @@ let game: GameInfo;
 //////////////////////////////////////////////////////////
 
 /**
- 	1 - Initialize or get the game instance
- 	2 - Ensures game is always available
+	  1 - Initialize or get the game instance
+	  2 - Ensures game is always available
 */
 
 function getGameInfo(): GameInfo {
@@ -139,15 +139,15 @@ export function initMenuEvents() {
 					const match = new Match(game.isTournament, [game.players[0], game.players[1]]);
 					match.playMatch();
 				}
-					game.resetGameInfo();
+				game.resetGameInfo();
 			}
 		}
 	})
 
 	//Start the next match after a point
-/* 	PONG_UI.playButton.addEventListener("click", () => {
-		.playPoint();
-	}); */
+	/* 	PONG_UI.playButton.addEventListener("click", () => {
+			.playPoint();
+		}); */
 
 }
 
@@ -173,20 +173,20 @@ function hideMatchSelectionMenu() {
 
 function showPlayerNbrMenu() {
 	showMenu(PONG_UI.enterPlayerNbrText,
-			PONG_UI.playerNbrText,
-			PONG_UI.playerIncrButton,
-			PONG_UI.playerDecrButton,
-			PONG_UI.aiCounter,
-			PONG_UI.okButton);
+		PONG_UI.playerNbrText,
+		PONG_UI.playerIncrButton,
+		PONG_UI.playerDecrButton,
+		PONG_UI.aiCounter,
+		PONG_UI.okButton);
 }
 
 function hidePlayerNbrMenu() {
 	hideMenu(PONG_UI.enterPlayerNbrText,
-			PONG_UI.playerNbrText,
-			PONG_UI.aiCounter,
-			PONG_UI.playerIncrButton,
-			PONG_UI.playerDecrButton,
-			PONG_UI.okButton);
+		PONG_UI.playerNbrText,
+		PONG_UI.aiCounter,
+		PONG_UI.playerIncrButton,
+		PONG_UI.playerDecrButton,
+		PONG_UI.okButton);
 }
 
 function showPlayerNameMenu() {
@@ -215,6 +215,8 @@ export function hideMenu(...toHide: (HTMLElement | null | undefined)[]) {
 }
 
 export function resetGameMenu() {
+	Match.pendingTimeouts.forEach(id => clearTimeout(id));
+	Match.pendingTimeouts = [];
 	if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 	if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
@@ -227,23 +229,23 @@ export function resetGameMenu() {
 	PONG_UI.aiNbrText.textContent = "0";
 
 	hideMenu(PONG_UI.okButton,
-			PONG_UI.leftPaddle,
-			PONG_UI.rightPaddle,
-			PONG_UI.readyText,
-			PONG_UI.goText,
-			PONG_UI.playerNameContainer,
-			PONG_UI.increasePlayerButton,
-			PONG_UI.decreasePlayerButton,
-			PONG_UI.ball,
-			PONG_UI.aiCounter,
-			PONG_UI.playersArea,
-			PONG_UI.enterPlayerNbrText,
-			PONG_UI.playerNbrText,
-			PONG_UI.finalList);
+		PONG_UI.leftPaddle,
+		PONG_UI.rightPaddle,
+		PONG_UI.readyText,
+		PONG_UI.goText,
+		PONG_UI.playerNameContainer,
+		PONG_UI.increasePlayerButton,
+		PONG_UI.decreasePlayerButton,
+		PONG_UI.ball,
+		PONG_UI.aiCounter,
+		PONG_UI.playersArea,
+		PONG_UI.enterPlayerNbrText,
+		PONG_UI.playerNbrText,
+		PONG_UI.finalList);
 
 	//Go back to the first Pong button
 	showPongMenu();
-}	
+}
 
 
 ///////////////////////////////////////////////////////////
