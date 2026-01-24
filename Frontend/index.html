@@ -235,11 +235,31 @@
 					<div class="relative">
 						<button id="history-button" class="w-full text-left hover:text-[#dc3cf0] px-2"
 							data-i18n="match_history">Match History</button>
+						<div id="history-menu" class="hidden absolute top-0 right-[230px] w-[400px] bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
 
-						<div id="history-menu"
-							class="hidden absolute top-0 right-[230px] w-80 bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-4 z-50">
-							<h2 class="text-xl font-bold mb-5" data-i18n="match_history">Match History</h2>
-							<div id="history-list" class="space-y-2"></div>
+						    <div class="flex items-center justify-between mb-5">
+						        <h2 class="text-xl font-bold" data-i18n="match_history">Match History</h2>
+								<div class="flex items-center gap-2">
+						        	<button id="stats-back-button" class="hidden bg-red-500 hover:bg-red-600 px-3 py-1 text-xs text-white rounded-full transition-colors">
+						        	    X
+						        	</button>
+						        	<button id="stats-button" class="hidden bg-red-500 hover:bg-red-600 px-3 py-1 text-xs text-white rounded-full transition-colors">
+						        	    Global Stats
+						        	</button>
+								</div>
+						    </div>
+						
+						    <div id="history-list" class="space-y-2"></div>
+						</div>
+
+
+						<div id="global-stats-menu" class="hidden absolute top-0 right-[638px] w-[600px] h-[500px] bg-gray-900 text-white border-2 border-[#dc3cf0] shadow-lg rounded p-6 z-50 overflow-y-auto">
+						    <div class="flex items-center justify-between mb-5">
+								<h2 class="text-xl font-bold">Global Statistics</h2>
+									<button id="back-to-history" class="bg-red-500 hover:bg-red-600 px-3 py-1 text-xs text-white rounded-full transition-colors">
+										X
+									</button>
+								</div>
 						</div>
 					</div>
 
@@ -464,6 +484,7 @@
 	</div>
 </body>
 
+<script src="/js/vendor/chart.js"></script>
 <script type="module" src="/js/main.js"></script>
 
 </html>

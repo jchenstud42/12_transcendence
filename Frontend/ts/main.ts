@@ -9,6 +9,9 @@ import { init2FA, showTwoFAForm, setSelected2FAType } from "./2FA_Front/2FA_Auth
 import { toggleMenu, hideMenu } from "./UI/UI_helpers.js";
 import { resetTwoFAForm } from "./UI/UI_events.js";
 
+// Chart.js global declaration
+declare const Chart: any;
+
 const registerContainer = document.getElementById("register-form") as HTMLDivElement | null;
 const loginContainer = document.getElementById("login-form") as HTMLDivElement | null;
 
@@ -38,6 +41,9 @@ const profile_menu = document.getElementById("profile-menu")! as HTMLDivElement;
 const edit_menu = document.getElementById("edit-profile-menu")! as HTMLDivElement | null;
 const friends_menu = document.getElementById("friends-menu")! as HTMLDivElement | null;
 const history_menu = document.getElementById("history-menu")! as HTMLDivElement | null;
+const global_stats_menu = document.getElementById("global-stats-menu")! as HTMLDivElement | null;
+const stats_back_button = document.getElementById("stats-back-button") as HTMLButtonElement;
+const buttonGlobalStats = document.getElementById("stats-button") as  HTMLButtonElement;
 const profile_button = document.getElementById("profile-button")!;
 const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
@@ -69,57 +75,11 @@ let is2FAEnabled = false;
 
 
 // POOOONNNNNNNG
-const paddle_left = document.getElementById("left-paddle") as HTMLDivElement;
-const paddle_right = document.getElementById("right-paddle") as HTMLDivElement;
-const ball = document.getElementById("ball") as HTMLDivElement;
-
-const PONG_WIDTH = 800;
-const PONG_HEIGHT = 600;
-const PADDLE_WIDTH = 10;
-const PADDLE_HEIGHT = 100;
-const PADDLE_SPEED = 10;
-const BALL_SIZE = 10;
-
 const pong_button = document.getElementById("pong-button")!;
 const qmatch_button = document.getElementById("quick-match-button")!;
 const tournament_button = document.getElementById("tournament-button")!;
 
-const enterPlayerNbr_text = document.getElementById("enterPlayerNbr-text")! as HTMLHeadingElement;
-const playerNbr_text = document.getElementById("playerNbr-text")! as HTMLHeadingElement;
-const playerIncr_button = document.getElementById("increasePlayer-button")!;
-const playerDecr_button = document.getElementById("decreasePlayer-button")!;
-const aiCounter = document.getElementById("ai-counter")! as HTMLDivElement;
-const aiNbr_text = document.getElementById("aiNbr-text")! as HTMLDivElement;
-const OK_button = document.getElementById("OK-button")! as HTMLDivElement;
 const play_button = document.getElementById("play-button") as HTMLButtonElement;
-const ready_text = document.getElementById("ready-text")!;
-const go_text = document.getElementById("go-text")!;
-
-const players_area = document.getElementById("players-area")! as HTMLDivElement | null;
-const decreasePlayer_button = document.getElementById("decreasePlayer-button")!;
-const increasePlayer_button = document.getElementById("increasePlayer-button")!;
-const score_left = document.getElementById("score-left")! as HTMLDivElement | null;
-const score_right = document.getElementById("score-right")! as HTMLDivElement | null;
-const playerName_container = document.getElementById("playerName-container")! as HTMLDivElement;
-const playerName_input = document.getElementById("playerName-input")! as HTMLInputElement;
-const playerColors = [
-	"text-red-400/90",
-	"text-blue-400/90",
-	"text-green-400/90",
-	"text-yellow-400/90",
-];
-const playersList = document.getElementById("players-list")! as HTMLDivElement;
-const finalList = document.getElementById("final-list")! as HTMLDivElement;
-const winnerName = document.getElementById("winner-name")! as HTMLDivElement;
-
-const guestPlayers = new Map<number, string>();
-let loggedUserCounter = 100;
-let guestIdCounter = 200;
-
-let isTournament = false;
-let playerNbr = 2;
-let maxPlayer = 2;
-let aiNbr = 0;
 
 initUIState(
 	{ register_button, login_button, registerContainer, loginContainer, profile_button, logout_button: document.getElementById("logout-button"), twofaForm, twofaTypeMenu },
@@ -135,8 +95,8 @@ init2FA(
 
 initUIEvents(
 	{
-		register_button, login_button, profile_button, edit_button, friends_button, history_button, start_button, play_button, pong_button, qmatch_button, tournament_button,
-		language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu, back_button, pong_overlay
+		register_button, login_button, profile_button, edit_button, friends_button, history_button, global_stats_menu, start_button, play_button, pong_button, qmatch_button, tournament_button,
+		stats_back_button, buttonGlobalStats, language_button, registerContainer, loginContainer, profile_menu, edit_menu, friends_menu, history_menu, twoFA_menu, twofaTypeMenu, language_menu, pong_menu, back_button, pong_overlay
 	});
 
 
@@ -704,10 +664,12 @@ async function fetchMatchHistory(userId: number) {
 		});
 
 		const text = await res.text();
+		console.log("Match history response:", text);
 
 		if (!res.ok) throw new Error(text);
 
 		const data = JSON.parse(text);
+		console.log("Parsed match history data:", data);
 		return Array.isArray(data) ? data : data.matches ?? [];
 	} catch (err) {
 		console.error("fetchMatchHistory error:", err);
@@ -715,19 +677,51 @@ async function fetchMatchHistory(userId: number) {
 	}
 }
 
+async function fetchGlobalStats(userId: number) {
+	try {
+		const res = await fetch(`/stats/${userId}`, {
+			credentials: "include",
+			headers: getAuthHeaders()
+		});
+
+		const text = await res.text();
+		console.log("Global Stats response:", text);
+
+		if (!res.ok) throw new Error(text);
+
+		const data = JSON.parse(text);
+		console.log("Parsed global stats data:", data);
+		// Return the stats object directly
+		return data;
+	} catch (err) {
+		console.error("fetchGlobalStats error:", err);
+		// Return default empty stats on error
+		return {
+			userId,
+			gamesPlayed: 0,
+			gamesWon: 0,
+			matchTime: 0
+		};
+	}
+}
+
 const historyMenuList = document.createElement("div");
 historyMenuList.id = "history-list";
+historyMenuList.className = "max-h-[400px] overflow-y-auto pr-2 custom-scrollbar";
 if (history_menu) {
 	history_menu.appendChild(historyMenuList);
 }
 
-function renderMatchHistory(matches: any[]) {
+function renderMatchHistory(matches: any[], stats: any) {
 	historyMenuList.innerHTML = "";
 
 	if (!matches.length) {
 		historyMenuList.textContent = t("no_match_history");
 		return;
 	}
+
+	hideMenu(stats_back_button);
+	showMenu(buttonGlobalStats);
 
 	matches.forEach(match => {
 		const p1 = match.player1?.username ?? "Unknown";
@@ -739,8 +733,232 @@ function renderMatchHistory(matches: any[]) {
 					t("draw");
 
 		const div = document.createElement("div");
+		div.className = "mb-4 pb-2 border-b border-gray-800 last:mb-0 last:border-0";
 		div.innerHTML = `${date} | ${p1} ${match.score1} - ${match.score2} ${p2}`;
+		renderMatchStat(matches, match, historyMenuList, stats);
+
 		historyMenuList.appendChild(div);
+	});
+
+	renderGlobalStats(matches, stats);
+}
+
+function renderMatchStat(matches: any, match: any, div: HTMLDivElement, stats: any) {
+		const buttonStats = document.createElement("button");
+		buttonStats.textContent = "View Stats";
+		buttonStats.className = "ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700";
+
+		buttonStats.addEventListener("click", () => {
+			if (global_stats_menu?.classList.contains!("hidden"))
+				hideMenu(global_stats_menu);
+			hideMenu(buttonGlobalStats);
+			historyMenuList.innerHTML = "";
+
+			showMenu(stats_back_button);
+			stats_back_button.addEventListener("click", () => {
+				return renderMatchHistory(matches, stats);
+			});
+
+			const statsList = document.createElement("div");
+			statsList.id = "stats-list";
+			statsList.innerHTML = "";
+			historyMenuList.appendChild(statsList);
+			if (statsList) {
+				statsList.innerHTML = `
+					<div><strong>${"Match statistics"}</strong></div>
+					<div>${"Balls hit"}: ${match.nbrOfBallHit ?? 0}</div>
+					<div>${"Balls missed"}: ${match.nbrOfBallMissed ?? 0}</div>
+					<div>${"Match duration"}: ${(match.matchTime != null) ? (Math.floor(match.matchTime / 1000) + " " + "seconds") : "N/A"}</div>`;
+			}
+		});
+		div.appendChild(buttonStats);
+};
+
+function renderGlobalStats(matches: any[], stats: any) {
+	// Clear existing global stats content
+	global_stats_menu!.innerHTML = '';
+	
+	// Add back to history button
+	const backHistoryButton = document.createElement("button");
+	backHistoryButton.id = "back-to-history";
+	backHistoryButton.className = "mb-4 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors";
+	backHistoryButton.textContent = "✕ Close";
+	global_stats_menu!.appendChild(backHistoryButton);
+
+	// Title
+	const title = document.createElement("h2");
+	title.className = "text-2xl font-bold mb-4 text-center";
+	title.textContent = "Global Statistics";
+	global_stats_menu!.appendChild(title);
+
+	if (stats && stats.gamesPlayed > 0) {
+		const gamesPlayed = stats.gamesPlayed ?? 0;
+		const gamesWon = stats.gamesWon ?? 0;
+		const gamesLost = gamesPlayed - gamesWon;
+		const winRate = gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(1) : "0.0";
+		const averageMatchDuration = stats.matchTime && gamesPlayed > 0 
+			? Math.floor(stats.matchTime / gamesPlayed / 1000) 
+			: 0;
+		
+		// Container for charts
+		const chartsContainer = document.createElement("div");
+		chartsContainer.className = "space-y-6";
+		global_stats_menu!.appendChild(chartsContainer);
+
+		// Win/Loss Pie Chart
+		const pieChartContainer = document.createElement("div");
+		pieChartContainer.className = "bg-gray-800 p-4 rounded";
+		const pieTitle = document.createElement("h3");
+		pieTitle.className = "text-lg font-semibold mb-2 text-center";
+		pieTitle.textContent = "Win/Loss Ratio";
+		pieChartContainer.appendChild(pieTitle);
+		
+		const pieCanvas = document.createElement("canvas");
+		pieCanvas.id = "winLossChart";
+		pieCanvas.width = 250;
+		pieCanvas.height = 250;
+		pieChartContainer.appendChild(pieCanvas);
+		chartsContainer.appendChild(pieChartContainer);
+
+		// Games Stats Bar Chart
+		const barChartContainer = document.createElement("div");
+		barChartContainer.className = "bg-gray-800 p-4 rounded";
+		const barTitle = document.createElement("h3");
+		barTitle.className = "text-lg font-semibold mb-2 text-center";
+		barTitle.textContent = "Games Overview";
+		barChartContainer.appendChild(barTitle);
+		
+		const barCanvas = document.createElement("canvas");
+		barCanvas.id = "gamesStatsChart";
+		barCanvas.width = 400;
+		barCanvas.height = 200;
+		barChartContainer.appendChild(barCanvas);
+		chartsContainer.appendChild(barChartContainer);
+
+		// Stats Summary
+		const summary = document.createElement("div");
+		summary.className = "bg-gray-800 p-4 rounded space-y-2";
+		summary.innerHTML = `
+			<div class="grid grid-cols-2 gap-2 text-sm">
+				<div><span class="text-gray-400">Games Played:</span> <span class="font-bold">${gamesPlayed}</span></div>
+				<div><span class="text-gray-400">Win Rate:</span> <span class="font-bold text-green-400">${winRate}%</span></div>
+				<div><span class="text-gray-400">Games Won:</span> <span class="font-bold text-green-500">${gamesWon}</span></div>
+				<div><span class="text-gray-400">Games Lost:</span> <span class="font-bold text-red-500">${gamesLost}</span></div>
+				<div class="col-span-2"><span class="text-gray-400">Avg Match Duration:</span> <span class="font-bold">${averageMatchDuration}s</span></div>
+			</div>`;
+		chartsContainer.appendChild(summary);
+
+		// Create charts after elements are in DOM
+		setTimeout(() => {
+			// Win/Loss Pie Chart
+			new Chart(pieCanvas, {
+				type: 'doughnut',
+				data: {
+					labels: ['Won', 'Lost'],
+					datasets: [{
+						data: [gamesWon, gamesLost],
+						backgroundColor: [
+							'rgba(34, 197, 94, 0.8)',  // green
+							'rgba(239, 68, 68, 0.8)'   // red
+						],
+						borderColor: [
+							'rgba(34, 197, 94, 1)',
+							'rgba(239, 68, 68, 1)'
+						],
+						borderWidth: 2
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: true,
+					plugins: {
+						legend: {
+							position: 'bottom',
+							labels: {
+								color: '#ffffff',
+								font: { size: 12 }
+							}
+						}
+					}
+				}
+			});
+
+			// Games Stats Bar Chart
+			new Chart(barCanvas, {
+				type: 'bar',
+				data: {
+					labels: ['Total Games', 'Won', 'Lost'],
+					datasets: [{
+						label: 'Games',
+						data: [gamesPlayed, gamesWon, gamesLost],
+						backgroundColor: [
+							'rgba(220, 60, 240, 0.6)',  // purple
+							'rgba(34, 197, 94, 0.6)',   // green
+							'rgba(239, 68, 68, 0.6)'    // red
+						],
+						borderColor: [
+							'rgba(220, 60, 240, 1)',
+							'rgba(34, 197, 94, 1)',
+							'rgba(239, 68, 68, 1)'
+						],
+						borderWidth: 2
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: true,
+					plugins: {
+						legend: {
+							display: false
+						}
+					},
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+								color: '#ffffff',
+								stepSize: 1
+							},
+							grid: {
+								color: 'rgba(255, 255, 255, 0.1)'
+							}
+						},
+						x: {
+							ticks: {
+								color: '#ffffff'
+							},
+							grid: {
+								color: 'rgba(255, 255, 255, 0.1)'
+							}
+						}
+					}
+				}
+			});
+		}, 100);
+	} else {
+		const noStats = document.createElement("div");
+		noStats.className = "text-center py-8 text-gray-400";
+		noStats.textContent = "No statistics available yet. Play some games!";
+		global_stats_menu!.appendChild(noStats);
+	}
+
+	// Remove old event listeners by cloning the button
+	const oldButton = buttonGlobalStats;
+	const newButton = oldButton.cloneNode(true) as HTMLButtonElement;
+	oldButton.parentNode?.replaceChild(newButton, oldButton);
+
+	// Add event listener to the new button
+	newButton.addEventListener("click", () => {
+		if (global_stats_menu?.classList.contains("hidden")) {
+			showMenu(global_stats_menu);
+		} else {
+			hideMenu(global_stats_menu);
+		}
+	});
+
+	// Add event listener to back button
+	backHistoryButton.addEventListener("click", () => {
+		hideMenu(global_stats_menu);
 	});
 }
 
@@ -753,12 +971,15 @@ history_button.addEventListener("click", async () => {
 		}
 		const userId = JSON.parse(s).id;
 		const matches = await fetchMatchHistory(userId);
-		renderMatchHistory(matches);
+		const stats = await fetchGlobalStats(userId);
+		renderMatchHistory(matches, stats);
 	} catch (err: any) {
 		console.error("Error:", err);
 		alert(getServerErrorMessage(err.message));
 	}
 });
 
-import { initMenuEvents } from "./Pong/menu.js";
+
+//PONG
+import { initMenuEvents, showMenu } from "./Pong/menu.js";
 initMenuEvents();

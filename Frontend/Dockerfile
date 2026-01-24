@@ -44,6 +44,7 @@ COPY index.html ./
 COPY --from=build /app/srcs/js ./js
 COPY --from=build /app/srcs/assets ./assets
 COPY --from=build /app/srcs/stylesDist ./stylesDist
+COPY --from=build /app/srcs/node_modules/chart.js/dist/chart.umd.js ./js/vendor/chart.js
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

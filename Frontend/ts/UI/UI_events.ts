@@ -1,4 +1,4 @@
-import { toggleMenu } from "./UI_helpers.js";
+import { hideMenu, toggleMenu } from "./UI_helpers.js";
 import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
@@ -26,6 +26,8 @@ type UIEventElements = {
 	pong_button?: HTMLElement | null;
 	qmatch_button?: HTMLElement | null;
 	tournament_button?: HTMLElement | null;
+	stats_back_button?: HTMLElement | null;
+	buttonGlobalStats?: HTMLElement | null;
 
 	registerContainer?: HTMLElement | null;
 	loginContainer?: HTMLElement | null;
@@ -35,6 +37,7 @@ type UIEventElements = {
 	pong_menu?: HTMLElement | null;
 	pong_overlay?: HTMLElement | null;
 	history_menu?: HTMLElement | null;
+	global_stats_menu?: HTMLElement | null;
 	twoFA_menu?: HTMLElement | null;
 	twofaTypeMenu?: HTMLElement | null;
 	language_menu?: HTMLElement | null;
@@ -97,9 +100,10 @@ export function initUIEvents(elems: UIEventElements) {
 		toggleMenu(elems.loginContainer, elems.registerContainer, elems.language_menu)
 	});
 
-	elems.profile_button?.addEventListener("click", () =>
-		toggleMenu(elems.profile_menu, elems.language_menu)
-	);
+	elems.profile_button?.addEventListener("click", () => {
+		toggleMenu(elems.profile_menu, elems.language_menu);
+		hideMenu(elems.edit_menu);
+	});
 
 	elems.edit_button?.addEventListener("click", () => {
 		resetProfileForm();
@@ -108,6 +112,7 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.twoFA_menu,
 			elems.friends_menu,
 			elems.history_menu,
+			elems.global_stats_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu
 		);
@@ -141,6 +146,7 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.twoFA_menu,
 			elems.friends_menu,
 			elems.history_menu,
+			elems.global_stats_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu,
 			elems.registerContainer,
@@ -156,6 +162,7 @@ export function initUIEvents(elems: UIEventElements) {
 			elems.twoFA_menu,
 			elems.edit_menu,
 			elems.history_menu,
+			elems.global_stats_menu,
 			elems.twofaTypeMenu,
 			elems.language_menu
 		)
@@ -164,6 +171,7 @@ export function initUIEvents(elems: UIEventElements) {
 	elems.history_button?.addEventListener("click", () =>
 		toggleMenu(
 			elems.history_menu,
+			elems.global_stats_menu,
 			elems.twoFA_menu,
 			elems.friends_menu,
 			elems.edit_menu,

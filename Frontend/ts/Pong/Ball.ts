@@ -50,6 +50,8 @@ export class Ball {
 
 	reset() {
 		this.initBallPos();
+		this.ballPaddleHitL = 0;
+		this.ballPaddleHitR = 0;
 	}
 
 	render() {

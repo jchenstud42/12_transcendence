@@ -9,6 +9,7 @@ import fastifyCookie from "@fastify/cookie";
 import userRoutes from '../user_manage/routes/user.routes.js';
 import friendRoutes from '../user_manage/routes/friend.routes.js';
 import matchRoutes from '../user_manage/routes/match.routes.js';
+import statsRoutes from '../user_manage/routes/stats.routes.js';
 import fastifyCors from '@fastify/cors';
 
 
@@ -55,6 +56,7 @@ export async function buildServer() {
 	fastify.register(userRoutes, { prefix: '/user' });
 	fastify.register(friendRoutes, { prefix: '/friend' });
 	fastify.register(matchRoutes, { prefix: '/match' });
+	fastify.register(statsRoutes, { prefix: '/stats' });
 	fastify.register(twofaRoutes);
 
 	return (fastify);

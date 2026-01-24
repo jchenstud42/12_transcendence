@@ -1,7 +1,18 @@
 import prisma from "../prisma/client.js";
 
 export class MatchService {
-	async addMatch(player1Id: number | null, player2Id: number | null, score1: number, score2: number, winnerId: number | null,player1Name?: string,player2Name?: string) {
+	async addMatch(
+			player1Id: number | null, 
+			player2Id: number | null, 
+			score1: number, 
+			score2: number, 
+			winnerId: number | null,
+			player1Name?: string,
+			player2Name?: string,
+			nbrOfBallHit?: number,
+			nbrOfBallMissed?: number,
+			matchTime?: number
+		) {
 		const data: any = {score1, score2,};
 
 		if (player1Id !== null) {
@@ -20,6 +31,17 @@ export class MatchService {
 		if (player2Name) {
 			data.player2GuestName = player2Name;
 		}
+
+		if (nbrOfBallHit !== undefined) {
+			data.nbrOfBallHit = nbrOfBallHit;
+		}
+		if (nbrOfBallMissed !== undefined) {
+			data.nbrOfBallMissed = nbrOfBallMissed;
+		}
+		if (matchTime !== undefined) {
+			data.matchTime = matchTime;
+		}
+
 		return await prisma.match.create({ data });
 	}
 
@@ -41,6 +63,9 @@ export class MatchService {
 				player2: { select: { id: true, username: true } },
 				player1GuestName: true,
 				player2GuestName: true,
+				nbrOfBallHit: true,
+				nbrOfBallMissed: true,
+				matchTime: true
 			},
 			orderBy: { date: "desc" },
 		});

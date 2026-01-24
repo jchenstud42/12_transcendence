@@ -19,6 +19,7 @@ all: build up
 
 build:
 	@echo "$(RED)"B"$(YELLOW)"u"$(GREEN)"i"$(CYAN)"l"$(BLUE)"d"$(MAGENTA)"i"$(RED)"n"$(YELLOW)"g"$(CYAN)"."$(BLUE)"."$(MAGENTA)"." " 👷👷​​​" $(RESET)"
+	@mkdir -p Backend/database
 	@docker compose build && cd Backend && npx tsc
 	@cd Frontend && npm run build
 	@echo "$(RED)"D"$(YELLOW)"o"$(GREEN)"n"$(CYAN)"e" $(BLUE)"!"$(MAGENTA) "🥳​​​​" $(RESET)"

@@ -1,0 +1,6 @@
+*.db
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+!.gitkeep

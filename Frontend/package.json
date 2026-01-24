@@ -6,6 +6,9 @@
 		"build:css": "npx tailwindcss -i ./styles/input.css -o ./stylesDist/output.css",
 		"build": "npm run build:ts && npm run build:css"
 	},
+	"dependencies": {
+		"chart.js": "^4.4.1"
+	},
 	"devDependencies": {
 		"tailwindcss": "^3.4.19",
 		"typescript": "^5.9.3"

@@ -14,6 +14,9 @@ interface MatchBody {
 	winnerId: number;
 	player1Name?: string;
 	player2Name?: string;
+	nbrOfBallHit?: number;
+	nbrOfBallMissed?: number;
+	matchTime?: number;
 }
 
 export default async function matchRoutes(fastify: FastifyInstance) {
@@ -25,7 +28,7 @@ export default async function matchRoutes(fastify: FastifyInstance) {
 	});
 
 	fastify.post("/", { preHandler: [authentizer()] }, async (req, reply) => {
-		const { player1Id, player2Id, score1, score2, winnerId, player1Name, player2Name } = req.body as MatchBody;
+		const { player1Id, player2Id, score1, score2, winnerId, player1Name, player2Name, nbrOfBallHit, nbrOfBallMissed, matchTime } = req.body as MatchBody;
 
 		const dbPlayer1Id = (player1Id >= 100 && player1Id < 300) ? null : player1Id;
 		const dbPlayer2Id = (player2Id >= 100 && player2Id < 300) ? null : player2Id;
@@ -38,7 +41,10 @@ export default async function matchRoutes(fastify: FastifyInstance) {
 			score2, 
 			dbWinnerId,
 			player1Name,
-			player2Name
+			player2Name,
+			nbrOfBallHit,
+			nbrOfBallMissed,
+			matchTime
 		);
 		
 		return reply.send(match);

@@ -4,7 +4,6 @@ import { PONG_UI } from "./elements.js";
 import { Ball } from "./Ball.js";
 import { showPlayerName, showMenu, hideMenu, resetGameMenu } from './menu.js';
 import { Ai } from "./Ai.js";
-import { saveTournamentMatch } from "./Tournament.js"
 import { t } from '../traduction/i18n.js';
 
 const PONG_HEIGHT = 600;
@@ -66,7 +65,7 @@ export class Match {
 	constructor(isTournament: boolean, matchPlayer: [Player, Player] | null = null) {
 		this.ball = new Ball(PONG_UI.ball);
 		this.matchPlayer = matchPlayer;
-		this.pointsToWin = 3;
+		this.pointsToWin = 1;
 		this.isTournament = isTournament;
 		this.winner = null;
 		this.starting = false;
@@ -219,8 +218,8 @@ export class Match {
 					//Start ball Loop
 					this.ball.active = true;
 					this.ball.serve();
-					if (this.aiLeft) this.aiLeft.oneSecondLoop();
-					if (this.aiRight) this.aiRight.oneSecondLoop();
+					if (this.aiLeft) this.aiLeft.oneSecondLoop(), this.aiLeft.showAiPredictions();
+					if (this.aiRight) this.aiRight.oneSecondLoop(), this.aiRight.showAiPredictions();
 					this.last = performance.now();
 					this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
 
@@ -250,6 +249,7 @@ export class Match {
 			this.matchPlayer[pointIndex].point++;
 
 			this.updateMatchStat();
+			this.ball.reset();
 			// Update score display
 			if (playerSide === 'left' && PONG_UI.scoreLeft) {
 				PONG_UI.scoreLeft.textContent = this.matchPlayer[pointIndex].point.toString();
@@ -310,12 +310,17 @@ export class Match {
 		
 		this.matchStat.matchTime = performance.now() - this.matchStat.matchTime;
 		
-		saveTournamentMatch(
+		console.log("Match stats:", this.matchStat);
+
+		saveMatchHistory(
 			this.matchPlayer![0],
 			this.matchPlayer![1],
 			this.matchPlayer![0].point,
 			this.matchPlayer![1].point,
-			winner
+			winner,
+			this.matchStat.nbrOfBallHit,
+			this.matchStat.nbrOfBallMissed,
+			this.matchStat.matchTime
 		);
 
 		this.partialReset();
@@ -470,4 +475,124 @@ function showGameElements() {
 	showMenu(PONG_UI.ball,
 		PONG_UI.leftPaddle,
 		PONG_UI.rightPaddle);
+}
+
+export async function saveMatchHistory(
+	player1: Player,
+	player2: Player,
+	score1: number,
+	score2: number,
+	winner: Player,
+	nbrOfBallHit: number,
+	nbrOfBallMissed: number,
+	matchTime: number
+): Promise<void> {
+	const token = localStorage.getItem("accessToken");
+	if (!token) return;
+
+	const payload = {
+		player1Id: player1.userId,
+		player2Id: player2.userId,
+		score1,
+		score2,
+		winnerId: winner.userId,
+		player1Name: player1.userId >= 100 ? player1.name : undefined,
+		player2Name: player2.userId >= 100 ? player2.name : undefined,
+		nbrOfBallHit,
+		nbrOfBallMissed,
+		matchTime
+	};
+
+	try {
+		// Save match history
+		const res = await fetch("/match", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+			body: JSON.stringify(payload)
+		});
+
+		if (!res.ok) {
+			console.error("Match save failed:", await res.text());
+			return;
+		}
+
+		// Save stats for player1 (if not a guest)
+		if (player1.userId < 100) {
+			await savePlayerStats(player1.userId, winner.userId === player1.userId, matchTime, token);
+		}
+
+		// Save stats for player2 (if not a guest)
+		if (player2.userId < 100) {
+			await savePlayerStats(player2.userId, winner.userId === player2.userId, matchTime, token);
+		}
+	} catch (err) {
+		console.error("Error saving match:", err);
+	}
+}
+
+async function savePlayerStats(
+	userId: number,
+	isWinner: boolean,
+	matchTime: number,
+	token: string
+): Promise<void> {
+	try {
+		const statsPayload = {
+			userId,
+			gamesPlayed: 1,
+			gamesWon: isWinner ? 1 : 0,
+			matchTime
+		};
+
+		const res = await fetch("/stats", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+			body: JSON.stringify(statsPayload)
+		});
+
+		if (!res.ok) {
+			console.error("Stats save failed:", await res.text());
+		}
+	} catch (err) {
+		console.error("Error saving stats:", err);
+	}
+}
+
+export async function saveStats(
+	playerId: number,
+	gamesWon: number,
+	matchTime: number
+): Promise<void> {
+	const token = localStorage.getItem("accessToken");
+	if (!token) return;
+
+	const payload = {
+		playerId,
+		gamesWon,
+		matchTime
+	};
+
+	try {
+		const res = await fetch("/match", {
+			method: "POST",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${token}`
+			},
+			body: JSON.stringify(payload)
+		});
+
+		if (!res.ok) console.error("Tournament match save failed:", await res.text());
+	} catch (err) {
+		console.error("Error saving tournament match:", err);
+	}
 }
