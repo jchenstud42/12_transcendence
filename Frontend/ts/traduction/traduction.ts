@@ -50,8 +50,8 @@ export const translations = {
 		lost: "Lost",
 		total_games: "Total Games",
 		no_stat: "No statistics available yet. Play some games!",
-		games_played: "Games Played:",
-		avg_duration: "Avg Match Duration:",
+		games_played: "Games Played",
+		avg_duration: "Avg Match Duration",
 
 
 		//2FA + Message
@@ -212,8 +212,8 @@ export const translations = {
 		lost: "Defaite",
 		total_games: "Partie(s) total",
 		no_stat: "Aucune partie disponible. Joue quelques parties !",
-		games_played: "Partie(s) jouee(s):",
-		avg_duration: "Duree moyenne des parties:",
+		games_played: "Partie(s) jouee(s)",
+		avg_duration: "Duree moyenne des parties",
 
 
 		//2FA + Messages
@@ -377,8 +377,8 @@ export const translations = {
 		lost: "Derrota",
 		total_games: "Total de partidos",
 		no_stat: "Aún no hay estadísticas disponibles. ¡Juega a algunos juegos!",
-		games_played: "Partido(s) jugado(s):",
-		avg_duration: "Duración media de las partidas:",
+		games_played: "Partido(s) jugado(s)",
+		avg_duration: "Duración media de las partidas",
 
 
 		//2FA + Mensajes
