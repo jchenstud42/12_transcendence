@@ -664,15 +664,12 @@ async function fetchMatchHistory(userId: number) {
 		});
 
 		const text = await res.text();
-		console.log("Match history response:", text);
 
 		if (!res.ok) throw new Error(text);
 
 		const data = JSON.parse(text);
-		console.log("Parsed match history data:", data);
 		return Array.isArray(data) ? data : data.matches ?? [];
 	} catch (err) {
-		console.error("fetchMatchHistory error:", err);
 		return [];
 	}
 }
@@ -685,16 +682,13 @@ async function fetchGlobalStats(userId: number) {
 		});
 
 		const text = await res.text();
-		console.log("Global Stats response:", text);
 
 		if (!res.ok) throw new Error(text);
 
 		const data = JSON.parse(text);
-		console.log("Parsed global stats data:", data);
 		// Return the stats object directly
 		return data;
 	} catch (err) {
-		console.error("fetchGlobalStats error:", err);
 		// Return default empty stats on error
 		return {
 			userId,

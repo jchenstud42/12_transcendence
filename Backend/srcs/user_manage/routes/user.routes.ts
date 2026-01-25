@@ -46,7 +46,6 @@ export default async function userRoutes(fastify: FastifyInstance) {
 	});
 
 	fastify.patch("/profile/:id", { preHandler: [authentizer()] }, async (req, reply) => {
-		console.log("TEST");
 		try {
 			const userId = Number((req.params as UserParams).id);
 
@@ -57,7 +56,8 @@ export default async function userRoutes(fastify: FastifyInstance) {
 		catch (err: any) {
 			console.error(err);
 			if (err.message === "User already exists") {
-				return reply.status(409).send({error: "User already exists",});}
+				return reply.status(409).send({ error: "User already exists", });
+			}
 			return reply.status(500).send({ error: "Server error" });
 		}
 	});

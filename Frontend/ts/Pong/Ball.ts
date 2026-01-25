@@ -72,7 +72,7 @@ export class Ball {
 		const h = PONG_UI.pongMenu.clientHeight;
 
 		//update ball position
-		//console.log('Ball x Position: ', this.x, ' + vx:', this.vx, ' dt:', dt); 
+		//console.log('Ball x Position: ', this.x, ' + vx:', this.vx, ' dt:', dt);
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
 
@@ -115,12 +115,12 @@ export class Ball {
 		}
 
 		if (this.x + BALL_SIZE < 0) {
-			console.debug('Ball out left -> right player scores');
+			// console.debug('Ball out left -> right player scores');
 			if (this.onScore) this.onScore('right'); // notifier le Game
 			this.reset();
 		}
 		if (this.x > w) {
-			console.debug('Ball out right -> left player scores');
+			// console.debug('Ball out right -> left player scores');
 			if (this.onScore) this.onScore('left'); // notifier le Game
 			this.reset();
 		}
