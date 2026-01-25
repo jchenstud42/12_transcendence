@@ -223,9 +223,11 @@ export function resetGameMenu() {
 	if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 	if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
 
-	game.resetGameInfo();
+	if (game)
+		game.resetGameInfo();
 
 	PONG_UI.playersList.innerHTML = "";
+	PONG_UI.playerNameInput.value = "";
 	PONG_UI.finalList.innerHTML = "";
 	PONG_UI.winnerName.innerHTML = "";
 	PONG_UI.leftPaddle.style.top = `${PONG_HEIGHT / 2 - PADDLE_HEIGHT / 2}px`;
