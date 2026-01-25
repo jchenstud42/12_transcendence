@@ -38,6 +38,22 @@ export const translations = {
 		win_with: " win with ",
 		point: " point!",
 
+		//Stats
+		global_stats: "Global Stats",
+		match_statistics: "Match statistics",
+		view_stats: "View Stats",
+		balls_hit: "Ball hit",
+		balls_missed: "Ball missed",
+		match_duration: "Match duration",
+		wl_ratio: "Win/Loss Ratio",
+		won: "Won",
+		lost: "Lost",
+		total_games: "Total Games",
+		no_stat: "No statistics available yet. Play some games!",
+		games_played: "Games Played:",
+		avg_duration: "Avg Match Duration:",
+
+
 		//2FA + Message
 		logout_btn: "Logout",
 		draw: "Draw",
@@ -183,6 +199,22 @@ export const translations = {
 		win_tournament: " remporte le tournoi !",
 		win_with: " gagne avec ",
 		point: " point(s)!",
+
+		//Stats
+		global_stats: "Stats Globales",
+		match_statistics: "Stats des matches",
+		view_stats: "Voir Stats",
+		balls_hit: "Balle(s) touchee(s)",
+		balls_missed: "Balle(s) ratee(s)",
+		match_duration: "Duree du match",
+		wl_ratio: "Ratio Victoire/Defaite",
+		won: "Victoire",
+		lost: "Defaite",
+		total_games: "Partie(s) total",
+		no_stat: "Aucune partie disponible. Joue quelques parties !",
+		games_played: "Partie(s) jouee(s):",
+		avg_duration: "Duree moyenne des parties:",
+
 
 		//2FA + Messages
 		logout_btn: "Deconnexion",
@@ -332,6 +364,22 @@ export const translations = {
 		win_tournament: " ganó el torneo!",
 		win_with: " ganar con ",
 		point: " punto(s)!",
+
+		//Estadisticas
+		global_stats: "Estadísticas Generales",
+		match_statistics: "Estadísticas del partido",
+		view_stats: "Ver Estadísticas",
+		balls_hit: "Bolas golpeadas",
+		balls_missed: "Bolas perdidas",
+		match_duration: "Duración del partido",
+		wl_ratio: "Relación Ganancia/Pérdida",
+		won: "Ganó",
+		lost: "Derrota",
+		total_games: "Total de partidos",
+		no_stat: "Aún no hay estadísticas disponibles. ¡Juega a algunos juegos!",
+		games_played: "Partido(s) jugado(s):",
+		avg_duration: "Duración media de las partidas:",
+
 
 		//2FA + Mensajes
 		draw: "Empate",

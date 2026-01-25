@@ -3,7 +3,7 @@ import { initLanguage, setLanguage } from "../traduction/i18n.js";
 import { storeUser, getServerErrorMessage } from "../utils/utils.js";
 import { sanitizeInput, validateEmail, validatePassword, validateTextInput } from "../utils/inputValidFront.js";
 import { t } from "../traduction/i18n.js";
-import { resetGameMenu } from "../Pong/menu.js"; 
+import { resetGameMenu } from "../Pong/menu.js";
 
 
 /*
@@ -95,13 +95,13 @@ export function initUIEvents(elems: UIEventElements) {
 	});
 
 
-	elems.login_button?.addEventListener("click", () =>	{
+	elems.login_button?.addEventListener("click", () => {
 		resetLoginForm();
 		toggleMenu(elems.loginContainer, elems.registerContainer, elems.language_menu)
 	});
 
 	elems.profile_button?.addEventListener("click", () => {
-		toggleMenu(elems.profile_menu, elems.language_menu);
+		toggleMenu(elems.profile_menu, elems.language_menu, elems.global_stats_menu, elems.history_menu);
 		hideMenu(elems.edit_menu);
 	});
 

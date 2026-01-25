@@ -43,7 +43,7 @@ const friends_menu = document.getElementById("friends-menu")! as HTMLDivElement 
 const history_menu = document.getElementById("history-menu")! as HTMLDivElement | null;
 const global_stats_menu = document.getElementById("global-stats-menu")! as HTMLDivElement | null;
 const stats_back_button = document.getElementById("stats-back-button") as HTMLButtonElement;
-const buttonGlobalStats = document.getElementById("stats-button") as  HTMLButtonElement;
+const buttonGlobalStats = document.getElementById("stats-button") as HTMLButtonElement;
 const profile_button = document.getElementById("profile-button")!;
 const edit_button = document.getElementById("edit-profile-button")!;
 const friends_button = document.getElementById("friends-button")!;
@@ -744,40 +744,40 @@ function renderMatchHistory(matches: any[], stats: any) {
 }
 
 function renderMatchStat(matches: any, match: any, div: HTMLDivElement, stats: any) {
-		const buttonStats = document.createElement("button");
-		buttonStats.textContent = "View Stats";
-		buttonStats.className = "ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700";
+	const buttonStats = document.createElement("button");
+	buttonStats.textContent = t("view_stats");
+	buttonStats.className = "ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700";
 
-		buttonStats.addEventListener("click", () => {
-			if (global_stats_menu?.classList.contains!("hidden"))
-				hideMenu(global_stats_menu);
-			hideMenu(buttonGlobalStats);
-			historyMenuList.innerHTML = "";
+	buttonStats.addEventListener("click", () => {
+		if (global_stats_menu?.classList.contains!("hidden"))
+			hideMenu(global_stats_menu);
+		hideMenu(buttonGlobalStats);
+		historyMenuList.innerHTML = "";
 
-			showMenu(stats_back_button);
-			stats_back_button.addEventListener("click", () => {
-				return renderMatchHistory(matches, stats);
-			});
-
-			const statsList = document.createElement("div");
-			statsList.id = "stats-list";
-			statsList.innerHTML = "";
-			historyMenuList.appendChild(statsList);
-			if (statsList) {
-				statsList.innerHTML = `
-					<div><strong>${"Match statistics"}</strong></div>
-					<div>${"Balls hit"}: ${match.nbrOfBallHit ?? 0}</div>
-					<div>${"Balls missed"}: ${match.nbrOfBallMissed ?? 0}</div>
-					<div>${"Match duration"}: ${(match.matchTime != null) ? (Math.floor(match.matchTime / 1000) + " " + "seconds") : "N/A"}</div>`;
-			}
+		showMenu(stats_back_button);
+		stats_back_button.addEventListener("click", () => {
+			return renderMatchHistory(matches, stats);
 		});
-		div.appendChild(buttonStats);
+
+		const statsList = document.createElement("div");
+		statsList.id = "stats-list";
+		statsList.innerHTML = "";
+		historyMenuList.appendChild(statsList);
+		if (statsList) {
+			statsList.innerHTML = `
+					<div><strong>${t("match_statistics")}</strong></div>
+					<div>${t("balls_hit")}: ${match.nbrOfBallHit ?? 0}</div>
+					<div>${t("balls_missed")}: ${match.nbrOfBallMissed ?? 0}</div>
+					<div>${t("match_duration")}: ${(match.matchTime != null) ? (Math.floor(match.matchTime / 1000) + " " + "seconds") : "N/A"}</div>`;
+		}
+	});
+	div.appendChild(buttonStats);
 };
 
 function renderGlobalStats(matches: any[], stats: any) {
 	// Clear existing global stats content
 	global_stats_menu!.innerHTML = '';
-	
+
 	// Add back to history button
 	const backHistoryButton = document.createElement("button");
 	backHistoryButton.id = "back-to-history";
@@ -788,7 +788,7 @@ function renderGlobalStats(matches: any[], stats: any) {
 	// Title
 	const title = document.createElement("h2");
 	title.className = "text-2xl font-bold mb-4 text-center";
-	title.textContent = "Global Statistics";
+	title.textContent = t("global_stats");
 	global_stats_menu!.appendChild(title);
 
 	if (stats && stats.gamesPlayed > 0) {
@@ -796,10 +796,10 @@ function renderGlobalStats(matches: any[], stats: any) {
 		const gamesWon = stats.gamesWon ?? 0;
 		const gamesLost = gamesPlayed - gamesWon;
 		const winRate = gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(1) : "0.0";
-		const averageMatchDuration = stats.matchTime && gamesPlayed > 0 
-			? Math.floor(stats.matchTime / gamesPlayed / 1000) 
+		const averageMatchDuration = stats.matchTime && gamesPlayed > 0
+			? Math.floor(stats.matchTime / gamesPlayed / 1000)
 			: 0;
-		
+
 		// Container for charts
 		const chartsContainer = document.createElement("div");
 		chartsContainer.className = "space-y-6";
@@ -810,9 +810,9 @@ function renderGlobalStats(matches: any[], stats: any) {
 		pieChartContainer.className = "bg-gray-800 p-4 rounded";
 		const pieTitle = document.createElement("h3");
 		pieTitle.className = "text-lg font-semibold mb-2 text-center";
-		pieTitle.textContent = "Win/Loss Ratio";
+		pieTitle.textContent = t("wl_ratio");
 		pieChartContainer.appendChild(pieTitle);
-		
+
 		const pieCanvas = document.createElement("canvas");
 		pieCanvas.id = "winLossChart";
 		pieCanvas.width = 250;
@@ -825,9 +825,9 @@ function renderGlobalStats(matches: any[], stats: any) {
 		barChartContainer.className = "bg-gray-800 p-4 rounded";
 		const barTitle = document.createElement("h3");
 		barTitle.className = "text-lg font-semibold mb-2 text-center";
-		barTitle.textContent = "Games Overview";
+		barTitle.textContent = t("match_statistics");
 		barChartContainer.appendChild(barTitle);
-		
+
 		const barCanvas = document.createElement("canvas");
 		barCanvas.id = "gamesStatsChart";
 		barCanvas.width = 400;
@@ -840,11 +840,11 @@ function renderGlobalStats(matches: any[], stats: any) {
 		summary.className = "bg-gray-800 p-4 rounded space-y-2";
 		summary.innerHTML = `
 			<div class="grid grid-cols-2 gap-2 text-sm">
-				<div><span class="text-gray-400">Games Played:</span> <span class="font-bold">${gamesPlayed}</span></div>
-				<div><span class="text-gray-400">Win Rate:</span> <span class="font-bold text-green-400">${winRate}%</span></div>
-				<div><span class="text-gray-400">Games Won:</span> <span class="font-bold text-green-500">${gamesWon}</span></div>
-				<div><span class="text-gray-400">Games Lost:</span> <span class="font-bold text-red-500">${gamesLost}</span></div>
-				<div class="col-span-2"><span class="text-gray-400">Avg Match Duration:</span> <span class="font-bold">${averageMatchDuration}s</span></div>
+				<div><span class="text-gray-400">${t("games_played")}</span> <span class="font-bold">${gamesPlayed}</span></div>
+				<div><span class="text-gray-400">${t("wl_ratio")}</span> <span class="font-bold text-green-400">${winRate}%</span></div>
+				<div><span class="text-gray-400">${t("won")}</span> <span class="font-bold text-green-500">${gamesWon}</span></div>
+				<div><span class="text-gray-400">${t("lost")}</span> <span class="font-bold text-red-500">${gamesLost}</span></div>
+				<div class="col-span-2"><span class="text-gray-400">${t("avg_duration")}</span> <span class="font-bold">${averageMatchDuration}s</span></div>
 			</div>`;
 		chartsContainer.appendChild(summary);
 
@@ -854,7 +854,7 @@ function renderGlobalStats(matches: any[], stats: any) {
 			new Chart(pieCanvas, {
 				type: 'doughnut',
 				data: {
-					labels: ['Won', 'Lost'],
+					labels: [t('won'), t('lost')],
 					datasets: [{
 						data: [gamesWon, gamesLost],
 						backgroundColor: [
@@ -887,7 +887,7 @@ function renderGlobalStats(matches: any[], stats: any) {
 			new Chart(barCanvas, {
 				type: 'bar',
 				data: {
-					labels: ['Total Games', 'Won', 'Lost'],
+					labels: [t('total_games'), t('won'), t('lost')],
 					datasets: [{
 						label: 'Games',
 						data: [gamesPlayed, gamesWon, gamesLost],
@@ -938,7 +938,7 @@ function renderGlobalStats(matches: any[], stats: any) {
 	} else {
 		const noStats = document.createElement("div");
 		noStats.className = "text-center py-8 text-gray-400";
-		noStats.textContent = "No statistics available yet. Play some games!";
+		noStats.textContent = t('no_stat');
 		global_stats_menu!.appendChild(noStats);
 	}
 
