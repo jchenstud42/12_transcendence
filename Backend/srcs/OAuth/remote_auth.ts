@@ -57,7 +57,7 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 	 * recu en query param avec celui stocke dans le cookie http)
 	 * on creer tokenParams avec les parametres necessaires pour echanger le code, les headers pour la requete
 	 * on fait la requete POST pour echanger le code contre un token d'acces
-	 * si ca marche pas on renvoie une erreur 502
+	 * si ca marche pas on renvoie une erreur 429
 	 * On utilise le token pour recuperer les infos de l'utilisateur depuis l'API 42
 	 * On cree ou met a jour l'utilisateur dans la db
 	 * On genere les tokens JWT (access et refresh) car l'user est authentifie et login
@@ -106,14 +106,14 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 			if (!tokenRes.ok) {
 				const text = await tokenRes.text();
 				fastify.log.error("42 token exchange failed (status %s): %s", String(tokenRes.status), text);
-				return reply.status(502).send({ error: "Token exchange failed", detail: text });
+				return reply.status(429).send({ error: "Token exchange failed due to 42Intra, try again later once their service is stable.", detail: text });
 			}
 
 			const tokenJson = await tokenRes.json();
 			const access_token = tokenJson.access_token as string | undefined;
 
 			if (!access_token)
-				return reply.status(502).send({ error: "No access token" });
+				return reply.status(429).send({ error: "No access token due to 42Intra, try again later once their service is stable." });
 
 			const profileRes = await fetch(INTRA_ME, {
 				headers: { Authorization: "Bearer " + access_token },
@@ -122,7 +122,7 @@ export default async function remoteAuthRoutes(fastify: FastifyInstance) {
 			if (!profileRes.ok) {
 				const text = await profileRes.text();
 				fastify.log.error("42 profile fetch failed: " + text);
-				return reply.status(502).send({ error: "Failed fetching profile" });
+				return reply.status(429).send({ error: "Failed fetching profile due to 42Intra, try again later once their service is stable." });
 			}
 
 			const profile = await profileRes.json();
