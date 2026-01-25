@@ -85,11 +85,11 @@ export function initMenuEvents() {
 		}
 
 		if (game.nameEntered < game.playerNbr) {
-			console.log("1 - Show player name menu");
+			// console.log("1 - Show player name menu");
 			showPlayerNameMenu();
 		} else {
 			//Start match or tournament directly (no need to enter player names)
-			console.log("2 - Start match directly");
+			// console.log("2 - Start match directly");
 			game.createAiName();
 			game.setCurrentUser(getLoggedUser());
 			game.createPlayers();
@@ -198,8 +198,9 @@ function showPlayerNameMenu() {
 export function showPlayerName(name: string, index: number, isAi: boolean) {
 	const label = document.createElement("div");
 
-	const colorClass = PONG_UI.playerColors[index];
-	label.className = `player-name-item text-center font-bold ${colorClass}/90 min-w-[120px]`;
+	const colorClass = PONG_UI.playerColors[index % PONG_UI.playerColors.length];
+	label.className = `player-name-item text-center font-bold ${colorClass} min-w-[120px]`;
+
 	if (!isAi)
 		label.innerHTML = `<span class="text-sm text-gray-400 whitespace-nowrap">${t("player")} ${index + 1}</span><br>${name}`;
 	else
@@ -221,6 +222,8 @@ export function resetGameMenu() {
 	Match.pendingTimeouts = [];
 	if (PONG_UI.scoreLeft) PONG_UI.scoreLeft.textContent = "0";
 	if (PONG_UI.scoreRight) PONG_UI.scoreRight.textContent = "0";
+
+	game.resetGameInfo();
 
 	PONG_UI.playersList.innerHTML = "";
 	PONG_UI.finalList.innerHTML = "";

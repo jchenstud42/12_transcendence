@@ -412,6 +412,7 @@ export function init2FA(elements: TwoFAElements, callbacks: TwoFACallbacks, init
 					document.getElementById("friends-menu"),
 					document.getElementById("history-menu"),
 					document.getElementById("language-menu"),
+					document.getElementById("global-stats-menu")
 				);
 				await update2FAStatus();
 			} else {

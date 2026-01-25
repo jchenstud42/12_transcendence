@@ -58,7 +58,6 @@ export class Tournament {
 	 * Posts match data including scores and winner
 	 */
 	public async startTournament() {
-		console.log("startTournament started");
 
 		let bracket: Player[] = shuffleArray(this.players.slice());
 
@@ -94,7 +93,7 @@ export class Tournament {
 		PONG_UI.backButton.addEventListener("click", tournamentBackHandler);
 
 		while (bracket.length > 1 && !tournamentAborted) {
-			console.log(`Round ${round} started with ${bracket.length} players`);
+			// console.log(`Round ${round} started with ${bracket.length} players`);
 			const nextRound: Player[] = [];
 
 			for (let i = 0; i < bracket.length; i += 2) {

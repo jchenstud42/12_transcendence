@@ -13,7 +13,7 @@ const PADDLE_SPEED = 10;
 interface matchStat {
 	nbrOfBallHit: number;
 	nbrOfBallMissed: number;
-	matchTime: number; 
+	matchTime: number;
 }
 
 export class Match {
@@ -76,7 +76,7 @@ export class Match {
 		if (this.matchPlayer && this.matchPlayer[1].isAi)
 			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle);
 
-		this.matchStat = { 
+		this.matchStat = {
 			nbrOfBallHit: 0,
 			nbrOfBallMissed: 0,
 			matchTime: performance.now()
@@ -309,11 +309,7 @@ export class Match {
 	}
 
 	private endMatch(winner: Player) {
-		console.log(`${winner.name} wins the match!`);
-		
 		this.matchStat.matchTime = performance.now() - this.matchStat.matchTime;
-		
-		console.log("Match stats:", this.matchStat);
 
 		saveMatchHistory(
 			this.matchPlayer![0],
@@ -384,19 +380,19 @@ export class Match {
 
 	private showPlayerPair = () => {
 		if (!this.matchPlayer) return;
-		console.log("Showing pair:", this.matchPlayer[0].name, "vs", this.matchPlayer[1].name);
+		// console.log("Showing pair:", this.matchPlayer[0].name, "vs", this.matchPlayer[1].name);
 		PONG_UI.playersList.innerHTML = "";
 		showPlayerName(this.matchPlayer[0].name, this.matchPlayer[0].playerNbr, this.matchPlayer[0].isAi);
 		showPlayerName(this.matchPlayer[1].name, this.matchPlayer[1].playerNbr, this.matchPlayer[1].isAi);
 		if (PONG_UI.playersArea) PONG_UI.playersArea.classList.remove("hidden");
 	};
 
-	
+
 	private updateMatchStat() {
-		if (this.matchPlayer && this.matchPlayer[0].isConnected ) {
+		if (this.matchPlayer && this.matchPlayer[0].isConnected) {
 			this.matchStat.nbrOfBallHit += this.ball.ballPaddleHitL;
 			this.matchStat.nbrOfBallMissed = this.matchPlayer[1].point;
-		} else if( this.matchPlayer && this.matchPlayer[1].isConnected) {
+		} else if (this.matchPlayer && this.matchPlayer[1].isConnected) {
 			this.matchStat.nbrOfBallHit += this.ball.ballPaddleHitR;
 			this.matchStat.nbrOfBallMissed = this.matchPlayer[0].point;
 		}

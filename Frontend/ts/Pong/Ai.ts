@@ -16,17 +16,17 @@ PONG_UI.aiViewsCanvas.height = PONG_HEIGHT;
 const ctx = PONG_UI.aiViewsCanvas.getContext('2d') as CanvasRenderingContext2D;
 
 interface PredictionBall {
-    x: number;
-    y: number;
-    opacity: number;  // 0.0 to 1.0 for visibility
-    visible: boolean;
-    color: string;
-    radius: number;
+	x: number;
+	y: number;
+	opacity: number;  // 0.0 to 1.0 for visibility
+	visible: boolean;
+	color: string;
+	radius: number;
 }
 
 const ballAiView = new Ball(PONG_UI.aiView);
 
-/* 
+/*
 	Problem to Solve:
 	- Prediction after a wall bounce is shit : OK
 	- Still some problem with the prediction view with wall bounce
@@ -43,8 +43,8 @@ export class Ai {
 	ballPos: { x: number; y: number };
 	ballPrevPos: { x: number; y: number };
 
-	ballPrevPred: { x: number; y: number }; 
-	ballNextPred: { x: number; y: number }; 
+	ballPrevPred: { x: number; y: number };
+	ballNextPred: { x: number; y: number };
 	wallBouncePred: boolean = false;
 
 	prevBallDelta: { x: number; y: number };
@@ -59,7 +59,7 @@ export class Ai {
 	AIside: 'NONE' | 'LEFT' | 'RIGHT' = 'NONE';
 	AIstate: 'RESET' | 'MOVE' = 'MOVE';
 	AILevel: number = 10;
-	
+
 	lastTime: number = performance.now();
 	gameElapsedTime: number = 1
 	nbrSecondsPredicted: number = 0;
@@ -77,7 +77,7 @@ export class Ai {
 
 		this.createPredictionBalls();
 		drawGrid(); // Draw the grid on the AI views canvas
-		
+
 		this.ballPos = { x: ball.x, y: ball.y };
 		this.ballPrevPos = { x: ball.x, y: ball.y };
 
@@ -116,7 +116,7 @@ export class Ai {
 
 			firstRun = false;
 		}
-		
+
 		// Every frame: check delta and press appropriate key
 		const delta = this.getPadBallDelta();
 		const randomAngle = Math.floor(Math.random() * (this.AILevel - 10 + 1)) + 10; // Random angle between 10 and AILevel
@@ -146,7 +146,7 @@ export class Ai {
 		const currentTime = performance.now();
 		if (currentTime - this.lastTime >= 1000) {
 			this.lastTime = currentTime;
-			console.log("Ball Pos Checked at", currentTime);
+			// console.log("Ball Pos Checked at", currentTime);
 			return true;
 		}
 		return false;
@@ -173,7 +173,7 @@ export class Ai {
 	}
 
 	isBallMovingTowardsAI() {
-		this.updatePrevBallDelta();	
+		this.updatePrevBallDelta();
 		if (this.AIside === 'LEFT' && this.prevBallDelta.x < 0) {
 			return true;
 		} else if (this.AIside === 'RIGHT' && this.prevBallDelta.x > 0) {
@@ -223,7 +223,7 @@ export class Ai {
 			return true;
 		else if (this.isBallGoingOutLeft())
 			return true;
-		return false;	
+		return false;
 	}
 
 	///////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ export class Ai {
 			//Predict Ball Position using previous/current position Delta
 			this.updatePrevBallDelta();
 			if (this.isDeltaZero()) {
-				console.log("Ball is not moving, skipping prediction");
+				// console.log("Ball is not moving, skipping prediction");
 				return;
 			}
 
@@ -247,8 +247,8 @@ export class Ai {
 			this.ballNextPred.y = this.ballPos.y + this.prevBallDelta.y;
 
 			if (!this.isBallGoingOut())
-				this.updatePredictionBalls(this.ballNextPred);	
-			
+				this.updatePredictionBalls(this.ballNextPred);
+
 			this.ballPrevPred.x = this.ballPos.x;
 			this.ballPrevPred.y = this.ballPos.y;
 
@@ -271,46 +271,46 @@ export class Ai {
 			this.ballNextPred.y += this.prevBallDelta.y;
 
 			if (!this.isBallGoingOut())
-				this.updatePredictionBalls(this.ballNextPred);	
+				this.updatePredictionBalls(this.ballNextPred);
 
 			this.nbrSecondsPredicted += 1;
-			
+
 			if (i === 19) {
-				console.log("Max Prediction Iterations reached");
+				// console.log("Max Prediction Iterations reached");
 				return;
 			}
 		}
 
 		const Xratio = this.prevBallDelta.x / this.prevBallDelta.y;
-		
+
 		if (this.isBallGoingOutUp()) {
 			this.predictUpWallBounce(Xratio); //Updadte ballPrev == ballRebound and ballNext
 			this.updatePrevBallDelta(this.ballNextPred, this.ballPrevPred);
-			this.updatePredictionBalls(this.ballNextPred);	
+			this.updatePredictionBalls(this.ballNextPred);
 			this.nbrSecondsPredicted += 1;
 		} else if (this.isBallGoingOutDown()) {
 			this.predictDownWallBounce(Xratio);
 			this.updatePrevBallDelta(this.ballNextPred, this.ballPrevPred);
-			this.updatePredictionBalls(this.ballNextPred);	
+			this.updatePredictionBalls(this.ballNextPred);
 			this.nbrSecondsPredicted += 1;
 		}
 
 		if (!this.isBallPaddleImpact())
 			this.predictballNextPos(false);
-		
+
 		const Yratio = this.prevBallDelta.y / this.prevBallDelta.x;
 
 		//Predict Point of impact with Paddle
 		if (this.isBallGoingOutRight()) {
-			console.log("Predicting Right Paddle Bounce");
+			// console.log("Predicting Right Paddle Bounce");
 			this.predictRightPaddleBounce(Yratio);
-			this.updatePredictionBalls(this.ballNextPred);	
+			this.updatePredictionBalls(this.ballNextPred);
 			this.nbrSecondsPredicted += 1;
 		}
 		else if (this.isBallGoingOutLeft()) {
-			console.log("Predicting Left Paddle Bounce");
+			// console.log("Predicting Left Paddle Bounce");
 			this.predictLeftPaddleBounce(Yratio);
-			this.updatePredictionBalls(this.ballNextPred);	
+			this.updatePredictionBalls(this.ballNextPred);
 			this.nbrSecondsPredicted += 1;
 		}
 
@@ -320,7 +320,7 @@ export class Ai {
 	}
 
 	predictUpWallBounce(Xratio: number) {
-		console.log("Predicting Bounce Up");
+		// console.log("Predicting Bounce Up");
 		// 1. Distance from current Y to the wall (0)
 		const distToWallY = 0 - this.ballPos.y;
 		// 2. Calculate horizontal shift to impact point
@@ -331,7 +331,7 @@ export class Ai {
 		ballAiBounce.x = this.ballPos.x + xImpactOffset;
 		ballAiBounce.y = BALL_SIZE / 2;
 
-		this.updatePredictionBalls(ballAiBounce);	
+		this.updatePredictionBalls(ballAiBounce);
 
 		// 4. Reflect the NextPos Y across the wall
 		this.ballNextPred.y = -this.ballNextPred.y;
@@ -348,7 +348,7 @@ export class Ai {
 	}
 
 	predictDownWallBounce(Xratio: number) {
-		console.log("Predicting Bounce Down");
+		// console.log("Predicting Bounce Down");
 		// 1. Distance from current Y to the wall (0)
 		const distToWallY = PONG_HEIGHT - this.ballPos.y;
 		// 2. Calculate horizontal shift to impact point
@@ -359,7 +359,7 @@ export class Ai {
 		ballAiBounce.x = this.ballPos.x + xImpactOffset;
 		ballAiBounce.y = PONG_HEIGHT - (BALL_SIZE / 2);
 
-		this.updatePredictionBalls(ballAiBounce);	
+		this.updatePredictionBalls(ballAiBounce);
 
 		this.ballNextPred.y = PONG_HEIGHT - (this.ballNextPred.y - PONG_HEIGHT);
 
@@ -420,7 +420,7 @@ export class Ai {
 		//PONG_UI.aiViewsCanvas.classList.remove('hidden');
 		//showGrid();
 	}
-	
+
 	// Hide Prediction balls Element
 	hideAiPredictions() {
 		ballAiView.ballUI.classList.add('hidden');
@@ -432,52 +432,52 @@ export class Ai {
 	createPredictionBalls() {
 		// Create as many prediction layers as MAX_SECONDS_PREDICTED
 		for (let i = 0; i < MAX_SECONDS_PREDICTED; i++) {
-    		this.predictionBalls.push({
-        		x: 0,
-        		y: 0,
-        		opacity: 1.0,  // Decreasing opacity
-        		visible: false,
-        		color: '#ff0000ff',
-        		radius: BALL_SIZE / 2
-    		});
+			this.predictionBalls.push({
+				x: 0,
+				y: 0,
+				opacity: 1.0,  // Decreasing opacity
+				visible: false,
+				color: '#ff0000ff',
+				radius: BALL_SIZE / 2
+			});
 		}
 	}
 
 	drawPredictionBalls(ctx: CanvasRenderingContext2D) {
 		this.setPredictionBallsOpacity();
 
-    	// Clear canvas first
-    	ctx.clearRect(0, 0, PONG_UI.aiViewsCanvas.width, PONG_UI.aiViewsCanvas.height);
-		
-    	// Draw each visible ball
-    	this.predictionBalls.forEach(ball => {
-    	    if (!ball.visible) return;  // Skip invisible balls
-		
-    	    ctx.save();
-    	    ctx.globalAlpha = ball.opacity;  // Control visibility
-    	    ctx.fillStyle = ball.color;
-    	    ctx.beginPath();
-    	    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    	    ctx.fill();
-    	    ctx.restore();
-    	});
+		// Clear canvas first
+		ctx.clearRect(0, 0, PONG_UI.aiViewsCanvas.width, PONG_UI.aiViewsCanvas.height);
+
+		// Draw each visible ball
+		this.predictionBalls.forEach(ball => {
+			if (!ball.visible) return;  // Skip invisible balls
+
+			ctx.save();
+			ctx.globalAlpha = ball.opacity;  // Control visibility
+			ctx.fillStyle = ball.color;
+			ctx.beginPath();
+			ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+		});
 	}
 
 	// Hide every single balls
 	hideAllPredictionsBalls() {
-	    this.predictionBalls.forEach(ball => ball.visible = false);
+		this.predictionBalls.forEach(ball => ball.visible = false);
 	}
 
 	getNextHiddenBallIndex(): number {
-    	return this.predictionBalls.findIndex(ball => !ball.visible);
-	} 
+		return this.predictionBalls.findIndex(ball => !ball.visible);
+	}
 
 	// Show specific Prediction ball
 	showPredictionBall(index: number) {
-	    this.predictionBalls[index].visible = true;
+		this.predictionBalls[index].visible = true;
 	}
 
-	updatePredictionBalls(ballPos: {x: number, y: number}) {
+	updatePredictionBalls(ballPos: { x: number, y: number }) {
 		const Index = this.getNextHiddenBallIndex();
 		if (Index === -1) return; // No hidden balls available
 
@@ -488,22 +488,22 @@ export class Ai {
 
 	setPredictionBallsOpacity() {
 		// Get only visible balls
-    	const visibleBalls = this.predictionBalls.filter(ball => ball.visible);
-    	const totalVisible = visibleBalls.length;
-		
-    	if (totalVisible === 0) return;
-		
-    	// Set opacity proportionally
-    	visibleBalls.forEach((ball, index) => {
-    	    ball.opacity = (index + 1) / totalVisible;
-    	});
+		const visibleBalls = this.predictionBalls.filter(ball => ball.visible);
+		const totalVisible = visibleBalls.length;
+
+		if (totalVisible === 0) return;
+
+		// Set opacity proportionally
+		visibleBalls.forEach((ball, index) => {
+			ball.opacity = (index + 1) / totalVisible;
+		});
 	}
 
 	///////////////////////////////////////////////////////////////
 	////               PADDLE CONTROL FUNCTIONS                ////
 	///////////////////////////////////////////////////////////////
 
-	pressPaddleUp(option : boolean) {
+	pressPaddleUp(option: boolean) {
 		const paddleUpKey = this.AIside === 'LEFT' ? 'w' : 'ArrowUp';
 		const paddleUpCode = this.AIside === 'LEFT' ? 87 : 38;
 
@@ -515,7 +515,8 @@ export class Ai {
 					keyCode: paddleUpCode,
 					which: paddleUpCode,
 					bubbles: true,
-					cancelable: true }));
+					cancelable: true
+				}));
 		} else {
 			document.dispatchEvent(new KeyboardEvent("keyup",
 				{
@@ -524,11 +525,12 @@ export class Ai {
 					keyCode: paddleUpCode,
 					which: paddleUpCode,
 					bubbles: true,
-					cancelable: true }));
+					cancelable: true
+				}));
 		}
 	}
 
-	pressPaddleDown(option : boolean) {
+	pressPaddleDown(option: boolean) {
 		const paddleDownKey = this.AIside === 'LEFT' ? 's' : 'ArrowDown';
 		const paddleDownCode = this.AIside === 'LEFT' ? 83 : 40;
 		if (option == true) {
@@ -539,7 +541,8 @@ export class Ai {
 					keyCode: paddleDownCode,
 					which: paddleDownCode,
 					bubbles: true,
-					cancelable: true }));
+					cancelable: true
+				}));
 		} else {
 			document.dispatchEvent(new KeyboardEvent("keyup",
 				{
@@ -548,7 +551,8 @@ export class Ai {
 					keyCode: paddleDownCode,
 					which: paddleDownCode,
 					bubbles: true,
-					cancelable: true }));
+					cancelable: true
+				}));
 		}
 	}
 
