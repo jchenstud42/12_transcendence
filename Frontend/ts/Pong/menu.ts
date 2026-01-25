@@ -80,7 +80,7 @@ export function initMenuEvents() {
 		PONG_UI.playersList.classList.remove("hidden");
 		if (loggedUsername && game.maxPlayer > game.aiNbr) {
 			game.playersName.push([loggedUsername, false]);
-			showPlayerName(loggedUsername, 0, false);
+			showPlayerName(loggedUsername, game.nameEntered, false);
 			game.nameEntered = 1;
 		}
 

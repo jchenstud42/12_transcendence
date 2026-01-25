@@ -13,7 +13,7 @@ export class Ball {
 	y = 0;
 	vx = 0;
 	vy = 0;
-	speed = 300;
+	speed = 250;
 	active = false;
 	onScore: ((playerSide: 'left' | 'right') => void) | null = null; // callback to notify game when a point is win
 	ballPaddleHitR: number;
@@ -42,7 +42,7 @@ export class Ball {
 		this.initBallPos();
 		const maxAngle = 45 * (Math.PI / 180);
 		const angle = (Math.random() * maxAngle * 2) - maxAngle;
-		this.speed = 300;
+		this.speed = 250;
 		this.vx = direction * this.speed * Math.cos(angle);
 		this.vy = this.speed * Math.sin(angle);
 		this.active = true;
@@ -72,6 +72,7 @@ export class Ball {
 		const h = PONG_UI.pongMenu.clientHeight;
 
 		//update ball position
+		//console.log('Ball x Position: ', this.x, ' + vx:', this.vx, ' dt:', dt); 
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
 

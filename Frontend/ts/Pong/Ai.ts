@@ -58,7 +58,7 @@ export class Ai {
 	paddleCenter: { x: number; y: number };
 	AIside: 'NONE' | 'LEFT' | 'RIGHT' = 'NONE';
 	AIstate: 'RESET' | 'MOVE' = 'MOVE';
-	AILevel: number = 1;
+	AILevel: number = 10;
 	
 	lastTime: number = performance.now();
 	gameElapsedTime: number = 1
@@ -66,7 +66,7 @@ export class Ai {
 
 	animationFrameId: number | null = null;
 
-	constructor(ball: Ball, paddleRight: HTMLDivElement, paddleLeft: HTMLDivElement, AIpaddle: HTMLDivElement, AILevel: number) {
+	constructor(ball: Ball, paddleRight: HTMLDivElement, paddleLeft: HTMLDivElement, AIpaddle: HTMLDivElement) {
 		if (!ball) {
 			throw new Error("Ball or paddle is null");
 		}
@@ -92,8 +92,6 @@ export class Ai {
 			this.AIside = 'LEFT';
 		else if (this.AIpaddle === this.paddleRight)
 			this.AIside = 'RIGHT';
-
-		this.AILevel = AILevel;
 
 		this.paddleCenter = { x: 0, y: 0 };
 		this.updatePaddleCenter();
@@ -121,7 +119,8 @@ export class Ai {
 		
 		// Every frame: check delta and press appropriate key
 		const delta = this.getPadBallDelta();
-		if (this.AIstate === 'MOVE' && Math.abs(delta) > 10) { // tolerance to avoid jitter
+		const randomAngle = Math.floor(Math.random() * (this.AILevel - 10 + 1)) + 10; // Random angle between 10 and AILevel
+		if (this.AIstate === 'MOVE' && Math.abs(delta) > this.AILevel) {
 			if (delta > 0) {
 				this.pressPaddleUp(true);
 				this.pressPaddleDown(false);
@@ -155,13 +154,13 @@ export class Ai {
 
 	updateBallPos() {
 		if (!this.wallBouncePred)
-			this.ballPrevPos = this.ballPos;
+			this.ballPrevPos = this.ballPos; //not sure
 
 		this.wallBouncePred = false;
 
 		this.ballPos = { x: this.ball.x, y: this.ball.y };
 
-		console.log("Ball Pos Updated to", this.ballPos);
+		//console.log("Ball Pos Updated to", this.ballPos);
 		ballAiView.x = this.ballPos.x;
 		ballAiView.y = this.ballPos.y;
 		ballAiView.render();
@@ -190,8 +189,8 @@ export class Ai {
 
 	updatePrevBallDelta(ballPos = this.ballPos, ballPrevPos = this.ballPrevPos) {
 		// Apply a smoothing factor to be sure the ball will reach the predicted position
-		this.prevBallDelta.x = (ballPos.x - ballPrevPos.x) * 0.8;
-		this.prevBallDelta.y = (ballPos.y - ballPrevPos.y) * 0.8;
+		this.prevBallDelta.x = (ballPos.x - ballPrevPos.x) * 0.9;
+		this.prevBallDelta.y = (ballPos.y - ballPrevPos.y) * 0.9;
 	}
 
 	isBallGoingOut() {
@@ -257,7 +256,7 @@ export class Ai {
 		}
 
 		if (this.isDeltaZero()) {
-			console.log("Ball is not moving, skipping prediction");
+			//console.log("Ball is not moving, skipping prediction");
 			return;
 		}
 
@@ -317,7 +316,7 @@ export class Ai {
 
 		this.drawPredictionBalls(ctx);
 
-		console.log("Prediction complete. Next Pos:", this.ballNextPred, "in", this.nbrSecondsPredicted, "seconds");
+		//console.log("Prediction complete. Next Pos:", this.ballNextPred, "in", this.nbrSecondsPredicted, "seconds");
 	}
 
 	predictUpWallBounce(Xratio: number) {
@@ -376,7 +375,7 @@ export class Ai {
 
 	predictRightPaddleBounce(Yratio: number) {
 		this.ballNextPred.x = this.paddleRight.offsetLeft - (BALL_SIZE / 2);
-		console.log("Ball going out Right detected ball.x will be placed at: ", this.ballNextPred.x);
+		//console.log("Ball going out Right detected ball.x will be placed at: ", this.ballNextPred.x);
 
 		const padBallDelta = this.ballNextPred.x - this.ballPrevPred.x;
 		const Ypos = padBallDelta * Yratio;
@@ -395,7 +394,7 @@ export class Ai {
 	predictLeftPaddleBounce(Yratio: number) {
 		this.ballNextPred.x = this.paddleLeft.offsetLeft + this.paddleLeft.offsetWidth + (BALL_SIZE / 2);
 
-		console.log("Ball going out Left detected ball.x will be placed at: ", this.ballNextPred.x);
+		//console.log("Ball going out Left detected ball.x will be placed at: ", this.ballNextPred.x);
 
 		const padBallDelta = this.ballNextPred.x - this.ballPrevPred.x;
 		const Ypos = padBallDelta * Yratio;
@@ -418,8 +417,8 @@ export class Ai {
 	// Show Prediction balls Element
 	showAiPredictions() {
 		ballAiView.ballUI.classList.remove('hidden');
-		PONG_UI.aiViewsCanvas.classList.remove('hidden');
-		showGrid();
+		//PONG_UI.aiViewsCanvas.classList.remove('hidden');
+		//showGrid();
 	}
 	
 	// Hide Prediction balls Element
@@ -576,6 +575,11 @@ export class Ai {
 
 	isDeltaZero(): boolean {
 		return this.prevBallDelta.x === 0 && this.prevBallDelta.y === 0;
+	}
+
+	updateAILevel() {
+		if (this.AILevel < 50)
+			this.AILevel += 20;
 	}
 
 	///////////////////////////////////////////////////////////////

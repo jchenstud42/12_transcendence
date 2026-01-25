@@ -65,16 +65,16 @@ export class Match {
 	constructor(isTournament: boolean, matchPlayer: [Player, Player] | null = null) {
 		this.ball = new Ball(PONG_UI.ball);
 		this.matchPlayer = matchPlayer;
-		this.pointsToWin = 1;
+		this.pointsToWin = 3;
 		this.isTournament = isTournament;
 		this.winner = null;
 		this.starting = false;
 		this.paddleLoopRunning = false;
 		this.ballLoopRafId = null;
 		if (this.matchPlayer && this.matchPlayer[0].isAi)
-			this.aiLeft = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.leftPaddle, 1);
+			this.aiLeft = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.leftPaddle);
 		if (this.matchPlayer && this.matchPlayer[1].isAi)
-			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle, 1);
+			this.aiRight = new Ai(this.ball, PONG_UI.rightPaddle, PONG_UI.leftPaddle, PONG_UI.rightPaddle);
 
 		this.matchStat = { 
 			nbrOfBallHit: 0,
@@ -218,9 +218,9 @@ export class Match {
 					//Start ball Loop
 					this.ball.active = true;
 					this.ball.serve();
+					this.last = performance.now();
 					if (this.aiLeft) this.aiLeft.oneSecondLoop(), this.aiLeft.showAiPredictions();
 					if (this.aiRight) this.aiRight.oneSecondLoop(), this.aiRight.showAiPredictions();
-					this.last = performance.now();
 					this.ballLoopRafId = requestAnimationFrame(this.ballLoop);
 
 					//Start Paddle loop (only once)
@@ -247,6 +247,9 @@ export class Match {
 		const pointIndex = playerSide === 'left' ? 0 : 1;
 		if (this.matchPlayer[pointIndex]) {
 			this.matchPlayer[pointIndex].point++;
+
+			if (pointIndex === 0) this.aiRight?.updateAILevel();
+			if (pointIndex === 1) this.aiLeft?.updateAILevel();
 
 			this.updateMatchStat();
 			this.ball.reset();
