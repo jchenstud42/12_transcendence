@@ -118,14 +118,6 @@ export function initUIEvents(elems: UIEventElements) {
 		);
 	});
 
-
-	document.addEventListener("keydown", (event: KeyboardEvent) => {
-		if (event.key == "Escape" && !elems.back_button?.classList.contains("hidden")) {
-			closePong(elems);
-			resetGameMenu();
-		}
-	});
-
 	elems.pong_button?.addEventListener("click", () => {
 		elems.pong_button?.classList.add("hidden");
 		elems.qmatch_button?.classList.remove("hidden");
